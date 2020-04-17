@@ -169,9 +169,15 @@ enum k4a_firmware_signature_t {
     K4A_FIRMWARE_SIGNATURE_UNSIGNED
 }
 
-pub(crate) type k4a_logging_message_cb_t = fn(context: *mut (), level: k4a_log_level_t, file: &str, line: i32, message: &str);
-pub(crate) type k4a_memory_destroy_cb_t = fn(buffer: *mut (), context: *mut ());
-pub(crate) type k4a_memory_allocate_cb_t = fn(size: i32, context: *mut *mut ());
+pub(crate) type k4a_logging_message_cb_t = fn(context: *mut (),
+                                              level: k4a_log_level_t,
+                                              file: &str,
+                                              line: i32,
+                                              message: &str);
+pub(crate) type k4a_memory_destroy_cb_t = fn(buffer: *mut (),
+                                             context: *mut ());
+pub(crate) type k4a_memory_allocate_cb_t = fn(size: i32,
+                                              context: *mut *mut ());
 
 #[allow(non_camel_case_types)]
 #[repr(C)]
