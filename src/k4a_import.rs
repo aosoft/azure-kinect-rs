@@ -1,4 +1,4 @@
-use super::k4atypes_import::*;
+use super::bindings::*;
 
 pub(crate) type k4a_device_get_installed_count = fn() -> u32;
 pub(crate) type k4a_set_debug_message_handler = fn(message_cb: k4a_logging_message_cb_t,
