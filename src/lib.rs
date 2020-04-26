@@ -1,5 +1,6 @@
 mod bindings;
-mod k4a_import;
+mod k4a_functions;
+mod import;
 
 #[cfg(test)]
 mod tests {
