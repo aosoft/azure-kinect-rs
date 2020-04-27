@@ -113,8 +113,11 @@ fn load_library(path: &str, dll_file_name: &str) -> Result<*const c_void, Error>
 }
 
 macro_rules! proc_address {
-    ($h:ident, $x:ident) => {
-        std::mem::transmute::<_, $x>(GetProcAddress($h, stringify!($x).as_ptr()))
+    ($h:ident, $proc_name:ident) => {
+        std::mem::transmute::<_, $proc_name>(GetProcAddress(
+            $h,
+            concat!(stringify!($proc_name), "\0").as_ptr(),
+        ))
     };
 }
 
