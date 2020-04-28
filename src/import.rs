@@ -116,15 +116,15 @@ macro_rules! proc_address {
     ($h:ident, $proc_name:ident) => {
         std::mem::transmute::<_, $proc_name>(GetProcAddress(
             $h,
-            concat!(stringify!($proc_name), "\0").as_ptr(),
-        ))
+            concat!(stringify!($proc_name), "\0").as_ptr()
+        ).to_result()?)
     };
 }
 
 impl DllManager {
-    fn new(handle: *const c_void) -> DllManager {
+    fn new(handle: *const c_void) -> Result<DllManager, Error> {
         unsafe {
-            DllManager {
+            Ok(DllManager {
                 handle: handle,
                 k4a_device_get_installed_count: proc_address!(
                     handle,
@@ -230,17 +230,19 @@ impl DllManager {
                     handle,
                     k4a_transformation_depth_image_to_point_cloud
                 ),
-            }
+            })
         }
     }
 
-    fn load(path: &str) -> Option<DllManager> {
-        let h = load_library(path, k4a_libname);
-
-        match h {
-            Ok(h) => Option::<DllManager>::from(DllManager::new(h)),
-            Err(e) => Option::<DllManager>::None,
+    fn load(path: &str) -> Result<DllManager, Error> {
+        let h = load_library(path, k4a_libname)?;
+        let r = DllManager::new(h);
+        if let Err(e) = r {
+            unsafe {
+                FreeLibrary(h);
+            }
         }
+        r
     }
 }
 
