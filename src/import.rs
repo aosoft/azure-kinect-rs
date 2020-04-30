@@ -114,10 +114,9 @@ fn load_library(path: &str, dll_file_name: &str) -> Result<*const c_void, Error>
 
 macro_rules! proc_address {
     ($h:ident, $proc_name:ident) => {
-        std::mem::transmute::<_, $proc_name>(GetProcAddress(
-            $h,
-            concat!(stringify!($proc_name), "\0").as_ptr()
-        ).to_result()?)
+        std::mem::transmute::<_, $proc_name>(
+            GetProcAddress($h, concat!(stringify!($proc_name), "\0").as_ptr()).to_result()?,
+        )
     };
 }
 
@@ -281,5 +280,20 @@ impl ToResult for *const c_void {
         } else {
             Ok(*self)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test() -> std::result::Result<(), Box<std::error::Error>> {
+        let manager = DllManager::load(std::env::current_dir()?.to_str().ok_or(super::Error(0))?);
+        assert!(manager.is_ok());
+        let manager2 = manager.unwrap();
+        let c = (manager2.k4a_device_get_installed_count)();
+        println!("device count = {}", c);
+        Ok(())
     }
 }
