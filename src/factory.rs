@@ -1,6 +1,7 @@
 use super::bindings::*;
-use super::k4a_functions::*;
+use super::device::Device;
 use super::error::{Error, ToResult};
+use super::k4a_functions::*;
 use std::ffi::c_void;
 use std::ptr;
 
@@ -244,6 +245,21 @@ impl Factory {
         }
         r
     }
+
+    /// Gets the number of connected devices
+    pub unsafe fn device_get_installed_count() -> u32 {
+        (k4a_device_get_installed_count)()
+    }
+
+    /// Open a k4a device.
+    pub unsafe fn device_open(&self, index: u32) -> Result<Device, Error> {
+        let mut handle: k4a_device_t = ptr::null_mut();
+        let r: Error = (k4a_device_open)(index, &mut handle).into();
+        match r {
+            Succeded => Ok(Device { factory: &self, handle: handle }),
+            _ => Err(r),
+        }
+    }
 }
 
 impl Drop for Factory {
@@ -256,8 +272,6 @@ impl Drop for Factory {
         }
     }
 }
-
-static mut dllmanager: Option<Factory> = Option::<Factory>::None;
 
 impl ToResult for *const c_void {
     fn to_result(&self) -> Result<*const c_void, Error> {

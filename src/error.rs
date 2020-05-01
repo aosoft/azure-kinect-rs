@@ -1,3 +1,5 @@
+use super::bindings::*;
+
 #[derive(Clone, Copy, Debug)]
 pub enum Error {
     Succeded,
@@ -17,4 +19,33 @@ impl std::fmt::Display for Error {
 
 pub(crate) trait ToResult: Sized {
     fn to_result(&self) -> Result<Self, Error>;
+}
+
+impl From<k4a_result_t> for Error {
+    fn from(s: k4a_result_t) -> Error {
+        match s {
+            K4A_RESULT_SUCCEEDED => Error::Succeded,
+            K4A_RESULT_FAILED => Error::Failed,
+        }
+    }
+}
+
+impl From<k4a_buffer_result_t> for Error {
+    fn from(s: k4a_buffer_result_t) -> Error {
+        match s {
+            K4A_RESULT_SUCCEEDED => Error::Succeded,
+            K4A_RESULT_FAILED => Error::Failed,
+            K4A_BUFFER_RESULT_TOO_SMALL => Error::TooSmall,
+        }
+    }
+}
+
+impl From<k4a_wait_result_t> for Error {
+    fn from(s: k4a_wait_result_t) -> Error {
+        match s {
+            K4A_RESULT_SUCCEEDED => Error::Succeded,
+            K4A_RESULT_FAILED => Error::Failed,
+            K4A_WAIT_RESULT_TIMEOUT => Error::Timeout,
+        }
+    }
 }
