@@ -1,5 +1,6 @@
 use super::bindings::*;
 use super::k4a_functions::*;
+use super::error::{Error, ToResult};
 use std::ffi::c_void;
 use std::ptr;
 
@@ -100,7 +101,7 @@ fn load_library(path: &str, dll_file_name: &str) -> Result<*const c_void, Error>
         LoadLibraryExW(
             full_path
                 .to_str()
-                .ok_or(Error(0))?
+                .ok_or(Error::Failed)?
                 .encode_utf16()
                 .chain(Some(0))
                 .collect::<Vec<u16>>()
@@ -258,25 +259,10 @@ impl Drop for DllManager {
 
 static mut dllmanager: Option<DllManager> = Option::<DllManager>::None;
 
-#[derive(Clone, Copy, Debug)]
-pub(crate) struct Error(u32);
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl std::error::Error for Error {}
-
-trait ToResult: Sized {
-    fn to_result(&self) -> Result<Self, Error>;
-}
-
 impl ToResult for *const c_void {
     fn to_result(&self) -> Result<*const c_void, Error> {
         if *self == ptr::null() {
-            unsafe { Err(Error(GetLastError())) }
+            unsafe { Err(Error::Win32Error(GetLastError())) }
         } else {
             Ok(*self)
         }
@@ -289,7 +275,7 @@ mod tests {
 
     #[test]
     fn test() -> std::result::Result<(), Box<std::error::Error>> {
-        let manager = DllManager::load(std::env::current_dir()?.to_str().ok_or(super::Error(0))?);
+        let manager = DllManager::load(std::env::current_dir()?.to_str().ok_or(Error::Failed)?);
         assert!(manager.is_ok());
         let manager2 = manager.unwrap();
         let c = (manager2.k4a_device_get_installed_count)();
