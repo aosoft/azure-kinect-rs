@@ -17,6 +17,7 @@ impl Device<'_> {
         }
     }
 
+    /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
     pub fn get_capture(&self, timeout_in_ms: i32) -> Result<Capture, Error> {
         unsafe {
             let mut handle: k4a_capture_t = ptr::null_mut();
@@ -30,19 +31,15 @@ impl Device<'_> {
         }
     }
 
+    /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
     pub fn get_capture_wait_infinite(&self) -> Result<Capture, Error> {
         self.get_capture(K4A_WAIT_INFINITE)
     }
 
+    /// Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
     pub fn get_imu_sample(&self, timeout_in_ms: i32) -> Result<k4a_imu_sample_t, Error> {
         unsafe {
-            let mut imu_sample = k4a_imu_sample_t {
-                acc_sample: k4a_float3_t { xyz: k4a_float3_t__xyz{x:0.0, y:0.0, z:0.0}},
-                acc_timestamp_usec: 0,
-                gyro_sample: k4a_float3_t { xyz: k4a_float3_t__xyz{x:0.0, y:0.0, z:0.0}},
-                gyro_timestamp_usec: 0,
-                temperature: 0.0,
-            };
+            let mut imu_sample = k4a_imu_sample_t::default();
             let r: Error = (self.factory.k4a_device_get_imu_sample)(
                 self.handle,
                 &mut imu_sample,

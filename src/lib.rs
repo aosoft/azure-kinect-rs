@@ -1,5 +1,6 @@
 mod bindings;
 mod k4a_functions;
+mod default;
 pub mod error;
 pub mod factory;
 pub mod device;
