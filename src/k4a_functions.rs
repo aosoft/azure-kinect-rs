@@ -12,7 +12,7 @@ pub(crate) type k4a_device_open = fn(index: u32, device_handle: *mut k4a_device_
 pub(crate) type k4a_device_close = fn(device_handle: k4a_device_t);
 pub(crate) type k4a_device_get_capture = fn(
     device_handle: k4a_device_t,
-    capture_handle: k4a_capture_t,
+    capture_handle: *mut k4a_capture_t,
     timeout_in_ms: i32,
 ) -> k4a_wait_result_t;
 pub(crate) type k4a_device_get_imu_sample = fn(
