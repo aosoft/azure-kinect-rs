@@ -21,13 +21,12 @@ impl Device<'_> {
     pub fn get_capture(&self, timeout_in_ms: i32) -> Result<Capture, Error> {
         unsafe {
             let mut handle: k4a_capture_t = ptr::null_mut();
-            let r: Error =
-                (self.factory.k4a_device_get_capture)(self.handle, &mut handle, timeout_in_ms)
-                    .into();
-            match r {
-                Succeded => Ok(Capture::new(self.factory, handle)),
-                _ => Err(r),
-            }
+            Error::from((self.factory.k4a_device_get_capture)(
+                self.handle,
+                &mut handle,
+                timeout_in_ms,
+            ))
+            .to_result_fn(&|| Capture::new(self.factory, handle))
         }
     }
 
@@ -40,17 +39,33 @@ impl Device<'_> {
     pub fn get_imu_sample(&self, timeout_in_ms: i32) -> Result<k4a_imu_sample_t, Error> {
         unsafe {
             let mut imu_sample = k4a_imu_sample_t::default();
-            let r: Error = (self.factory.k4a_device_get_imu_sample)(
+            Error::from((self.factory.k4a_device_get_imu_sample)(
                 self.handle,
                 &mut imu_sample,
                 timeout_in_ms,
-            )
-            .into();
-            match r {
-                Succeded => Ok(imu_sample),
-                _ => Err(r),
-            }
+            ))
+            .to_result(imu_sample)
         }
+    }
+
+    pub fn get_imu_sample_wait_infinite(&self) -> Result<k4a_imu_sample_t, Error> {
+        self.get_imu_sample(K4A_WAIT_INFINITE)
+    }
+
+    pub fn start_cameras(&self, configuration: &k4a_device_configuration_t) -> Result<(), Error> {
+        Error::from((self.factory.k4a_device_start_cameras)(
+            self.handle,
+            configuration,
+        ))
+        .to_result(())
+    }
+
+    pub fn stop_cameras(&self) {
+        (self.factory.k4a_device_stop_cameras)(self.handle);
+    }
+
+    pub fn start_imu(&self) -> Result<(), Error> {
+        Error::from((self.factory.k4a_device_start_imu)(self.handle)).to_result(())
     }
 }
 

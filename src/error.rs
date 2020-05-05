@@ -9,6 +9,22 @@ pub enum Error {
     Win32Error(u32),
 }
 
+impl Error {
+    pub(crate) fn to_result<T>(self, ok: T) -> Result<T, Error> {
+        match(self) {
+            Succeded => Ok(ok),
+            _ => Err(self)
+        }
+    }
+
+    pub(crate) fn to_result_fn<T>(self, ok: &Fn() -> T) -> Result<T, Error> {
+        match(self) {
+            Succeded => Ok(ok()),
+            _ => Err(self)
+        }
+    }
+}
+
 impl std::error::Error for Error {}
 
 impl std::fmt::Display for Error {

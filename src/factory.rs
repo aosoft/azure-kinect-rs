@@ -247,19 +247,16 @@ impl Factory {
     }
 
     /// Gets the number of connected devices
-    pub fn device_get_installed_count() -> u32 {
-        unsafe { (k4a_device_get_installed_count)() }
+    pub fn device_get_installed_count(&self) -> u32 {
+        unsafe { (self.k4a_device_get_installed_count)() }
     }
 
     /// Open a k4a device.
     pub unsafe fn device_open(&self, index: u32) -> Result<Device, Error> {
         unsafe {
             let mut handle: k4a_device_t = ptr::null_mut();
-            let r: Error = (k4a_device_open)(index, &mut handle).into();
-            match r {
-                Succeded => Ok(Device::new(self, handle)),
-                _ => Err(r),
-            }
+            Error::from((self.k4a_device_open)(index, &mut handle))
+                .to_result_fn(&|| Device::new(self, handle))
         }
     }
 }
