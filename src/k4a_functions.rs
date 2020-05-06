@@ -84,7 +84,7 @@ pub(crate) type k4a_device_start_imu = fn(device_handle: k4a_device_t) -> k4a_re
 pub(crate) type k4a_device_stop_imu = fn(device_handle: k4a_device_t);
 pub(crate) type k4a_device_get_serialnum = fn(
     device_handle: k4a_device_t,
-    serial_number: &str,
+    serial_number: *mut ::std::os::raw::c_char,
     serial_number_size: *mut usize,
 ) -> k4a_buffer_result_t;
 pub(crate) type k4a_device_get_version =
