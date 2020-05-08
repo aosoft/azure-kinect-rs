@@ -2,9 +2,7 @@ use super::bindings::*;
 use super::capture::Capture;
 use super::error::Error;
 use super::factory::Factory;
-use super::utility;
-use crate::error::Error::Succeeded;
-use crate::utility::{get_k4a_string, get_k4a_binary_data};
+use super::utility::*;
 use std::ptr;
 
 pub struct Device<'a> {
