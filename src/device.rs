@@ -1,8 +1,9 @@
 use super::bindings::*;
-use super::capture::Capture;
 use super::error::Error;
 use super::factory::Factory;
 use super::utility::*;
+use super::capture::Capture;
+use super::calibration::Calibration;
 use std::ptr;
 
 pub struct Device<'a> {
@@ -115,6 +116,14 @@ impl Device<'_> {
         get_k4a_binary_data(&|calibration, buffer| {
             (self.factory.k4a_device_get_raw_calibration)(self.handle, calibration, buffer)
         })
+    }
+
+    pub fn get_calibration(&self, depth_mode: k4a_depth_mode_t, color_resolution: k4a_color_resolution_t) -> Result<Calibration, Error> {
+        unsafe {
+            let mut calibaraion = k4a_calibration_t::default();
+            Error::from((self.factory.k4a_device_get_calibration)(self.handle, depth_mode, color_resolution, &mut calibaraion)).to_result_fn(
+                &||{ Calibration::new(self.factory, calibaraion)})
+        }
     }
 }
 

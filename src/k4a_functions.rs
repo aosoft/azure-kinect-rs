@@ -118,7 +118,7 @@ pub(crate) type k4a_device_get_calibration = fn(
     depth_mode: k4a_depth_mode_t,
     color_resolution: k4a_color_resolution_t,
     calibration: *mut k4a_calibration_t,
-);
+) -> k4a_result_t;
 pub(crate) type k4a_device_get_sync_jack = fn(
     device_handle: k4a_device_t,
     sync_in_jack_connected: *mut bool,

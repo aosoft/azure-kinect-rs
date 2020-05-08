@@ -3,14 +3,14 @@ use super::error::Error;
 use super::factory::Factory;
 use std::ptr;
 
-pub struct Caribartion<'a> {
+pub struct Calibration<'a> {
     factory: &'a Factory,
     calibration: k4a_calibration_t,
 }
 
-impl Caribartion<'_> {
-    pub(crate) fn new(factory: &Factory, calibration: k4a_calibration_t) -> Caribartion {
-        Caribartion {
+impl Calibration<'_> {
+    pub(crate) fn new(factory: &Factory, calibration: k4a_calibration_t) -> Calibration {
+        Calibration {
             factory: factory,
             calibration: calibration,
         }
