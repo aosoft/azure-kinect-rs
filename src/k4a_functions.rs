@@ -108,11 +108,11 @@ pub(crate) type k4a_device_get_color_control = fn(
 pub(crate) type k4a_device_set_color_control = fn(
     device_handle: k4a_device_t,
     command: k4a_color_control_command_t,
-    mode: *mut k4a_color_control_mode_t,
+    mode: k4a_color_control_mode_t,
     value: i32,
 ) -> k4a_result_t;
 pub(crate) type k4a_device_get_raw_calibration =
-    fn(device_handle: k4a_device_t, data: *mut u8, data_size: *mut usize);
+    fn(device_handle: k4a_device_t, data: *mut u8, data_size: *mut usize) -> k4a_buffer_result_t;
 pub(crate) type k4a_device_get_calibration = fn(
     device_handle: k4a_device_t,
     depth_mode: k4a_depth_mode_t,

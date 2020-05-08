@@ -4,7 +4,7 @@ use super::error::Error;
 use super::factory::Factory;
 use super::utility;
 use crate::error::Error::Succeeded;
-use crate::utility::get_k4a_string;
+use crate::utility::{get_k4a_string, get_k4a_binary_data};
 use std::ptr;
 
 pub struct Device<'a> {
@@ -78,6 +78,44 @@ impl Device<'_> {
     pub fn get_serialnum(&self) -> Result<String, Error> {
         get_k4a_string(&|serialnum, buffer| {
             (self.factory.k4a_device_get_serialnum)(self.handle, serialnum, buffer)
+        })
+    }
+
+    pub fn get_color_control(
+        &self,
+        command: k4a_color_control_command_t,
+    ) -> Result<(k4a_color_control_mode_t, i32), Error> {
+        let mut mode: k4a_color_control_mode_t =
+            k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO;
+        let mut value: i32 = 0;
+        unsafe {
+            Error::from((self.factory.k4a_device_get_color_control)(
+                self.handle,
+                command,
+                &mut mode,
+                &mut value,
+            ))
+            .to_result((mode, value))
+        }
+    }
+
+    pub fn set_color_control(
+        &self,
+        command: k4a_color_control_command_t,
+        mode: k4a_color_control_mode_t,
+        value: i32,
+    ) -> Result<(), Error> {
+        Error::from((self.factory.k4a_device_set_color_control)(
+            self.handle,
+            command,
+            mode,
+            value,
+        )).to_result(())
+    }
+
+    pub fn get_raw_calibration(&self) -> Result<Vec<u8>, Error> {
+        get_k4a_binary_data(&|calibration, buffer| {
+            (self.factory.k4a_device_get_raw_calibration)(self.handle, calibration, buffer)
         })
     }
 }
