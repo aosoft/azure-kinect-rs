@@ -2,7 +2,9 @@ use super::bindings::*;
 use super::capture::Capture;
 use super::error::Error;
 use super::factory::Factory;
-use crate::error::Error::Succeded;
+use super::utility;
+use crate::error::Error::Succeeded;
+use crate::utility::get_k4a_string;
 use std::ptr;
 
 pub struct Device<'a> {
@@ -74,30 +76,9 @@ impl Device<'_> {
     }
 
     pub fn get_serialnum(&self) -> Result<String, Error> {
-        unsafe {
-            let mut buffer: usize = 0;
-            let r: Error =
-                (self.factory.k4a_device_get_serialnum)(self.handle, ptr::null_mut(), &mut buffer)
-                    .into();
-            match r {
-                Succeded => Ok(String::new()),
-                Error::TooSmall => {
-                    if (buffer > 1) {
-                        let mut serialnum = String::with_capacity(buffer);
-                        serialnum.as_mut_vec().set_len(buffer - 1);
-                        Error::from((self.factory.k4a_device_get_serialnum)(
-                            self.handle,
-                            serialnum.as_mut_ptr() as *mut ::std::os::raw::c_char,
-                            &mut buffer,
-                        ))
-                        .to_result(serialnum)
-                    } else {
-                        Err(r)
-                    }
-                }
-                _ => Err(r),
-            }
-        }
+        get_k4a_string(&|serialnum, buffer| {
+            (self.factory.k4a_device_get_serialnum)(self.handle, serialnum, buffer)
+        })
     }
 }
 
