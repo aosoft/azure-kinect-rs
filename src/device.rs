@@ -1,9 +1,9 @@
 use super::bindings::*;
+use super::calibration::Calibration;
+use super::capture::Capture;
 use super::error::Error;
 use super::factory::Factory;
 use super::utility::*;
-use super::capture::Capture;
-use super::calibration::Calibration;
 use std::ptr;
 
 pub struct Device<'a> {
@@ -109,7 +109,8 @@ impl Device<'_> {
             command,
             mode,
             value,
-        )).to_result(())
+        ))
+        .to_result(())
     }
 
     pub fn get_raw_calibration(&self) -> Result<Vec<u8>, Error> {
@@ -118,11 +119,52 @@ impl Device<'_> {
         })
     }
 
-    pub fn get_calibration(&self, depth_mode: k4a_depth_mode_t, color_resolution: k4a_color_resolution_t) -> Result<Calibration, Error> {
+    pub fn get_calibration(
+        &self,
+        depth_mode: k4a_depth_mode_t,
+        color_resolution: k4a_color_resolution_t,
+    ) -> Result<Calibration, Error> {
         unsafe {
             let mut calibaraion = k4a_calibration_t::default();
-            Error::from((self.factory.k4a_device_get_calibration)(self.handle, depth_mode, color_resolution, &mut calibaraion)).to_result_fn(
-                &||{ Calibration::new(self.factory, calibaraion)})
+            Error::from((self.factory.k4a_device_get_calibration)(
+                self.handle,
+                depth_mode,
+                color_resolution,
+                &mut calibaraion,
+            ))
+            .to_result_fn(&|| Calibration::new(self.factory, calibaraion))
+        }
+    }
+
+    pub fn is_sync_connected(&self) -> Result<(bool, bool), Error> {
+        unsafe {
+            let mut sync_in_jack_connected = false;
+            let mut sync_out_jack_connected = false;
+            Error::from((self.factory.k4a_device_get_sync_jack)(
+                self.handle,
+                &mut sync_in_jack_connected,
+                &mut sync_out_jack_connected,
+            ))
+            .to_result((sync_in_jack_connected, sync_out_jack_connected))
+        }
+    }
+
+    pub fn is_sync_in_connected(&self) -> Result<bool, Error> {
+        Ok(self.is_sync_connected()?.0)
+    }
+
+    pub fn is_sync_out_connected(&self) -> Result<bool, Error> {
+        Ok(self.is_sync_connected()?.1)
+    }
+
+    pub fn get_version(&self) -> Result<k4a_hardware_version_t, Error> {
+        unsafe {
+            let mut version = k4a_hardware_version_t::default();
+            Error::from((self.factory.k4a_device_get_version)(
+                self.handle,
+                &mut version,
+            ))
+            .to_result(version)
         }
     }
 }
