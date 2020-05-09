@@ -92,7 +92,7 @@ pub struct Factory {
         k4a_transformation_depth_image_to_point_cloud,
 }
 
-const k4a_libname: &'static str = "k4a.dll";
+const K4A_LIBNAME: &'static str = "k4a.dll";
 
 fn load_library(lib_dir: &str, dll_file_name: &str) -> Result<*const c_void, Error> {
     let full_path =
@@ -236,7 +236,7 @@ impl Factory {
     }
 
     pub fn load(lib_dir: &str) -> Result<Factory, Error> {
-        let h = load_library(lib_dir, k4a_libname)?;
+        let h = load_library(lib_dir, K4A_LIBNAME)?;
         let r = Factory::new(h);
         if let Err(e) = r {
             unsafe {

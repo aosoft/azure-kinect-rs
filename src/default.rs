@@ -1,6 +1,49 @@
 use super::bindings::*;
-use std::default::Default;
 
+impl Default for k4a_float2_t {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
+impl Default for k4a_float3_t {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
+impl Default for k4a_imu_sample_t {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
+impl Default for k4a_calibration_extrinsics_t {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
+impl Default for k4a_calibration_intrinsics_t {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
+impl Default for k4a_calibration_camera_t {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
+impl Default for k4a_calibration_t {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
+
+/*
 impl Default for k4a_float2_t__xy {
     fn default() -> Self {
         k4a_float2_t__xy { x: 0.0, y: 0.0 }
@@ -95,3 +138,4 @@ impl Default for k4a_calibration_t {
         }
     }
 }
+*/
