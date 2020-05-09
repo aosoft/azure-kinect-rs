@@ -12,14 +12,14 @@ pub enum Error {
 impl Error {
     pub(crate) fn to_result<T>(self, ok: T) -> Result<T, Error> {
         match(self) {
-            Succeded => Ok(ok),
+            Error::Succeeded => Ok(ok),
             _ => Err(self)
         }
     }
 
     pub(crate) fn to_result_fn<T>(self, ok: &Fn() -> T) -> Result<T, Error> {
         match(self) {
-            Succeded => Ok(ok()),
+            Error::Succeeded => Ok(ok()),
             _ => Err(self)
         }
     }
