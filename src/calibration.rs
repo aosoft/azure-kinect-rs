@@ -17,7 +17,7 @@ impl Calibration<'_> {
         }
     }
 
-    pub(crate) fn from_raw<'a>(
+    pub fn from_raw<'a>(
         factory: &'a Factory,
         raw_calibration: &Vec<u8>,
         target_depth_mode: k4a_depth_mode_t,
