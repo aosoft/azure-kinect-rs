@@ -9,7 +9,7 @@ pub struct Image<'a> {
 }
 
 impl Image<'_> {
-    pub(crate) fn new(factory: &Factory, handle: k4a_image_t) -> Image {
+    pub(crate) fn from_handle(factory: &Factory, handle: k4a_image_t) -> Image {
         Image {
             factory: factory,
             handle: handle,

@@ -256,7 +256,7 @@ impl Factory {
         unsafe {
             let mut handle: k4a_device_t = ptr::null_mut();
             Error::from((self.k4a_device_open)(index, &mut handle))
-                .to_result_fn(&|| Device::new(self, handle))
+                .to_result_fn(&|| Device::from_handle(self, handle))
         }
     }
 }

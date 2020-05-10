@@ -10,13 +10,35 @@ pub struct Calibration<'a> {
 }
 
 impl Calibration<'_> {
-    pub(crate) fn new(factory: &Factory, calibration: k4a_calibration_t) -> Calibration {
+
+
+    pub(crate) fn from_handle(factory: &Factory, calibration: k4a_calibration_t) -> Calibration {
         Calibration {
             factory: factory,
             calibration: calibration,
         }
     }
 
+    pub(crate) fn from_raw<'a>(
+        factory: &'a Factory,
+        raw_calibration: &Vec<u8>,
+        target_depth_mode: k4a_depth_mode_t,
+        target_color_resolution: k4a_color_resolution_t,
+    ) -> Result<Calibration<'a>, Error> {
+        unsafe {
+            let mut calibration = k4a_calibration_t::default();
+            Error::from((factory.k4a_calibration_get_from_raw)(
+                raw_calibration.as_ptr() as *mut i8,
+                raw_calibration.len(),
+                target_depth_mode,
+                target_color_resolution,
+                &mut calibration,
+            ))
+            .to_result_fn(&|| Calibration::from_handle(factory, calibration))
+        }
+    }
+
+    /// Transform a 3d point of a source coordinate system into a 3d point of the target coordinate system.
     pub fn convert_3d_to_3d(
         &self,
         source_point3d: &k4a_float3_t,
@@ -36,6 +58,8 @@ impl Calibration<'_> {
         }
     }
 
+    /// Transform a 2d pixel coordinate with an associated depth value of the source camera into a 3d point of the target coordinate system.
+    /// Returns false if the point is invalid in the target coordinate system (and therefore target_point3d should not be used)
     pub fn convert_2d_to_3d(
         &self,
         source_point2d: &k4a_float2_t,
@@ -59,6 +83,8 @@ impl Calibration<'_> {
         }
     }
 
+    /// Transform a 3d point of a source coordinate system into a 2d pixel coordinate of the target camera.
+    /// Returns false if the point is invalid in the target coordinate system (and therefore target_point2d should not be used)
     pub fn convert_3d_to_2d(
         &self,
         source_point3d: &k4a_float3_t,
@@ -80,6 +106,8 @@ impl Calibration<'_> {
         }
     }
 
+    /// Transform a 2d pixel coordinate with an associated depth value of the source camera into a 2d pixel coordinate of the target camera
+    /// Returns false if the point is invalid in the target coordinate system (and therefore target_point2d should not be used)
     pub fn convert_2d_to_2d(
         &self,
         source_point2d: &k4a_float2_t,
@@ -103,6 +131,9 @@ impl Calibration<'_> {
         }
     }
 
+    /// Transform a 2D pixel coordinate from color camera into a 2D pixel coordinate of the depth camera. This function
+    /// searches along an epipolar line in the depth image to find the corresponding depth pixel.
+    /// Returns false if the point is invalid in the target coordinate system (and therefore target_point2d should not be used)
     pub fn convert_color_2d_to_depth_2d(
         &self,
         source_point2d: &k4a_float2_t,
