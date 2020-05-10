@@ -1,6 +1,7 @@
 use super::bindings::*;
 use super::error::Error;
 use super::factory::Factory;
+use super::image::Image;
 use std::ptr;
 
 pub struct Calibration<'a> {
@@ -95,6 +96,25 @@ impl Calibration<'_> {
                 source_depth,
                 source_camera,
                 target_camera,
+                &mut target_point2d,
+                &mut valid,
+            ))
+            .to_result((target_point2d, valid != 0))
+        }
+    }
+
+    pub fn convert_color_2d_to_depth_2d(
+        &self,
+        source_point2d: &k4a_float2_t,
+        depth_image: &Image,
+    ) -> Result<(k4a_float2_t, bool), Error> {
+        unsafe {
+            let mut target_point2d = k4a_float2_t::default();
+            let mut valid: i32 = 0;
+            Error::from((self.factory.k4a_calibration_color_2d_to_depth_2d)(
+                &self.calibration,
+                source_point2d,
+                depth_image.handle,
                 &mut target_point2d,
                 &mut valid,
             ))

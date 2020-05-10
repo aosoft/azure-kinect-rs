@@ -7,4 +7,5 @@ pub mod factory;
 pub mod device;
 pub mod capture;
 pub mod calibration;
+pub mod image;
 
