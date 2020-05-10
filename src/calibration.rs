@@ -10,8 +10,6 @@ pub struct Calibration<'a> {
 }
 
 impl Calibration<'_> {
-
-
     pub(crate) fn from_handle(factory: &Factory, calibration: k4a_calibration_t) -> Calibration {
         Calibration {
             factory: factory,

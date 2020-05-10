@@ -1,4 +1,5 @@
 use super::bindings::*;
+use super::error::Error;
 use super::factory::Factory;
 use super::image::Image;
 use std::ptr;
@@ -9,6 +10,13 @@ pub struct Capture<'a> {
 }
 
 impl Capture<'_> {
+    pub fn new(factory: &Factory) -> Result<Capture, Error> {
+        unsafe {
+            let mut handle: k4a_capture_t = ptr::null_mut();
+            Error::from((factory.k4a_capture_create)(&mut handle)).to_result_fn(&|| Capture::from_handle(factory, handle))
+        }
+    }
+
     pub(crate) fn from_handle(factory: &Factory, handle: k4a_capture_t) -> Capture {
         Capture {
             factory: factory,
