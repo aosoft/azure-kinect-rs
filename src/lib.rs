@@ -2,16 +2,17 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+pub mod error;
+pub mod default;
+pub mod display;
+pub mod k4a_functions;
+pub mod utility;
+pub mod factory;
 pub mod calibration;
 pub mod capture;
 pub mod device;
-pub mod error;
-pub mod factory;
 pub mod image;
 pub mod transformation;
-mod default;
-mod k4a_functions;
-mod utility;
 
 pub mod bindings {
     include!("bindings.rs");
@@ -36,7 +37,7 @@ mod tests {
         println!("serial = {} / hw ver = {:?}", serial, version);
 
         let imu = device.get_imu_sample_wait_infinite()?;
-        //println!("imu = {:?}", imu);
+        println!("imu = {}", imu);
         let color_control = device.get_color_control(
             bindings::k4a_color_control_command_t::K4A_COLOR_CONTROL_BRIGHTNESS,
         )?;
