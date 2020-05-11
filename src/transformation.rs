@@ -10,6 +10,7 @@ pub struct Resolution {
     height: i32,
 }
 
+#[allow(dead_code)]
 pub struct Transformation<'a> {
     factory: &'a Factory,
     handle: k4a_transformation_t,

@@ -11,6 +11,16 @@ pub struct Device<'a> {
     handle: k4a_device_t,
 }
 
+#[derive(Copy, Clone, Default)]
+pub struct ColorControlCapabilities {
+    supports_auto: bool,
+    min_value: i32,
+    max_value: i32,
+    step_value: i32,
+    default_value: i32,
+    default_mode: k4a_color_control_mode_t,
+}
+
 impl Device<'_> {
     pub(crate) fn from_handle(factory: &Factory, handle: k4a_device_t) -> Device {
         Device {
@@ -112,6 +122,24 @@ impl Device<'_> {
             value,
         ))
         .to_result(())
+    }
+
+    pub fn get_color_control_capabilities(
+        &self,
+        command: k4a_color_control_command_t,
+    ) -> Result<ColorControlCapabilities, Error> {
+        let mut capabilties = ColorControlCapabilities::default();
+        Error::from((self.factory.k4a_device_get_color_control_capabilities)(
+            self.handle,
+            command,
+            &mut capabilties.supports_auto,
+            &mut capabilties.min_value,
+            &mut capabilties.max_value,
+            &mut capabilties.step_value,
+            &mut capabilties.default_value,
+            &mut capabilties.default_mode,
+        ))
+        .to_result(capabilties)
     }
 
     /// Get the raw calibration blob for the entire K4A device.

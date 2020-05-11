@@ -1,5 +1,9 @@
 use super::bindings::*;
 
+impl Default for k4a_color_control_mode_t {
+    fn default() -> Self { k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO }
+}
+
 impl Default for k4a_float2_t {
     fn default() -> Self {
         unsafe { std::mem::zeroed() }
