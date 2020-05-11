@@ -21,15 +21,13 @@ impl Device<'_> {
 
     /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
     pub fn get_capture(&self, timeout_in_ms: i32) -> Result<Capture, Error> {
-        unsafe {
-            let mut handle: k4a_capture_t = ptr::null_mut();
-            Error::from((self.factory.k4a_device_get_capture)(
-                self.handle,
-                &mut handle,
-                timeout_in_ms,
-            ))
-            .to_result_fn(&|| Capture::from_handle(self.factory, handle))
-        }
+        let mut handle: k4a_capture_t = ptr::null_mut();
+        Error::from((self.factory.k4a_device_get_capture)(
+            self.handle,
+            &mut handle,
+            timeout_in_ms,
+        ))
+        .to_result_fn(&|| Capture::from_handle(self.factory, handle))
     }
 
     /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
@@ -39,15 +37,13 @@ impl Device<'_> {
 
     /// Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
     pub fn get_imu_sample(&self, timeout_in_ms: i32) -> Result<k4a_imu_sample_t, Error> {
-        unsafe {
-            let mut imu_sample = k4a_imu_sample_t::default();
-            Error::from((self.factory.k4a_device_get_imu_sample)(
-                self.handle,
-                &mut imu_sample,
-                timeout_in_ms,
-            ))
-            .to_result(imu_sample)
-        }
+        let mut imu_sample = k4a_imu_sample_t::default();
+        Error::from((self.factory.k4a_device_get_imu_sample)(
+            self.handle,
+            &mut imu_sample,
+            timeout_in_ms,
+        ))
+        .to_result(imu_sample)
     }
 
     pub fn get_imu_sample_wait_infinite(&self) -> Result<k4a_imu_sample_t, Error> {
@@ -93,15 +89,13 @@ impl Device<'_> {
         let mut mode: k4a_color_control_mode_t =
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO;
         let mut value: i32 = 0;
-        unsafe {
-            Error::from((self.factory.k4a_device_get_color_control)(
-                self.handle,
-                command,
-                &mut mode,
-                &mut value,
-            ))
-            .to_result((mode, value))
-        }
+        Error::from((self.factory.k4a_device_get_color_control)(
+            self.handle,
+            command,
+            &mut mode,
+            &mut value,
+        ))
+        .to_result((mode, value))
     }
 
     /// Set the K4A color sensor control value
@@ -133,30 +127,26 @@ impl Device<'_> {
         depth_mode: k4a_depth_mode_t,
         color_resolution: k4a_color_resolution_t,
     ) -> Result<Calibration, Error> {
-        unsafe {
-            let mut calibaraion = k4a_calibration_t::default();
-            Error::from((self.factory.k4a_device_get_calibration)(
-                self.handle,
-                depth_mode,
-                color_resolution,
-                &mut calibaraion,
-            ))
-            .to_result_fn(&|| Calibration::from_handle(self.factory, calibaraion))
-        }
+        let mut calibaraion = k4a_calibration_t::default();
+        Error::from((self.factory.k4a_device_get_calibration)(
+            self.handle,
+            depth_mode,
+            color_resolution,
+            &mut calibaraion,
+        ))
+        .to_result_fn(&|| Calibration::from_handle(self.factory, calibaraion))
     }
 
     /// Get the device jack status for the synchronization connectors
     pub fn is_sync_connected(&self) -> Result<(bool, bool), Error> {
-        unsafe {
-            let mut sync_in_jack_connected = false;
-            let mut sync_out_jack_connected = false;
-            Error::from((self.factory.k4a_device_get_sync_jack)(
-                self.handle,
-                &mut sync_in_jack_connected,
-                &mut sync_out_jack_connected,
-            ))
-            .to_result((sync_in_jack_connected, sync_out_jack_connected))
-        }
+        let mut sync_in_jack_connected = false;
+        let mut sync_out_jack_connected = false;
+        Error::from((self.factory.k4a_device_get_sync_jack)(
+            self.handle,
+            &mut sync_in_jack_connected,
+            &mut sync_out_jack_connected,
+        ))
+        .to_result((sync_in_jack_connected, sync_out_jack_connected))
     }
 
     /// Get the device jack status for the synchronization in connector
@@ -171,14 +161,12 @@ impl Device<'_> {
 
     /// Get the version numbers of the K4A subsystems' firmware
     pub fn get_version(&self) -> Result<k4a_hardware_version_t, Error> {
-        unsafe {
-            let mut version = k4a_hardware_version_t::default();
-            Error::from((self.factory.k4a_device_get_version)(
-                self.handle,
-                &mut version,
-            ))
-            .to_result(version)
-        }
+        let mut version = k4a_hardware_version_t::default();
+        Error::from((self.factory.k4a_device_get_version)(
+            self.handle,
+            &mut version,
+        ))
+        .to_result(version)
     }
 }
 

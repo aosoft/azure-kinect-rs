@@ -48,7 +48,6 @@ impl Default for k4a_hardware_version_t {
     }
 }
 
-
 /*
 impl Default for k4a_float2_t__xy {
     fn default() -> Self {

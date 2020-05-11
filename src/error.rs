@@ -13,14 +13,14 @@ impl Error {
     pub(crate) fn to_result<T>(self, ok: T) -> Result<T, Error> {
         match self {
             Error::Succeeded => Ok(ok),
-            _ => Err(self)
+            _ => Err(self),
         }
     }
 
     pub(crate) fn to_result_fn<T>(self, ok: &dyn Fn() -> T) -> Result<T, Error> {
         match self {
             Error::Succeeded => Ok(ok()),
-            _ => Err(self)
+            _ => Err(self),
         }
     }
 }

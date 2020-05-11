@@ -238,7 +238,7 @@ impl Factory {
     pub fn load(lib_dir: &str) -> Result<Factory, Error> {
         let h = load_library(lib_dir, K4A_LIBNAME)?;
         let r = Factory::new(h);
-        if let Err(e) = r {
+        if let Err(_) = r {
             unsafe {
                 FreeLibrary(h);
             }
@@ -248,16 +248,14 @@ impl Factory {
 
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {
-        unsafe { (self.k4a_device_get_installed_count)() }
+        (self.k4a_device_get_installed_count)()
     }
 
     /// Open a k4a device.
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
-        unsafe {
-            let mut handle: k4a_device_t = ptr::null_mut();
-            Error::from((self.k4a_device_open)(index, &mut handle))
-                .to_result_fn(&|| Device::from_handle(self, handle))
-        }
+        let mut handle: k4a_device_t = ptr::null_mut();
+        Error::from((self.k4a_device_open)(index, &mut handle))
+            .to_result_fn(&|| Device::from_handle(self, handle))
     }
 }
 
