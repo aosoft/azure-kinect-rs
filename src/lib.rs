@@ -21,6 +21,23 @@ pub mod bindings {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::device::Device;
+    use super::bindings::*;
+
+    extern "C" fn debug_message_handler(
+        context: *mut ::std::os::raw::c_void,
+        level: k4a_log_level_t,
+        file: *const ::std::os::raw::c_char,
+        line: ::std::os::raw::c_int,
+        message: *const ::std::os::raw::c_char,
+    ){
+        unsafe {
+            let file2 = std::ffi::CStr::from_ptr(file).to_str().unwrap_or("");
+            let message2 = std::ffi::CStr::from_ptr(message).to_str().unwrap_or("");
+
+            println!("{:?}, {}, {}, {}", level, file2, line, message2);
+        }
+    }
 
     #[test]
     fn test() -> std::result::Result<(), Box<dyn std::error::Error>> {
@@ -29,6 +46,12 @@ mod tests {
                 .to_str()
                 .ok_or(error::Error::Failed)?,
         )?;
+
+        factory.set_debug_message_handler(
+            Some(debug_message_handler),
+            std::ptr::null_mut(),
+            k4a_log_level_t::K4A_LOG_LEVEL_ERROR)?;
+
         let c = factory.device_get_installed_count();
         println!("device count = {}", c);
         let device = factory.device_open(0)?;
@@ -36,13 +59,36 @@ mod tests {
         let version = device.get_version();
         println!("serial = {} / hw ver = {:?}", serial, version);
 
-        let imu = device.get_imu_sample_wait_infinite()?;
-        println!("imu = {}", imu);
         let color_control = device.get_color_control(
             bindings::k4a_color_control_command_t::K4A_COLOR_CONTROL_BRIGHTNESS,
         )?;
         println!("color control(brightness) = {:?}", color_control);
 
+        let camera_config = k4a_device_configuration_t::default();
+        device.start_cameras(&camera_config)?;
+        let r = test_camera(&device);
+        device.stop_cameras();
+        if let Err(e) = r {
+            return Err(e);
+        }
         Ok(())
     }
+
+    fn test_camera(device: &Device) -> std::result::Result<(), Box<dyn std::error::Error>> {
+
+        device.start_imu()?;
+        let r = test_imu(device);
+        device.stop_imu();
+        if let Err(e) = r {
+            return Err(e);
+        }
+        Ok(())
+    }
+
+    fn test_imu(device: &Device) -> std::result::Result<(), Box<dyn std::error::Error>> {
+        let imu = device.get_imu_sample_wait_infinite()?;
+        println!("imu = {}", imu);
+        Ok(())
+    }
+
 }
