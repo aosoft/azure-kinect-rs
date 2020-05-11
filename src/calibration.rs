@@ -5,7 +5,7 @@ use super::image::Image;
 
 pub struct Calibration<'a> {
     factory: &'a Factory,
-    calibration: k4a_calibration_t,
+    pub(crate) calibration: k4a_calibration_t,
 }
 
 impl Calibration<'_> {

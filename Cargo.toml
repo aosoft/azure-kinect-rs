@@ -1,5 +1,5 @@
 [package]
-name = "azure_kinect"
+name = "azure-kinect"
 version = "0.1.0"
 authors = ["Yasuhiro Taniuchi"]
 edition = "2018"

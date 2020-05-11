@@ -4,11 +4,12 @@
 
 pub mod calibration;
 pub mod capture;
-mod default;
 pub mod device;
 pub mod error;
 pub mod factory;
 pub mod image;
+pub mod transformation;
+mod default;
 mod k4a_functions;
 mod utility;
 
