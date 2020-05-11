@@ -252,7 +252,7 @@ impl Factory {
     }
 
     /// Open a k4a device.
-    pub unsafe fn device_open(&self, index: u32) -> Result<Device, Error> {
+    pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         unsafe {
             let mut handle: k4a_device_t = ptr::null_mut();
             Error::from((self.k4a_device_open)(index, &mut handle))
@@ -287,7 +287,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() -> std::result::Result<(), Box<std::error::Error>> {
+    fn test() -> std::result::Result<(), Box<dyn std::error::Error>> {
         let manager = Factory::load(std::env::current_dir()?.to_str().ok_or(Error::Failed)?);
         assert!(manager.is_ok());
         let manager2 = manager.unwrap();

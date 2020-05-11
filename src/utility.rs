@@ -62,7 +62,7 @@ mod tests {
 
         let f: &Fn(*mut ::std::os::raw::c_char, *mut usize) -> k4a_buffer_result_t = &|s, len| unsafe {
             *len = t1.len() + 1;
-            if (s == std::ptr::null_mut()) {
+            if s == std::ptr::null_mut() {
                 k4a_buffer_result_t::K4A_BUFFER_RESULT_TOO_SMALL
             } else {
                 std::ptr::copy_nonoverlapping(ct1.as_ptr(), s, t1.len() + 1);

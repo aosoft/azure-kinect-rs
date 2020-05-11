@@ -2,7 +2,6 @@ use super::bindings::*;
 use super::error::Error;
 use super::factory::Factory;
 use super::image::Image;
-use std::ptr;
 
 pub struct Calibration<'a> {
     factory: &'a Factory,
