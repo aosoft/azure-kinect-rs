@@ -166,8 +166,45 @@ impl Transformation<'_> {
             self.color_resolution.width * (std::mem::size_of::<u8>() as i32) * 4,
         )?;
 
-        self.color_image_to_depth_camera_exist_image(depth_image, color_image, &mut transformed_color_image)?;
+        self.color_image_to_depth_camera_exist_image(
+            depth_image,
+            color_image,
+            &mut transformed_color_image,
+        )?;
         Ok(transformed_color_image)
+    }
+
+    pub fn depth_image_to_point_cloud_exist_image(
+        &self,
+        depth_image: &Image,
+        camera: k4a_calibration_type_t,
+        xyz_image: &mut Image,
+    ) -> Result<(), Error> {
+        Error::from(
+            (self.factory.k4a_transformation_depth_image_to_point_cloud)(
+                self.handle,
+                depth_image.handle,
+                camera,
+                xyz_image.handle,
+            ),
+        )
+        .to_result(())
+    }
+
+    pub fn depth_image_to_point_cloud(
+        &self,
+        depth_image: &Image,
+        camera: k4a_calibration_type_t,
+    ) -> Result<Image, Error> {
+        let mut xyz_image = Image::with_format(
+            self.factory,
+            k4a_image_format_t::K4A_IMAGE_FORMAT_CUSTOM,
+            self.color_resolution.width,
+            self.color_resolution.height,
+            self.color_resolution.width * (std::mem::size_of::<u16>() as i32) * 3,
+        )?;
+        self.depth_image_to_point_cloud_exist_image(depth_image, camera, &mut xyz_image)?;
+        Ok(xyz_image)
     }
 }
 

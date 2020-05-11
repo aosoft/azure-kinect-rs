@@ -199,4 +199,4 @@ pub(crate) type k4a_transformation_depth_image_to_point_cloud = fn(
     depth_image: k4a_image_t,
     camera: k4a_calibration_type_t,
     xyz_image: k4a_image_t,
-);
+) -> k4a_result_t;
