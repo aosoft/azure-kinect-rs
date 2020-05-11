@@ -149,3 +149,10 @@ impl Drop for Image<'_> {
         self.handle = ptr::null_mut();
     }
 }
+
+impl Clone for Image<'_> {
+    fn clone(&self) -> Self {
+        (self.factory.k4a_image_reference)(self.handle);
+        Image::from_handle(self.factory, self.handle)
+    }
+}

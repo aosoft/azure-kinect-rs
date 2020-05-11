@@ -79,3 +79,10 @@ impl Drop for Capture<'_> {
         self.handle = ptr::null_mut();
     }
 }
+
+impl Clone for Capture<'_> {
+    fn clone(&self) -> Self {
+        (self.factory.k4a_capture_reference)(self.handle);
+        Capture::from_handle(self.factory, self.handle)
+    }
+}
