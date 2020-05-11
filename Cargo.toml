@@ -9,7 +9,12 @@ repository = "https://github.com/aosoft/azure-kinect-rs"
 readme = "README.md"
 keywords = ["kinect"]
 edition = "2018"
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
