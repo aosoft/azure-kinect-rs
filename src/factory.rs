@@ -47,17 +47,17 @@ pub struct Factory {
     pub(crate) k4a_image_get_width_pixels: k4a_image_get_width_pixels,
     pub(crate) k4a_image_get_height_pixels: k4a_image_get_height_pixels,
     pub(crate) k4a_image_get_stride_bytes: k4a_image_get_stride_bytes,
-    pub(crate) k4a_image_get_timestamp_usec: k4a_image_get_timestamp_usec,
+    //pub(crate) k4a_image_get_timestamp_usec: k4a_image_get_timestamp_usec,
     pub(crate) k4a_image_get_device_timestamp_usec: k4a_image_get_device_timestamp_usec,
     pub(crate) k4a_image_get_system_timestamp_nsec: k4a_image_get_system_timestamp_nsec,
     pub(crate) k4a_image_get_exposure_usec: k4a_image_get_exposure_usec,
     pub(crate) k4a_image_get_white_balance: k4a_image_get_white_balance,
     pub(crate) k4a_image_get_iso_speed: k4a_image_get_iso_speed,
     pub(crate) k4a_image_set_device_timestamp_usec: k4a_image_set_device_timestamp_usec,
-    pub(crate) k4a_image_set_timestamp_usec: k4a_image_set_timestamp_usec,
+    //pub(crate) k4a_image_set_timestamp_usec: k4a_image_set_timestamp_usec,
     pub(crate) k4a_image_set_system_timestamp_nsec: k4a_image_set_system_timestamp_nsec,
     pub(crate) k4a_image_set_exposure_usec: k4a_image_set_exposure_usec,
-    pub(crate) k4a_image_set_exposure_time_usec: k4a_image_set_exposure_time_usec,
+    //pub(crate) k4a_image_set_exposure_time_usec: k4a_image_set_exposure_time_usec,
     pub(crate) k4a_image_set_white_balance: k4a_image_set_white_balance,
     pub(crate) k4a_image_set_iso_speed: k4a_image_set_iso_speed,
     pub(crate) k4a_image_reference: k4a_image_reference,
@@ -156,7 +156,7 @@ impl Factory {
                 k4a_image_get_width_pixels: proc_address!(handle, k4a_image_get_width_pixels),
                 k4a_image_get_height_pixels: proc_address!(handle, k4a_image_get_height_pixels),
                 k4a_image_get_stride_bytes: proc_address!(handle, k4a_image_get_stride_bytes),
-                k4a_image_get_timestamp_usec: proc_address!(handle, k4a_image_get_timestamp_usec),
+                //k4a_image_get_timestamp_usec: proc_address!(handle, k4a_image_get_timestamp_usec),
                 k4a_image_get_device_timestamp_usec: proc_address!(
                     handle,
                     k4a_image_get_device_timestamp_usec
@@ -172,16 +172,16 @@ impl Factory {
                     handle,
                     k4a_image_set_device_timestamp_usec
                 ),
-                k4a_image_set_timestamp_usec: proc_address!(handle, k4a_image_set_timestamp_usec),
+                //k4a_image_set_timestamp_usec: proc_address!(handle, k4a_image_set_timestamp_usec),
                 k4a_image_set_system_timestamp_nsec: proc_address!(
                     handle,
                     k4a_image_set_system_timestamp_nsec
                 ),
                 k4a_image_set_exposure_usec: proc_address!(handle, k4a_image_set_exposure_usec),
-                k4a_image_set_exposure_time_usec: proc_address!(
-                    handle,
-                    k4a_image_set_exposure_time_usec
-                ),
+                //k4a_image_set_exposure_time_usec: proc_address!(
+                //    handle,
+                //    k4a_image_set_exposure_time_usec
+                //),
                 k4a_image_set_white_balance: proc_address!(handle, k4a_image_set_white_balance),
                 k4a_image_set_iso_speed: proc_address!(handle, k4a_image_set_iso_speed),
                 k4a_image_reference: proc_address!(handle, k4a_image_reference),

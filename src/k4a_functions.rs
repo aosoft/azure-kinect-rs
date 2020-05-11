@@ -59,7 +59,7 @@ pub(crate) type k4a_image_get_format = fn(image_handle: k4a_image_t) -> k4a_imag
 pub(crate) type k4a_image_get_width_pixels = fn(image_handle: k4a_image_t) -> i32;
 pub(crate) type k4a_image_get_height_pixels = fn(image_handle: k4a_image_t) -> i32;
 pub(crate) type k4a_image_get_stride_bytes = fn(image_handle: k4a_image_t) -> i32;
-pub(crate) type k4a_image_get_timestamp_usec = fn(image_handle: k4a_image_t) -> u64;
+//pub(crate) type k4a_image_get_timestamp_usec = fn(image_handle: k4a_image_t) -> u64;
 pub(crate) type k4a_image_get_device_timestamp_usec = fn(image_handle: k4a_image_t) -> u64;
 pub(crate) type k4a_image_get_system_timestamp_nsec = fn(image_handle: k4a_image_t) -> u64;
 pub(crate) type k4a_image_get_exposure_usec = fn(image_handle: k4a_image_t) -> u64;
@@ -67,12 +67,12 @@ pub(crate) type k4a_image_get_white_balance = fn(image_handle: k4a_image_t) -> u
 pub(crate) type k4a_image_get_iso_speed = fn(image_handle: k4a_image_t) -> u32;
 pub(crate) type k4a_image_set_device_timestamp_usec =
     fn(image_handle: k4a_image_t, timestamp_usec: u64);
-pub(crate) type k4a_image_set_timestamp_usec = fn(image_handle: k4a_image_t, timestamp_usec: u64);
+//pub(crate) type k4a_image_set_timestamp_usec = fn(image_handle: k4a_image_t, timestamp_usec: u64);
 pub(crate) type k4a_image_set_system_timestamp_nsec =
     fn(image_handle: k4a_image_t, timestamp_usec: u64);
 pub(crate) type k4a_image_set_exposure_usec = fn(image_handle: k4a_image_t, timestamp_usec: u64);
-pub(crate) type k4a_image_set_exposure_time_usec =
-    fn(image_handle: k4a_image_t, timestamp_usec: u64);
+//pub(crate) type k4a_image_set_exposure_time_usec =
+//    fn(image_handle: k4a_image_t, timestamp_usec: u64);
 pub(crate) type k4a_image_set_white_balance = fn(image_handle: k4a_image_t, white_balance: u32);
 pub(crate) type k4a_image_set_iso_speed = fn(image_handle: k4a_image_t, white_balance: u32);
 pub(crate) type k4a_image_reference = fn(image_handle: k4a_image_t);

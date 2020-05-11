@@ -127,6 +127,11 @@ impl Image<'_> {
         (self.factory.k4a_image_set_device_timestamp_usec)(self.handle, timestamp)
     }
 
+    /// Set the image's system timestamp in nanoseconds
+    pub fn set_system_timestamp_nsec(&self, timestamp: u64) {
+        (self.factory.k4a_image_set_system_timestamp_nsec)(self.handle, timestamp)
+    }
+
     /// Set the image exposure time in microseconds
     pub fn set_exposure_usec(&mut self, exposure: u64) {
         (self.factory.k4a_image_set_exposure_usec)(self.handle, exposure)
