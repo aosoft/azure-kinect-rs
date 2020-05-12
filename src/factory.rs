@@ -3,6 +3,7 @@ use super::device::Device;
 use super::error::{Error, ToResult};
 use super::k4a_functions::*;
 use std::ffi::c_void;
+use std::os::raw;
 use std::ptr;
 
 #[link(name = "kernel32")]
@@ -18,8 +19,11 @@ extern "stdcall" {
     fn GetProcAddress(hModule: *const c_void, lpProcName: *const u8) -> *const c_void;
 }
 
+pub type DebugMessageHandler = Box<dyn Fn(k4a_log_level_t, &str, raw::c_int, &str)>;
+
 pub struct Factory {
     handle: *const c_void,
+    debug_message_handler: Option<DebugMessageHandler>,
 
     pub(crate) k4a_device_get_installed_count: k4a_device_get_installed_count,
     pub(crate) k4a_set_debug_message_handler: k4a_set_debug_message_handler,
@@ -127,6 +131,7 @@ impl Factory {
         unsafe {
             Ok(Factory {
                 handle: handle,
+                debug_message_handler: None,
                 k4a_device_get_installed_count: proc_address!(
                     handle,
                     k4a_device_get_installed_count
@@ -248,17 +253,23 @@ impl Factory {
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
     pub fn set_debug_message_handler(
-        &self,
-        message_cb: k4a_logging_message_cb_t,
-        message_cb_context: *mut (),
+        mut self,
+        debug_message_handler: Option<DebugMessageHandler>,
         min_level: k4a_log_level_t,
-    ) -> Result<(), Error> {
-        Error::from((self.k4a_set_debug_message_handler)(
-            message_cb,
-            message_cb_context,
-            min_level,
-        ))
-        .to_result(())
+    ) -> Self {
+        (self.k4a_set_debug_message_handler)(None, ptr::null_mut(), min_level);
+        unsafe {
+            if debug_message_handler.is_some() {
+                self.debug_message_handler = debug_message_handler;
+                (self.k4a_set_debug_message_handler)(
+                    Some(debug_message_handler_func),
+                    &self.debug_message_handler as *const Option<DebugMessageHandler> as *mut (),
+                    min_level,
+                );
+            }
+        }
+
+        self
     }
 
     /// Gets the number of connected devices
@@ -271,6 +282,26 @@ impl Factory {
         let mut handle: k4a_device_t = ptr::null_mut();
         Error::from((self.k4a_device_open)(index, &mut handle))
             .to_result_fn(&|| Device::from_handle(self, handle))
+    }
+}
+
+extern "C" fn debug_message_handler_func(
+    context: *mut ::std::os::raw::c_void,
+    level: k4a_log_level_t,
+    file: *const ::std::os::raw::c_char,
+    line: ::std::os::raw::c_int,
+    message: *const ::std::os::raw::c_char,
+) {
+    unsafe {
+        let h = context as *const Option<DebugMessageHandler>;
+        if h != ptr::null() && (*h).is_some() {
+            (*h).as_ref().unwrap()(
+                level,
+                std::ffi::CStr::from_ptr(file).to_str().unwrap_or(""),
+                line,
+                std::ffi::CStr::from_ptr(message).to_str().unwrap_or(""),
+            );
+        }
     }
 }
 

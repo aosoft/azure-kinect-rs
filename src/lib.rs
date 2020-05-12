@@ -25,34 +25,18 @@ mod tests {
     use super::bindings::*;
     use super::*;
 
-    extern "C" fn debug_message_handler(
-        _: *mut ::std::os::raw::c_void,
-        level: k4a_log_level_t,
-        file: *const ::std::os::raw::c_char,
-        line: ::std::os::raw::c_int,
-        message: *const ::std::os::raw::c_char,
-    ) {
-        unsafe {
-            let file2 = std::ffi::CStr::from_ptr(file).to_str().unwrap_or("");
-            let message2 = std::ffi::CStr::from_ptr(message).to_str().unwrap_or("");
-
-            println!("{:?}, {}, {}, {}", level, file2, line, message2);
-        }
-    }
-
     #[test]
     fn test() -> std::result::Result<(), Box<dyn std::error::Error>> {
         let factory = factory::Factory::load(
             std::env::current_dir()?
                 .to_str()
                 .ok_or(error::Error::Failed)?,
-        )?;
-
-        factory.set_debug_message_handler(
-            Some(debug_message_handler),
-            std::ptr::null_mut(),
+        )?.set_debug_message_handler(
+            Some(Box::new(|level, file, line, message| {
+                println!("{:?}, {}, {}, {}", level, file, line, message);
+            })),
             k4a_log_level_t::K4A_LOG_LEVEL_ERROR,
-        )?;
+        );
 
         let c = factory.device_get_installed_count();
         println!("device count = {}", c);
