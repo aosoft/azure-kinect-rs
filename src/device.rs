@@ -1,14 +1,14 @@
 use super::bindings::*;
 use super::calibration::Calibration;
-use super::capture::Capture;
 use super::error::Error;
 use super::factory::Factory;
 use super::utility::*;
+use super::camera::Camera;
 use std::ptr;
 
 pub struct Device<'a> {
-    factory: &'a Factory,
-    handle: k4a_device_t,
+    pub(crate) factory: &'a Factory,
+    pub(crate) handle: k4a_device_t,
 }
 
 #[derive(Copy, Clone, Default)]
@@ -29,59 +29,9 @@ impl Device<'_> {
         }
     }
 
-    /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
-    pub fn get_capture(&self, timeout_in_ms: i32) -> Result<Capture, Error> {
-        let mut handle: k4a_capture_t = ptr::null_mut();
-        Error::from((self.factory.k4a_device_get_capture)(
-            self.handle,
-            &mut handle,
-            timeout_in_ms,
-        ))
-        .to_result_fn(&|| Capture::from_handle(self.factory, handle))
-    }
-
-    /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
-    pub fn get_capture_wait_infinite(&self) -> Result<Capture, Error> {
-        self.get_capture(K4A_WAIT_INFINITE)
-    }
-
-    /// Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
-    pub fn get_imu_sample(&self, timeout_in_ms: i32) -> Result<k4a_imu_sample_t, Error> {
-        let mut imu_sample = k4a_imu_sample_t::default();
-        Error::from((self.factory.k4a_device_get_imu_sample)(
-            self.handle,
-            &mut imu_sample,
-            timeout_in_ms,
-        ))
-        .to_result(imu_sample)
-    }
-
-    pub fn get_imu_sample_wait_infinite(&self) -> Result<k4a_imu_sample_t, Error> {
-        self.get_imu_sample(K4A_WAIT_INFINITE)
-    }
-
     /// Starts the K4A device's cameras
-    pub fn start_cameras(&self, configuration: &k4a_device_configuration_t) -> Result<(), Error> {
-        Error::from((self.factory.k4a_device_start_cameras)(
-            self.handle,
-            configuration,
-        ))
-        .to_result(())
-    }
-
-    /// Stops the K4A device's cameras
-    pub fn stop_cameras(&self) {
-        (self.factory.k4a_device_stop_cameras)(self.handle);
-    }
-
-    /// Starts the K4A IMU
-    pub fn start_imu(&self) -> Result<(), Error> {
-        Error::from((self.factory.k4a_device_start_imu)(self.handle)).to_result(())
-    }
-
-    /// Stops the K4A IMU
-    pub fn stop_imu(&self) {
-        (self.factory.k4a_device_stop_imu)(self.handle)
+    pub fn start_cameras(&self, configuration: &k4a_device_configuration_t) -> Result<Camera, Error> {
+        Camera::new(&self, configuration)
     }
 
     /// Get the K4A device serial number

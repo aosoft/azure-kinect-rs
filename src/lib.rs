@@ -11,6 +11,8 @@ pub mod factory;
 pub mod calibration;
 pub mod capture;
 pub mod device;
+pub mod camera;
+pub mod imu;
 pub mod image;
 pub mod transformation;
 
@@ -21,11 +23,10 @@ pub mod bindings {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::device::Device;
     use super::bindings::*;
 
     extern "C" fn debug_message_handler(
-        context: *mut ::std::os::raw::c_void,
+        _: *mut ::std::os::raw::c_void,
         level: k4a_log_level_t,
         file: *const ::std::os::raw::c_char,
         line: ::std::os::raw::c_int,
@@ -65,30 +66,11 @@ mod tests {
         println!("color control(brightness) = {:?}", color_control);
 
         let camera_config = k4a_device_configuration_t::default();
-        device.start_cameras(&camera_config)?;
-        let r = test_camera(&device);
-        device.stop_cameras();
-        if let Err(e) = r {
-            return Err(e);
-        }
+        let camera = device.start_cameras(&camera_config)?;
+        let imu = camera.start_imu()?;
+        let imu_sample = imu.get_imu_sample_wait_infinite()?;
+        println!("imu = {}", imu_sample);
+
         Ok(())
     }
-
-    fn test_camera(device: &Device) -> std::result::Result<(), Box<dyn std::error::Error>> {
-
-        device.start_imu()?;
-        let r = test_imu(device);
-        device.stop_imu();
-        if let Err(e) = r {
-            return Err(e);
-        }
-        Ok(())
-    }
-
-    fn test_imu(device: &Device) -> std::result::Result<(), Box<dyn std::error::Error>> {
-        let imu = device.get_imu_sample_wait_infinite()?;
-        println!("imu = {}", imu);
-        Ok(())
-    }
-
 }
