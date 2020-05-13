@@ -1,9 +1,5 @@
-use super::bindings::*;
-use super::calibration::Calibration;
-use super::error::Error;
-use super::factory::Factory;
 use super::utility::*;
-use super::camera::Camera;
+use super::*;
 use std::ptr;
 
 pub struct Device<'a> {
@@ -30,7 +26,10 @@ impl Device<'_> {
     }
 
     /// Starts the K4A device's cameras
-    pub fn start_cameras(&self, configuration: &k4a_device_configuration_t) -> Result<Camera, Error> {
+    pub fn start_cameras(
+        &self,
+        configuration: &k4a_device_configuration_t,
+    ) -> Result<Camera, Error> {
         Camera::new(&self, configuration)
     }
 

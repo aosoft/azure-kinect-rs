@@ -1,6 +1,4 @@
-use super::bindings::*;
-use super::error::Error;
-use super::device::Device;
+use super::*;
 
 pub struct Imu<'a> {
     device: &'a Device<'a>,
@@ -20,7 +18,7 @@ impl Imu<'_> {
             &mut imu_sample,
             timeout_in_ms,
         ))
-            .to_result(imu_sample)
+        .to_result(imu_sample)
     }
 
     pub fn get_imu_sample_wait_infinite(&self) -> Result<k4a_imu_sample_t, Error> {
@@ -33,4 +31,3 @@ impl Drop for Imu<'_> {
         (self.device.factory.k4a_device_stop_imu)(self.device.handle)
     }
 }
-

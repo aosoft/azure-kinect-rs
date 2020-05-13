@@ -1,5 +1,4 @@
-use super::bindings::*;
-use super::error::Error;
+use super::*;
 use std::ptr;
 
 pub(crate) fn get_k4a_string(

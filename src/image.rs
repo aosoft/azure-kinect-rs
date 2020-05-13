@@ -1,6 +1,4 @@
-use super::bindings::*;
-use super::error::Error;
-use super::factory::Factory;
+use super::*;
 use std::ptr;
 
 pub struct Image<'a> {

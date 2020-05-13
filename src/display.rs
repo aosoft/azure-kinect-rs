@@ -1,4 +1,4 @@
-use super::bindings::*;
+use super::*;
 use std::fmt::{Display, Formatter, Result};
 
 impl Display for k4a_imu_sample_t {

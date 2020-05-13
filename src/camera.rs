@@ -1,8 +1,4 @@
-use super::bindings::*;
-use super::error::Error;
-use super::device::Device;
-use super::capture::Capture;
-use super::imu::Imu;
+use super::*;
 use std::ptr;
 
 pub struct Camera<'a> {

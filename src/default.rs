@@ -1,7 +1,9 @@
-use super::bindings::*;
+use super::*;
 
 impl Default for k4a_color_control_mode_t {
-    fn default() -> Self { k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO }
+    fn default() -> Self {
+        k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO
+    }
 }
 
 impl Default for k4a_device_configuration_t {
@@ -67,4 +69,3 @@ impl Default for k4a_hardware_version_t {
         unsafe { std::mem::zeroed() }
     }
 }
-

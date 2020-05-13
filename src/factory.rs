@@ -1,7 +1,6 @@
-use super::bindings::*;
-use super::device::Device;
-use super::error::{Error, ToResult};
+use super::error::ToResult;
 use super::k4a_functions::*;
+use super::*;
 use std::ffi::c_void;
 use std::os::raw;
 use std::ptr;
@@ -27,7 +26,7 @@ pub struct Factory {
 
     pub(crate) k4a_device_get_installed_count: k4a_device_get_installed_count,
     pub(crate) k4a_set_debug_message_handler: k4a_set_debug_message_handler,
-    pub(crate) k4a_set_allocator: k4a_set_allocator,
+    //pub(crate) k4a_set_allocator: k4a_set_allocator,
     pub(crate) k4a_device_open: k4a_device_open,
     pub(crate) k4a_device_close: k4a_device_close,
     pub(crate) k4a_device_get_capture: k4a_device_get_capture,
@@ -137,7 +136,7 @@ impl Factory {
                     k4a_device_get_installed_count
                 ),
                 k4a_set_debug_message_handler: proc_address!(handle, k4a_set_debug_message_handler),
-                k4a_set_allocator: proc_address!(handle, k4a_set_allocator),
+                //k4a_set_allocator: proc_address!(handle, k4a_set_allocator),
                 k4a_device_open: proc_address!(handle, k4a_device_open),
                 k4a_device_close: proc_address!(handle, k4a_device_close),
                 k4a_device_get_capture: proc_address!(handle, k4a_device_get_capture),
@@ -267,11 +266,15 @@ impl Factory {
         self
     }
 
-    pub fn reset_debug_message_handler(self) -> Self {
-        (self.k4a_set_debug_message_handler)(None, ptr::null_mut(), k4a_log_level_t::K4A_LOG_LEVEL_OFF);
+    pub fn reset_debug_message_handler(mut self) -> Self {
+        self.debug_message_handler = None;
+        (self.k4a_set_debug_message_handler)(
+            None,
+            ptr::null_mut(),
+            k4a_log_level_t::K4A_LOG_LEVEL_OFF,
+        );
         self
     }
-
 
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {

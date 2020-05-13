@@ -1,4 +1,3 @@
-use azure_kinect::bindings::*;
 use azure_kinect::*;
 
 #[test]
@@ -7,7 +6,8 @@ fn test() -> std::result::Result<(), Box<dyn std::error::Error>> {
         std::env::current_dir()?
             .to_str()
             .ok_or(error::Error::Failed)?,
-    )?.set_debug_message_handler(
+    )?
+    .set_debug_message_handler(
         Box::new(|level, file, line, message| {
             println!("{:?}, {}, {}, {}", level, file, line, message);
         }),
@@ -21,9 +21,8 @@ fn test() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let version = device.get_version()?;
     println!("serial = {} / hw ver = {:?}", serial, version);
 
-    let color_control = device.get_color_control(
-        k4a_color_control_command_t::K4A_COLOR_CONTROL_BRIGHTNESS,
-    )?;
+    let color_control =
+        device.get_color_control(k4a_color_control_command_t::K4A_COLOR_CONTROL_BRIGHTNESS)?;
     println!("color control(brightness) = {:?}", color_control);
 
     let camera_config = k4a_device_configuration_t::default();

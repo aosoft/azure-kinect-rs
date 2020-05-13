@@ -1,7 +1,4 @@
-use super::bindings::*;
-use super::error::Error;
-use super::factory::Factory;
-use super::image::Image;
+use super::*;
 
 pub struct Calibration<'a> {
     factory: &'a Factory,
