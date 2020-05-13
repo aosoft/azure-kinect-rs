@@ -257,19 +257,17 @@ impl Factory {
         debug_message_handler: DebugMessageHandler,
         min_level: k4a_log_level_t,
     ) -> Self {
-        unsafe {
-            self.debug_message_handler = debug_message_handler.into();
-            (self.k4a_set_debug_message_handler)(
-                Some(debug_message_handler_func),
-                &self.debug_message_handler as *const Option<DebugMessageHandler> as *mut (),
-                min_level,
-            );
-        }
+        self.debug_message_handler = debug_message_handler.into();
+        (self.k4a_set_debug_message_handler)(
+            Some(debug_message_handler_func),
+            &self.debug_message_handler as *const Option<DebugMessageHandler> as *mut (),
+            min_level,
+        );
 
         self
     }
 
-    pub fn reset_debug_message_handler(mut self) -> Self {
+    pub fn reset_debug_message_handler(self) -> Self {
         (self.k4a_set_debug_message_handler)(None, ptr::null_mut(), k4a_log_level_t::K4A_LOG_LEVEL_OFF);
         self
     }
