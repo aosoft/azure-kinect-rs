@@ -6,8 +6,8 @@ pub(crate) type k4a_set_debug_message_handler = fn(
     message_cb_context: *mut (),
     min_level: k4a_log_level_t,
 ) -> k4a_result_t;
-pub(crate) type k4a_set_allocator =
-    fn(allocate: k4a_memory_allocate_cb_t, free: k4a_memory_destroy_cb_t) -> k4a_result_t;
+//pub(crate) type k4a_set_allocator =
+//    fn(allocate: k4a_memory_allocate_cb_t, free: k4a_memory_destroy_cb_t) -> k4a_result_t;
 pub(crate) type k4a_device_open = fn(index: u32, device_handle: *mut k4a_device_t) -> k4a_result_t;
 pub(crate) type k4a_device_close = fn(device_handle: k4a_device_t);
 pub(crate) type k4a_device_get_capture = fn(
