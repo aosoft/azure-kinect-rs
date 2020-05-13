@@ -254,23 +254,26 @@ impl Factory {
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
     pub fn set_debug_message_handler(
         mut self,
-        debug_message_handler: Option<DebugMessageHandler>,
+        debug_message_handler: DebugMessageHandler,
         min_level: k4a_log_level_t,
     ) -> Self {
-        (self.k4a_set_debug_message_handler)(None, ptr::null_mut(), min_level);
         unsafe {
-            if debug_message_handler.is_some() {
-                self.debug_message_handler = debug_message_handler;
-                (self.k4a_set_debug_message_handler)(
-                    Some(debug_message_handler_func),
-                    &self.debug_message_handler as *const Option<DebugMessageHandler> as *mut (),
-                    min_level,
-                );
-            }
+            self.debug_message_handler = debug_message_handler.into();
+            (self.k4a_set_debug_message_handler)(
+                Some(debug_message_handler_func),
+                &self.debug_message_handler as *const Option<DebugMessageHandler> as *mut (),
+                min_level,
+            );
         }
 
         self
     }
+
+    pub fn reset_debug_message_handler(mut self) -> Self {
+        (self.k4a_set_debug_message_handler)(None, ptr::null_mut(), k4a_log_level_t::K4A_LOG_LEVEL_OFF);
+        self
+    }
+
 
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {

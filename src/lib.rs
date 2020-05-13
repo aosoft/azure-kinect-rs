@@ -32,9 +32,9 @@ mod tests {
                 .to_str()
                 .ok_or(error::Error::Failed)?,
         )?.set_debug_message_handler(
-            Some(Box::new(|level, file, line, message| {
+            Box::new(|level, file, line, message| {
                 println!("{:?}, {}, {}, {}", level, file, line, message);
-            })),
+            }),
             k4a_log_level_t::K4A_LOG_LEVEL_ERROR,
         );
 
@@ -42,11 +42,11 @@ mod tests {
         println!("device count = {}", c);
         let device = factory.device_open(0)?;
         let serial = device.get_serialnum()?;
-        let version = device.get_version();
+        let version = device.get_version()?;
         println!("serial = {} / hw ver = {:?}", serial, version);
 
         let color_control = device.get_color_control(
-            bindings::k4a_color_control_command_t::K4A_COLOR_CONTROL_BRIGHTNESS,
+            k4a_color_control_command_t::K4A_COLOR_CONTROL_BRIGHTNESS,
         )?;
         println!("color control(brightness) = {:?}", color_control);
 
