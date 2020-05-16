@@ -126,7 +126,7 @@ macro_rules! proc_address {
 }
 
 impl Factory {
-    fn new(handle: *const c_void) -> Result<Factory, Error> {
+    fn with_handle(handle: *const c_void) -> Result<Factory, Error> {
         unsafe {
             Ok(Factory {
                 handle: handle,
@@ -239,9 +239,20 @@ impl Factory {
         }
     }
 
-    pub fn load(lib_dir: &str) -> Result<Factory, Error> {
+    pub fn new() -> Result<Factory, Error> {
+        Ok(Self::with_library_directory(
+            std::env::current_exe()
+                .map_err(|_| Error::Failed)?
+                .parent()
+                .ok_or(Error::Failed)?
+                .to_str()
+                .ok_or(Error::Failed)?,
+        )?)
+    }
+
+    pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
         let h = load_library(lib_dir, K4A_LIBNAME)?;
-        let r = Factory::new(h);
+        let r = Factory::with_handle(h);
         if let Err(_) = r {
             unsafe {
                 FreeLibrary(h);
@@ -266,6 +277,7 @@ impl Factory {
         self
     }
 
+    /// Clears the callback function to receive debug messages from the Azure Kinect device.
     pub fn reset_debug_message_handler(mut self) -> Self {
         self.debug_message_handler = None;
         (self.k4a_set_debug_message_handler)(
@@ -336,7 +348,9 @@ mod tests {
 
     #[test]
     fn test() -> std::result::Result<(), Box<dyn std::error::Error>> {
-        let manager = Factory::load(std::env::current_dir()?.to_str().ok_or(Error::Failed)?);
+        let manager = Factory::with_library_directory(
+            std::env::current_dir()?.to_str().ok_or(Error::Failed)?,
+        );
         assert!(manager.is_ok());
         let manager2 = manager.unwrap();
         let c = (manager2.k4a_device_get_installed_count)();

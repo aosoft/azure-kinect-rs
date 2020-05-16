@@ -2,7 +2,7 @@ use azure_kinect::*;
 
 #[test]
 fn test() -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let factory = Factory::load(
+    let factory = Factory::with_library_directory(
         std::env::current_dir()?
             .to_str()
             .ok_or(error::Error::Failed)?,

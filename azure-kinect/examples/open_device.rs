@@ -1,11 +1,7 @@
 use azure_kinect::*;
 
 pub fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let factory = Factory::load(
-        std::env::current_dir()?
-            .to_str()
-            .ok_or(error::Error::Failed)?,
-    )?;
+    let factory = Factory::new()?;
     let device = factory.device_open(0)?;
     let camera_config = k4a_device_configuration_t::default();
     let camera = device.start_cameras(&camera_config)?;
