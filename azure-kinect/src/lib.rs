@@ -10,6 +10,7 @@ pub mod device;
 pub mod display;
 pub mod error;
 pub mod factory;
+pub mod format;
 pub mod image;
 pub mod imu;
 pub mod k4a_functions;
@@ -26,9 +27,10 @@ pub use capture::Capture;
 pub use device::Device;
 pub use error::Error;
 pub use factory::{DebugMessageHandler, Factory};
+pub use format::Resolution;
 pub use image::Image;
 pub use imu::Imu;
-pub use transformation::{Resolution, Transformation};
+pub use transformation::Transformation;
 
 pub use bindings::{
     k4a_buffer_result_t, k4a_calibration_camera_t, k4a_calibration_extrinsics_t,

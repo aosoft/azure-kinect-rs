@@ -1,11 +1,6 @@
 use super::*;
 use std::ptr;
 
-pub struct Resolution {
-    width: i32,
-    height: i32,
-}
-
 #[allow(dead_code)]
 pub struct Transformation<'a> {
     factory: &'a Factory,
