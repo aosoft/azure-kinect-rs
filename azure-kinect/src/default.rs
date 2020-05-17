@@ -11,7 +11,7 @@ impl Default for k4a_device_configuration_t {
         k4a_device_configuration_t {
             color_format: k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_BGRA32,
             color_resolution: k4a_color_resolution_t::K4A_COLOR_RESOLUTION_720P,
-            depth_mode: k4a_depth_mode_t::K4A_DEPTH_MODE_NFOV_2X2BINNED,
+            depth_mode: k4a_depth_mode_t::K4A_DEPTH_MODE_WFOV_2X2BINNED,
             camera_fps: k4a_fps_t::K4A_FRAMES_PER_SECOND_30,
             synchronized_images_only: false,
             depth_delay_off_color_usec: 0,
