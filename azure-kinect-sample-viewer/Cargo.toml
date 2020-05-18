@@ -10,3 +10,8 @@ edition = "2018"
 
 azure-kinect = { path = "../azure-kinect" }
 sdl2 = "0.34.0"
+
+[features]
+
+default = ["depth-view"]
+depth-view = []
