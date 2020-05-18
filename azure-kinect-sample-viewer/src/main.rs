@@ -15,7 +15,7 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
     let camera_config = k4a_device_configuration_t::default();
     let camera = device.start_cameras(&camera_config)?;
 
-    let color_image_resoulution = camera_config.color_resolution.get_resolution();
+    let color_image_dimension = camera_config.color_resolution.get_dimension();
 
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
@@ -23,8 +23,8 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
     let window = video_subsystem
         .window(
             "azure-kinect-sample-viewer",
-            color_image_resoulution.width as u32,
-            color_image_resoulution.height as u32,
+            color_image_dimension.width as u32,
+            color_image_dimension.height as u32,
         )
         .position_centered()
         .opengl()
@@ -35,8 +35,8 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
     let mut texture = texture_creator
         .create_texture_streaming(
             PixelFormatEnum::ARGB8888,
-            color_image_resoulution.width as u32,
-            color_image_resoulution.height as u32,
+            color_image_dimension.width as u32,
+            color_image_dimension.height as u32,
         )
         .map_err(|e| e.to_string())?;
 

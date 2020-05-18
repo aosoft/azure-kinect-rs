@@ -5,8 +5,8 @@ use std::ptr;
 pub struct Transformation<'a> {
     factory: &'a Factory,
     handle: k4a_transformation_t,
-    color_resolution: Resolution,
-    depth_resolution: Resolution,
+    color_resolution: Dimension,
+    depth_resolution: Dimension,
 }
 
 impl Transformation<'_> {
@@ -15,7 +15,7 @@ impl Transformation<'_> {
         Transformation {
             factory: factory,
             handle: handle,
-            color_resolution: Resolution {
+            color_resolution: Dimension {
                 width: calibration
                     .calibration
                     .color_camera_calibration
@@ -25,7 +25,7 @@ impl Transformation<'_> {
                     .color_camera_calibration
                     .resolution_height,
             },
-            depth_resolution: Resolution {
+            depth_resolution: Dimension {
                 width: calibration
                     .calibration
                     .depth_camera_calibration

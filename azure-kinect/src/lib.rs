@@ -27,7 +27,7 @@ pub use capture::Capture;
 pub use device::Device;
 pub use error::Error;
 pub use factory::{DebugMessageHandler, Factory};
-pub use format::Resolution;
+pub use format::Dimension;
 pub use image::Image;
 pub use imu::Imu;
 pub use transformation::Transformation;
