@@ -11,4 +11,4 @@ Rust Bindings for Azure Kinect Sensor SDK
 
 ## How to use
 
-See: [examples/open_device.rs](examples/open_device.rs)
+See: [examples/open_device.rs](azure-kinect/examples/open_device.rs)
