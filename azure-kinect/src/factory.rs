@@ -16,12 +16,14 @@ extern "stdcall" {
     ) -> *const c_void;
     fn FreeLibrary(hLibModule: *const c_void) -> i32;
     fn GetProcAddress(hModule: *const c_void, lpProcName: *const u8) -> *const c_void;
+    fn GetModuleHandleW(lpModuleName: *const u16) -> *const c_void;
 }
 
 pub type DebugMessageHandler = Box<dyn Fn(k4a_log_level_t, &str, raw::c_int, &str)>;
 
 pub struct Factory {
     handle: *const c_void,
+    require_free_library: bool,
     debug_message_handler: Option<DebugMessageHandler>,
 
     pub(crate) k4a_device_get_installed_count: k4a_device_get_installed_count,
@@ -127,10 +129,11 @@ macro_rules! proc_address {
 }
 
 impl Factory {
-    fn with_handle(handle: *const c_void) -> Result<Factory, Error> {
+    fn with_handle(handle: *const c_void, require_free_library: bool) -> Result<Factory, Error> {
         unsafe {
             Ok(Factory {
                 handle: handle,
+                require_free_library: require_free_library,
                 debug_message_handler: None,
                 k4a_device_get_installed_count: proc_address!(
                     handle,
@@ -253,7 +256,7 @@ impl Factory {
 
     pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
         let h = load_library(lib_dir, K4A_LIBNAME)?;
-        let r = Factory::with_handle(h);
+        let r = Factory::with_handle(h, true);
         if let Err(_) = r {
             unsafe {
                 FreeLibrary(h);
@@ -268,25 +271,38 @@ impl Factory {
         debug_message_handler: DebugMessageHandler,
         min_level: k4a_log_level_t,
     ) -> Self {
+        self.set_debug_message_handler_internal(debug_message_handler, min_level);
+        self
+    }
+
+    /// Clears the callback function to receive debug messages from the Azure Kinect device.
+    pub fn reset_debug_message_handler(mut self) -> Self {
+        self.reset_debug_message_handler_internal();
+        self
+    }
+
+    /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
+    pub(crate) fn set_debug_message_handler_internal(
+        &mut self,
+        debug_message_handler: DebugMessageHandler,
+        min_level: k4a_log_level_t,
+    ) {
         self.debug_message_handler = debug_message_handler.into();
         (self.k4a_set_debug_message_handler)(
             Some(debug_message_handler_func),
             &self.debug_message_handler as *const Option<DebugMessageHandler> as *mut (),
             min_level,
         );
-
-        self
     }
 
     /// Clears the callback function to receive debug messages from the Azure Kinect device.
-    pub fn reset_debug_message_handler(mut self) -> Self {
+    pub fn reset_debug_message_handler_internal(&mut self) {
         self.debug_message_handler = None;
         (self.k4a_set_debug_message_handler)(
             None,
             ptr::null_mut(),
             k4a_log_level_t::K4A_LOG_LEVEL_OFF,
         );
-        self
     }
 
     /// Gets the number of connected devices
@@ -324,7 +340,7 @@ extern "C" fn debug_message_handler_func(
 
 impl Drop for Factory {
     fn drop(&mut self) {
-        if self.handle != ptr::null() {
+        if self.handle != ptr::null() && self.require_free_library {
             unsafe {
                 FreeLibrary(self.handle);
                 self.handle = ptr::null();
@@ -335,6 +351,7 @@ impl Drop for Factory {
 
 pub struct FactoryRecord {
     handle: *const c_void,
+    k4a: Factory,
     pub(crate) k4a_playback_open: k4a_playback_open,
     pub(crate) k4a_playback_get_raw_calibration: k4a_playback_get_raw_calibration,
     pub(crate) k4a_playback_get_calibration: k4a_playback_get_calibration,
@@ -378,10 +395,11 @@ pub struct FactoryRecord {
 }
 
 impl FactoryRecord {
-    fn with_handle(handle: *const c_void) -> Result<FactoryRecord, Error> {
+    fn with_handle(handle: *const c_void, k4a: Factory) -> Result<FactoryRecord, Error> {
         unsafe {
             Ok(FactoryRecord {
                 handle: handle,
+                k4a: k4a,
                 k4a_playback_open : proc_address!(handle, k4a_playback_open),
                 k4a_playback_get_raw_calibration : proc_address!(handle, k4a_playback_get_raw_calibration),
                 k4a_playback_get_calibration : proc_address!(handle, k4a_playback_get_calibration),
@@ -438,13 +456,44 @@ impl FactoryRecord {
 
     pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
         let h = load_library(lib_dir, K4ARECORD_LIBNAME)?;
-        let r = FactoryRecord::with_handle(h);
+        let h2 = unsafe { GetModuleHandleW(K4A_LIBNAME.encode_utf16()
+                                      .chain(Some(0))
+                                      .collect::<Vec<u16>>()
+                                      .as_ptr()) };
+        let r = FactoryRecord::with_handle(h, Factory::with_handle(h2, false)?);
         if let Err(_) = r {
             unsafe {
                 FreeLibrary(h);
             }
         }
         r
+    }
+
+
+    /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
+    pub fn set_debug_message_handler(
+        mut self,
+        debug_message_handler: DebugMessageHandler,
+        min_level: k4a_log_level_t,
+    ) -> Self {
+        self.k4a.set_debug_message_handler_internal(debug_message_handler, min_level);
+        self
+    }
+
+    /// Clears the callback function to receive debug messages from the Azure Kinect device.
+    pub fn reset_debug_message_handler(mut self) -> Self {
+        self.k4a.reset_debug_message_handler_internal();
+        self
+    }
+
+    /// Gets the number of connected devices
+    pub fn device_get_installed_count(&self) -> u32 {
+        self.k4a.device_get_installed_count()
+    }
+
+    /// Open a k4a device.
+    pub fn device_open(&self, index: u32) -> Result<Device, Error> {
+        self.k4a.device_open(index)
     }
 }
 
