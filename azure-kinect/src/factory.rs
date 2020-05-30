@@ -96,6 +96,7 @@ pub struct Factory {
 }
 
 const K4A_LIBNAME: &'static str = "k4a.dll";
+const K4ARECORD_LIBNAME: &'static str = "k4arecord.dll";
 
 fn load_library(lib_dir: &str, dll_file_name: &str) -> Result<*const c_void, Error> {
     let full_path =
@@ -322,6 +323,132 @@ extern "C" fn debug_message_handler_func(
 }
 
 impl Drop for Factory {
+    fn drop(&mut self) {
+        if self.handle != ptr::null() {
+            unsafe {
+                FreeLibrary(self.handle);
+                self.handle = ptr::null();
+            }
+        }
+    }
+}
+
+pub struct FactoryRecord {
+    handle: *const c_void,
+    pub(crate) k4a_playback_open: k4a_playback_open,
+    pub(crate) k4a_playback_get_raw_calibration: k4a_playback_get_raw_calibration,
+    pub(crate) k4a_playback_get_calibration: k4a_playback_get_calibration,
+    pub(crate) k4a_playback_get_record_configuration: k4a_playback_get_record_configuration,
+    pub(crate) k4a_playback_check_track_exists: k4a_playback_check_track_exists,
+    pub(crate) k4a_playback_get_track_count: k4a_playback_get_track_count,
+    pub(crate) k4a_playback_get_track_name: k4a_playback_get_track_name,
+    pub(crate) k4a_playback_track_is_builtin: k4a_playback_track_is_builtin,
+    pub(crate) k4a_playback_track_get_video_settings: k4a_playback_track_get_video_settings,
+    pub(crate) k4a_playback_track_get_codec_id: k4a_playback_track_get_codec_id,
+    pub(crate) k4a_playback_track_get_codec_context: k4a_playback_track_get_codec_context,
+    pub(crate) k4a_playback_get_tag: k4a_playback_get_tag,
+    pub(crate) k4a_playback_set_color_conversion: k4a_playback_set_color_conversion,
+    pub(crate) k4a_playback_get_next_capture: k4a_playback_get_next_capture,
+    pub(crate) k4a_playback_get_previous_capture: k4a_playback_get_previous_capture,
+    pub(crate) k4a_playback_get_next_imu_sample: k4a_playback_get_next_imu_sample,
+    pub(crate) k4a_playback_get_previous_imu_sample: k4a_playback_get_previous_imu_sample,
+    pub(crate) k4a_playback_get_next_data_block: k4a_playback_get_next_data_block,
+    pub(crate) k4a_playback_get_previous_data_block: k4a_playback_get_previous_data_block,
+    pub(crate) k4a_playback_data_block_get_device_timestamp_usec:
+        k4a_playback_data_block_get_device_timestamp_usec,
+    pub(crate) k4a_playback_data_block_get_buffer_size: k4a_playback_data_block_get_buffer_size,
+    pub(crate) k4a_playback_data_block_get_buffer: k4a_playback_data_block_get_buffer,
+    pub(crate) k4a_playback_data_block_release: k4a_playback_data_block_release,
+    pub(crate) k4a_playback_seek_timestamp: k4a_playback_seek_timestamp,
+    pub(crate) k4a_playback_get_recording_length_usec: k4a_playback_get_recording_length_usec,
+    pub(crate) k4a_playback_get_last_timestamp_usec: k4a_playback_get_last_timestamp_usec,
+    pub(crate) k4a_playback_close: k4a_playback_close,
+    pub(crate) k4a_record_create: k4a_record_create,
+    pub(crate) k4a_record_add_tag: k4a_record_add_tag,
+    pub(crate) k4a_record_add_imu_track: k4a_record_add_imu_track,
+    pub(crate) k4a_record_add_attachment: k4a_record_add_attachment,
+    pub(crate) k4a_record_add_custom_video_track: k4a_record_add_custom_video_track,
+    pub(crate) k4a_record_add_custom_subtitle_track: k4a_record_add_custom_subtitle_track,
+    pub(crate) k4a_record_write_header: k4a_record_write_header,
+    pub(crate) k4a_record_write_capture: k4a_record_write_capture,
+    pub(crate) k4a_record_write_imu_sample: k4a_record_write_imu_sample,
+    pub(crate) k4a_record_write_custom_track_data: k4a_record_write_custom_track_data,
+    pub(crate) k4a_record_flush: k4a_record_flush,
+    pub(crate) k4a_record_close: k4a_record_close,
+}
+
+impl FactoryRecord {
+    fn with_handle(handle: *const c_void) -> Result<FactoryRecord, Error> {
+        unsafe {
+            Ok(FactoryRecord {
+                handle: handle,
+                k4a_playback_open : proc_address!(handle, k4a_playback_open),
+                k4a_playback_get_raw_calibration : proc_address!(handle, k4a_playback_get_raw_calibration),
+                k4a_playback_get_calibration : proc_address!(handle, k4a_playback_get_calibration),
+                k4a_playback_get_record_configuration : proc_address!(handle, k4a_playback_get_record_configuration),
+                k4a_playback_check_track_exists : proc_address!(handle, k4a_playback_check_track_exists),
+                k4a_playback_get_track_count : proc_address!(handle, k4a_playback_get_track_count),
+                k4a_playback_get_track_name : proc_address!(handle, k4a_playback_get_track_name),
+                k4a_playback_track_is_builtin : proc_address!(handle, k4a_playback_track_is_builtin),
+                k4a_playback_track_get_video_settings : proc_address!(handle, k4a_playback_track_get_video_settings),
+                k4a_playback_track_get_codec_id : proc_address!(handle, k4a_playback_track_get_codec_id),
+                k4a_playback_track_get_codec_context : proc_address!(handle, k4a_playback_track_get_codec_context),
+                k4a_playback_get_tag : proc_address!(handle, k4a_playback_get_tag),
+                k4a_playback_set_color_conversion : proc_address!(handle, k4a_playback_set_color_conversion),
+                k4a_playback_get_next_capture : proc_address!(handle, k4a_playback_get_next_capture),
+                k4a_playback_get_previous_capture : proc_address!(handle, k4a_playback_get_previous_capture),
+                k4a_playback_get_next_imu_sample : proc_address!(handle, k4a_playback_get_next_imu_sample),
+                k4a_playback_get_previous_imu_sample : proc_address!(handle, k4a_playback_get_previous_imu_sample),
+                k4a_playback_get_next_data_block : proc_address!(handle, k4a_playback_get_next_data_block),
+                k4a_playback_get_previous_data_block : proc_address!(handle, k4a_playback_get_previous_data_block),
+                k4a_playback_data_block_get_device_timestamp_usec : proc_address!(handle, k4a_playback_data_block_get_device_timestamp_usec),
+                k4a_playback_data_block_get_buffer_size : proc_address!(handle, k4a_playback_data_block_get_buffer_size),
+                k4a_playback_data_block_get_buffer : proc_address!(handle, k4a_playback_data_block_get_buffer),
+                k4a_playback_data_block_release : proc_address!(handle, k4a_playback_data_block_release),
+                k4a_playback_seek_timestamp : proc_address!(handle, k4a_playback_seek_timestamp),
+                k4a_playback_get_recording_length_usec : proc_address!(handle, k4a_playback_get_recording_length_usec),
+                k4a_playback_get_last_timestamp_usec : proc_address!(handle, k4a_playback_get_last_timestamp_usec),
+                k4a_playback_close : proc_address!(handle, k4a_playback_close),
+                k4a_record_create : proc_address!(handle, k4a_record_create),
+                k4a_record_add_tag : proc_address!(handle, k4a_record_add_tag),
+                k4a_record_add_imu_track : proc_address!(handle, k4a_record_add_imu_track),
+                k4a_record_add_attachment : proc_address!(handle, k4a_record_add_attachment),
+                k4a_record_add_custom_video_track : proc_address!(handle, k4a_record_add_custom_video_track),
+                k4a_record_add_custom_subtitle_track : proc_address!(handle, k4a_record_add_custom_subtitle_track),
+                k4a_record_write_header : proc_address!(handle, k4a_record_write_header),
+                k4a_record_write_capture : proc_address!(handle, k4a_record_write_capture),
+                k4a_record_write_imu_sample : proc_address!(handle, k4a_record_write_imu_sample),
+                k4a_record_write_custom_track_data : proc_address!(handle, k4a_record_write_custom_track_data),
+                k4a_record_flush : proc_address!(handle, k4a_record_flush),
+                k4a_record_close : proc_address!(handle, k4a_record_close),
+            })
+        }
+    }
+
+    pub fn new() -> Result<FactoryRecord, Error> {
+        Ok(Self::with_library_directory(
+            std::env::current_exe()
+                .map_err(|_| Error::Failed)?
+                .parent()
+                .ok_or(Error::Failed)?
+                .to_str()
+                .ok_or(Error::Failed)?,
+        )?)
+    }
+
+    pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
+        let h = load_library(lib_dir, K4ARECORD_LIBNAME)?;
+        let r = FactoryRecord::with_handle(h);
+        if let Err(_) = r {
+            unsafe {
+                FreeLibrary(h);
+            }
+        }
+        r
+    }
+}
+
+impl Drop for FactoryRecord {
     fn drop(&mut self) {
         if self.handle != ptr::null() {
             unsafe {
