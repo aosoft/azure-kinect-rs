@@ -331,9 +331,9 @@ extern "C" fn debug_message_handler_func(
         if h != ptr::null() && (*h).is_some() {
             (*h).as_ref().unwrap()(
                 level,
-                std::ffi::CStr::from_ptr(file).to_str().unwrap_or(""),
+                std::ffi::CStr::from_ptr(file).to_str().unwrap_or_default(),
                 line,
-                std::ffi::CStr::from_ptr(message).to_str().unwrap_or(""),
+                std::ffi::CStr::from_ptr(message).to_str().unwrap_or_default(),
             );
         }
     }
@@ -352,7 +352,7 @@ impl Drop for Factory {
 
 pub struct FactoryRecord {
     handle: *const c_void,
-    k4a: Factory,
+    pub(crate) k4a: Factory,
     pub(crate) k4a_playback_open: k4a_playback_open,
     pub(crate) k4a_playback_get_raw_calibration: k4a_playback_get_raw_calibration,
     pub(crate) k4a_playback_get_calibration: k4a_playback_get_calibration,
@@ -500,7 +500,7 @@ impl FactoryRecord {
     /// Opens a K4A recording for playback.
     pub fn playback_open(&self, path: &str) -> Result<Playback, Error> {
         let mut handle: k4a_playback_t = ptr::null_mut();
-        let path = CString::new(path)?;
+        let path = CString::new(path).unwrap_or_default();
         Error::from((self.k4a_playback_open)(path.as_ptr(), &mut handle))
             .to_result_fn(&|| Playback::from_handle(self, handle))
     }

@@ -45,5 +45,5 @@ pub use bindings::{
     k4a_wired_sync_mode_t, K4A_DEVICE_DEFAULT, K4A_VERSION_BUILD_METADATA, K4A_VERSION_MAJOR,
     K4A_VERSION_MINOR, K4A_VERSION_PATCH, K4A_VERSION_PRERELEASE, K4A_VERSION_STR,
     K4A_WAIT_INFINITE,
-    k4a_playback_t, k4a_playback_data_block_t,
+    k4a_playback_t, k4a_playback_data_block_t, k4a_record_configuration_t, size_t,
 };

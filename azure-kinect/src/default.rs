@@ -64,6 +64,12 @@ impl Default for k4a_calibration_t {
     }
 }
 
+impl Default for k4a_record_configuration_t {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
 impl Default for k4a_hardware_version_t {
     fn default() -> Self {
         unsafe { std::mem::zeroed() }
