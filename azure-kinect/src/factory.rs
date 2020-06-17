@@ -1,9 +1,10 @@
 use super::error::ToResult;
 use super::k4a_functions::*;
 use super::*;
-use std::ffi::c_void;
+use std::ffi::{c_void, CString};
 use std::os::raw;
 use std::ptr;
+use crate::playback::Playback;
 
 #[link(name = "kernel32")]
 #[no_mangle]
@@ -494,6 +495,14 @@ impl FactoryRecord {
     /// Open a k4a device.
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         self.k4a.device_open(index)
+    }
+
+    /// Opens a K4A recording for playback.
+    pub fn playback_open(&self, path: &str) -> Result<Playback, Error> {
+        let mut handle: k4a_playback_t = ptr::null_mut();
+        let path = CString::new(path)?;
+        Error::from((self.k4a_playback_open)(path.as_ptr(), &mut handle))
+            .to_result_fn(&|| Playback::from_handle(self, handle))
     }
 }
 

@@ -14,6 +14,8 @@ pub mod format;
 pub mod image;
 pub mod imu;
 pub mod k4a_functions;
+pub mod playback;
+pub mod playback_data_block;
 pub mod transformation;
 pub mod utility;
 
@@ -26,7 +28,7 @@ pub use camera::Camera;
 pub use capture::Capture;
 pub use device::Device;
 pub use error::Error;
-pub use factory::{DebugMessageHandler, Factory};
+pub use factory::{DebugMessageHandler, Factory, FactoryRecord};
 pub use format::{Dimension, Range};
 pub use image::Image;
 pub use imu::Imu;
@@ -43,4 +45,5 @@ pub use bindings::{
     k4a_wired_sync_mode_t, K4A_DEVICE_DEFAULT, K4A_VERSION_BUILD_METADATA, K4A_VERSION_MAJOR,
     K4A_VERSION_MINOR, K4A_VERSION_PATCH, K4A_VERSION_PRERELEASE, K4A_VERSION_STR,
     K4A_WAIT_INFINITE,
+    k4a_playback_t, k4a_playback_data_block_t,
 };
