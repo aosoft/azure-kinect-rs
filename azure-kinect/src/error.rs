@@ -7,6 +7,7 @@ pub enum Error {
     TooSmall,
     Timeout,
     Win32Error(u32),
+    Eof,
 }
 
 impl Error {
@@ -62,6 +63,16 @@ impl From<k4a_wait_result_t> for Error {
             k4a_wait_result_t::K4A_WAIT_RESULT_SUCCEEDED => Error::Succeeded,
             k4a_wait_result_t::K4A_WAIT_RESULT_FAILED => Error::Failed,
             k4a_wait_result_t::K4A_WAIT_RESULT_TIMEOUT => Error::Timeout,
+        }
+    }
+}
+
+impl From<k4a_stream_result_t> for Error {
+    fn from(s: k4a_stream_result_t) -> Error {
+        match s {
+            k4a_stream_result_t::K4A_STREAM_RESULT_SUCCEEDED => Error::Succeeded,
+            k4a_stream_result_t::K4A_STREAM_RESULT_FAILED => Error::Failed,
+            k4a_stream_result_t::K4A_STREAM_RESULT_EOF => Error::Eof,
         }
     }
 }
