@@ -17,6 +17,7 @@ pub mod k4a_functions;
 pub mod playback;
 pub mod playback_data_block;
 pub mod playback_track;
+pub mod record;
 pub mod transformation;
 pub mod utility;
 
@@ -47,6 +48,6 @@ pub use bindings::{
     K4A_VERSION_MINOR, K4A_VERSION_PATCH, K4A_VERSION_PRERELEASE, K4A_VERSION_STR,
     K4A_WAIT_INFINITE,
     k4a_playback_t, k4a_playback_data_block_t, k4a_record_configuration_t, size_t, k4a_stream_result_t,
-    k4a_playback_seek_origin_t, k4a_record_video_settings_t, k4a_record_subtitle_settings_t
+    k4a_playback_seek_origin_t, k4a_record_video_settings_t, k4a_record_subtitle_settings_t, k4a_record_t
 
 };
