@@ -375,7 +375,7 @@ pub(crate) type k4a_playback_seek_timestamp = fn(
 
 pub(crate) type k4a_playback_get_recording_length_usec = fn(playback_handle: k4a_playback_t) -> u64;
 
-pub(crate) type k4a_playback_get_last_timestamp_usec = fn(playback_handle: k4a_playback_t) -> u64;
+//pub(crate) type k4a_playback_get_last_timestamp_usec = fn(playback_handle: k4a_playback_t) -> u64;
 
 pub(crate) type k4a_playback_close = fn(playback_handle: k4a_playback_t);
 

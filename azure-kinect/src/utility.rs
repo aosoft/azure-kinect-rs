@@ -18,7 +18,7 @@ pub(crate) fn get_k4a_cstring(
                         retbuf.as_mut_ptr() as *mut ::std::os::raw::c_char,
                         &mut buffer,
                     ))
-                    .to_result(unsafe { CString::from_vec_unchecked(retbuf) })
+                    .to_result(CString::from_vec_unchecked(retbuf) )
                 } else {
                     Err(Error::from(r))
                 }
