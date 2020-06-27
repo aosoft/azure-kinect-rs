@@ -1,10 +1,11 @@
 use super::error::ToResult;
 use super::k4a_functions::*;
 use super::*;
+use crate::playback::Playback;
+use crate::record::Record;
 use std::ffi::{c_void, CString};
 use std::os::raw;
 use std::ptr;
-use crate::playback::Playback;
 
 #[link(name = "kernel32")]
 #[no_mangle]
@@ -333,7 +334,9 @@ extern "C" fn debug_message_handler_func(
                 level,
                 std::ffi::CStr::from_ptr(file).to_str().unwrap_or_default(),
                 line,
-                std::ffi::CStr::from_ptr(message).to_str().unwrap_or_default(),
+                std::ffi::CStr::from_ptr(message)
+                    .to_str()
+                    .unwrap_or_default(),
             );
         }
     }
@@ -402,46 +405,106 @@ impl FactoryRecord {
             Ok(FactoryRecord {
                 handle: handle,
                 k4a: k4a,
-                k4a_playback_open : proc_address!(handle, k4a_playback_open),
-                k4a_playback_get_raw_calibration : proc_address!(handle, k4a_playback_get_raw_calibration),
-                k4a_playback_get_calibration : proc_address!(handle, k4a_playback_get_calibration),
-                k4a_playback_get_record_configuration : proc_address!(handle, k4a_playback_get_record_configuration),
-                k4a_playback_check_track_exists : proc_address!(handle, k4a_playback_check_track_exists),
-                k4a_playback_get_track_count : proc_address!(handle, k4a_playback_get_track_count),
-                k4a_playback_get_track_name : proc_address!(handle, k4a_playback_get_track_name),
-                k4a_playback_track_is_builtin : proc_address!(handle, k4a_playback_track_is_builtin),
-                k4a_playback_track_get_video_settings : proc_address!(handle, k4a_playback_track_get_video_settings),
-                k4a_playback_track_get_codec_id : proc_address!(handle, k4a_playback_track_get_codec_id),
-                k4a_playback_track_get_codec_context : proc_address!(handle, k4a_playback_track_get_codec_context),
-                k4a_playback_get_tag : proc_address!(handle, k4a_playback_get_tag),
-                k4a_playback_set_color_conversion : proc_address!(handle, k4a_playback_set_color_conversion),
+                k4a_playback_open: proc_address!(handle, k4a_playback_open),
+                k4a_playback_get_raw_calibration: proc_address!(
+                    handle,
+                    k4a_playback_get_raw_calibration
+                ),
+                k4a_playback_get_calibration: proc_address!(handle, k4a_playback_get_calibration),
+                k4a_playback_get_record_configuration: proc_address!(
+                    handle,
+                    k4a_playback_get_record_configuration
+                ),
+                k4a_playback_check_track_exists: proc_address!(
+                    handle,
+                    k4a_playback_check_track_exists
+                ),
+                k4a_playback_get_track_count: proc_address!(handle, k4a_playback_get_track_count),
+                k4a_playback_get_track_name: proc_address!(handle, k4a_playback_get_track_name),
+                k4a_playback_track_is_builtin: proc_address!(handle, k4a_playback_track_is_builtin),
+                k4a_playback_track_get_video_settings: proc_address!(
+                    handle,
+                    k4a_playback_track_get_video_settings
+                ),
+                k4a_playback_track_get_codec_id: proc_address!(
+                    handle,
+                    k4a_playback_track_get_codec_id
+                ),
+                k4a_playback_track_get_codec_context: proc_address!(
+                    handle,
+                    k4a_playback_track_get_codec_context
+                ),
+                k4a_playback_get_tag: proc_address!(handle, k4a_playback_get_tag),
+                k4a_playback_set_color_conversion: proc_address!(
+                    handle,
+                    k4a_playback_set_color_conversion
+                ),
                 k4a_playback_get_attachment: proc_address!(handle, k4a_playback_get_attachment),
-                k4a_playback_get_next_capture : proc_address!(handle, k4a_playback_get_next_capture),
-                k4a_playback_get_previous_capture : proc_address!(handle, k4a_playback_get_previous_capture),
-                k4a_playback_get_next_imu_sample : proc_address!(handle, k4a_playback_get_next_imu_sample),
-                k4a_playback_get_previous_imu_sample : proc_address!(handle, k4a_playback_get_previous_imu_sample),
-                k4a_playback_get_next_data_block : proc_address!(handle, k4a_playback_get_next_data_block),
-                k4a_playback_get_previous_data_block : proc_address!(handle, k4a_playback_get_previous_data_block),
-                k4a_playback_data_block_get_device_timestamp_usec : proc_address!(handle, k4a_playback_data_block_get_device_timestamp_usec),
-                k4a_playback_data_block_get_buffer_size : proc_address!(handle, k4a_playback_data_block_get_buffer_size),
-                k4a_playback_data_block_get_buffer : proc_address!(handle, k4a_playback_data_block_get_buffer),
-                k4a_playback_data_block_release : proc_address!(handle, k4a_playback_data_block_release),
-                k4a_playback_seek_timestamp : proc_address!(handle, k4a_playback_seek_timestamp),
-                k4a_playback_get_recording_length_usec : proc_address!(handle, k4a_playback_get_recording_length_usec),
+                k4a_playback_get_next_capture: proc_address!(handle, k4a_playback_get_next_capture),
+                k4a_playback_get_previous_capture: proc_address!(
+                    handle,
+                    k4a_playback_get_previous_capture
+                ),
+                k4a_playback_get_next_imu_sample: proc_address!(
+                    handle,
+                    k4a_playback_get_next_imu_sample
+                ),
+                k4a_playback_get_previous_imu_sample: proc_address!(
+                    handle,
+                    k4a_playback_get_previous_imu_sample
+                ),
+                k4a_playback_get_next_data_block: proc_address!(
+                    handle,
+                    k4a_playback_get_next_data_block
+                ),
+                k4a_playback_get_previous_data_block: proc_address!(
+                    handle,
+                    k4a_playback_get_previous_data_block
+                ),
+                k4a_playback_data_block_get_device_timestamp_usec: proc_address!(
+                    handle,
+                    k4a_playback_data_block_get_device_timestamp_usec
+                ),
+                k4a_playback_data_block_get_buffer_size: proc_address!(
+                    handle,
+                    k4a_playback_data_block_get_buffer_size
+                ),
+                k4a_playback_data_block_get_buffer: proc_address!(
+                    handle,
+                    k4a_playback_data_block_get_buffer
+                ),
+                k4a_playback_data_block_release: proc_address!(
+                    handle,
+                    k4a_playback_data_block_release
+                ),
+                k4a_playback_seek_timestamp: proc_address!(handle, k4a_playback_seek_timestamp),
+                k4a_playback_get_recording_length_usec: proc_address!(
+                    handle,
+                    k4a_playback_get_recording_length_usec
+                ),
                 //k4a_playback_get_last_timestamp_usec : proc_address!(handle, k4a_playback_get_last_timestamp_usec),
-                k4a_playback_close : proc_address!(handle, k4a_playback_close),
-                k4a_record_create : proc_address!(handle, k4a_record_create),
-                k4a_record_add_tag : proc_address!(handle, k4a_record_add_tag),
-                k4a_record_add_imu_track : proc_address!(handle, k4a_record_add_imu_track),
-                k4a_record_add_attachment : proc_address!(handle, k4a_record_add_attachment),
-                k4a_record_add_custom_video_track : proc_address!(handle, k4a_record_add_custom_video_track),
-                k4a_record_add_custom_subtitle_track : proc_address!(handle, k4a_record_add_custom_subtitle_track),
-                k4a_record_write_header : proc_address!(handle, k4a_record_write_header),
-                k4a_record_write_capture : proc_address!(handle, k4a_record_write_capture),
-                k4a_record_write_imu_sample : proc_address!(handle, k4a_record_write_imu_sample),
-                k4a_record_write_custom_track_data : proc_address!(handle, k4a_record_write_custom_track_data),
-                k4a_record_flush : proc_address!(handle, k4a_record_flush),
-                k4a_record_close : proc_address!(handle, k4a_record_close),
+                k4a_playback_close: proc_address!(handle, k4a_playback_close),
+                k4a_record_create: proc_address!(handle, k4a_record_create),
+                k4a_record_add_tag: proc_address!(handle, k4a_record_add_tag),
+                k4a_record_add_imu_track: proc_address!(handle, k4a_record_add_imu_track),
+                k4a_record_add_attachment: proc_address!(handle, k4a_record_add_attachment),
+                k4a_record_add_custom_video_track: proc_address!(
+                    handle,
+                    k4a_record_add_custom_video_track
+                ),
+                k4a_record_add_custom_subtitle_track: proc_address!(
+                    handle,
+                    k4a_record_add_custom_subtitle_track
+                ),
+                k4a_record_write_header: proc_address!(handle, k4a_record_write_header),
+                k4a_record_write_capture: proc_address!(handle, k4a_record_write_capture),
+                k4a_record_write_imu_sample: proc_address!(handle, k4a_record_write_imu_sample),
+                k4a_record_write_custom_track_data: proc_address!(
+                    handle,
+                    k4a_record_write_custom_track_data
+                ),
+                k4a_record_flush: proc_address!(handle, k4a_record_flush),
+                k4a_record_close: proc_address!(handle, k4a_record_close),
             })
         }
     }
@@ -459,10 +522,15 @@ impl FactoryRecord {
 
     pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
         let h = load_library(lib_dir, K4ARECORD_LIBNAME)?;
-        let h2 = unsafe { GetModuleHandleW(K4A_LIBNAME.encode_utf16()
-                                      .chain(Some(0))
-                                      .collect::<Vec<u16>>()
-                                      .as_ptr()) };
+        let h2 = unsafe {
+            GetModuleHandleW(
+                K4A_LIBNAME
+                    .encode_utf16()
+                    .chain(Some(0))
+                    .collect::<Vec<u16>>()
+                    .as_ptr(),
+            )
+        };
         let r = FactoryRecord::with_handle(h, Factory::with_handle(h2, false)?);
         if let Err(_) = r {
             unsafe {
@@ -472,14 +540,14 @@ impl FactoryRecord {
         r
     }
 
-
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
     pub fn set_debug_message_handler(
         mut self,
         debug_message_handler: DebugMessageHandler,
         min_level: k4a_log_level_t,
     ) -> Self {
-        self.k4a.set_debug_message_handler_internal(debug_message_handler, min_level);
+        self.k4a
+            .set_debug_message_handler_internal(debug_message_handler, min_level);
         self
     }
 
@@ -505,6 +573,24 @@ impl FactoryRecord {
         let path = CString::new(path).unwrap_or_default();
         Error::from((self.k4a_playback_open)(path.as_ptr(), &mut handle))
             .to_result_fn(&|| Playback::from_handle(self, handle))
+    }
+
+    /// Opens a new recording file for writing
+    pub fn record_create(
+        &self,
+        path: &str,
+        device: &Device,
+        device_configuration: &k4a_device_configuration_t,
+    ) -> Result<Record, Error> {
+        let mut handle: k4a_record_t = ptr::null_mut();
+        let path = CString::new(path).unwrap_or_default();
+        Error::from((self.k4a_record_create)(
+            path.as_ptr(),
+            device.handle,
+            *device_configuration,
+            &mut handle,
+        ))
+        .to_result_fn(&|| Record::from_handle(self, handle))
     }
 }
 
