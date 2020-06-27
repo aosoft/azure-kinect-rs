@@ -1,6 +1,7 @@
 use super::utility::*;
 use super::*;
 use crate::playback_data_block::PlaybackDataBlock;
+use crate::playback_track::PlaybackTrack;
 use std::ptr;
 
 pub struct Playback<'a> {
@@ -166,6 +167,23 @@ impl Playback<'_> {
                 data_size as *mut size_t,
             )
         })
+    }
+
+    /// Get the number of tracks in a playback file.
+    pub fn get_track_count(&self) -> isize {
+        (self.factory.k4a_playback_get_track_count)(self.handle) as isize
+    }
+
+    /// Gets the track at a specific index.
+    pub fn get_track(&self, track_index: isize) -> Result<PlaybackTrack, Error> {
+        Ok(PlaybackTrack::new(&self,get_k4a_cstring(&|track_name, track_name_size| {
+            (self.factory.k4a_playback_get_track_name)(
+                self.handle,
+                track_index as size_t,
+                track_name,
+                track_name_size as *mut size_t,
+            )
+        })?))
     }
 }
 

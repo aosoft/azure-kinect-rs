@@ -75,3 +75,15 @@ impl Default for k4a_hardware_version_t {
         unsafe { std::mem::zeroed() }
     }
 }
+
+impl Default for k4a_record_video_settings_t {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
+impl Default for k4a_record_subtitle_settings_t {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}

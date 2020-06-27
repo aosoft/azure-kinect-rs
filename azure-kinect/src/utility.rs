@@ -1,5 +1,32 @@
 use super::*;
+use std::ffi::CString;
 use std::ptr;
+
+pub(crate) fn get_k4a_cstring(
+    f: &dyn Fn(*mut ::std::os::raw::c_char, *mut usize) -> k4a_buffer_result_t,
+) -> Result<CString, Error> {
+    unsafe {
+        let mut buffer: usize = 0;
+        let r = (f)(ptr::null_mut(), &mut buffer);
+        match r {
+            k4a_buffer_result_t::K4A_BUFFER_RESULT_SUCCEEDED => Ok(CString::default()),
+            k4a_buffer_result_t::K4A_BUFFER_RESULT_TOO_SMALL => {
+                if buffer > 1 {
+                    let mut retbuf = Vec::<u8>::with_capacity(buffer);
+                    retbuf.set_len(buffer - 1);
+                    Error::from((f)(
+                        retbuf.as_mut_ptr() as *mut ::std::os::raw::c_char,
+                        &mut buffer,
+                    ))
+                    .to_result(unsafe { CString::from_vec_unchecked(retbuf) })
+                } else {
+                    Err(Error::from(r))
+                }
+            }
+            _ => Err(Error::from(r)),
+        }
+    }
+}
 
 pub(crate) fn get_k4a_string(
     f: &dyn Fn(*mut ::std::os::raw::c_char, *mut usize) -> k4a_buffer_result_t,
@@ -69,7 +96,8 @@ mod tests {
             };
 
         let rst1 = get_k4a_string(&f);
-        let st1 = rst1.unwrap();
-        assert_eq!(st1, t1)
+        let rst2 = get_k4a_cstring(&f);
+        assert_eq!(rst1.unwrap(), t1);
+        assert_eq!(rst2.unwrap().to_str().unwrap(), t1);
     }
 }
