@@ -2,7 +2,11 @@ use azure_kinect::*;
 
 //  Copy depthengine_2_0.dll and k4a.dll to current directory.
 #[test]
-fn test() -> std::result::Result<(), Box<dyn std::error::Error>> {
+fn test() {
+    assert_eq!(test_main().unwrap(), ());
+}
+
+fn test_main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let factory = Factory::with_library_directory(
         std::env::current_dir()?
             .to_str()

@@ -1,5 +1,5 @@
 [package]
-name = "azure-kinect-sample-viewer"
+name = "k4arecorder"
 version = "0.1.3"
 authors = ["Yasuhiro Taniuchi"]
 edition = "2018"
@@ -9,9 +9,3 @@ edition = "2018"
 [dependencies]
 
 azure-kinect = { path = "../azure-kinect" }
-sdl2 = "0.34.0"
-
-[features]
-
-default = ["depth-view"]
-depth-view = []
