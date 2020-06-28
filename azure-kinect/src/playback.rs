@@ -170,20 +170,23 @@ impl Playback<'_> {
     }
 
     /// Get the number of tracks in a playback file.
-    pub fn get_track_count(&self) -> isize {
-        (self.factory.k4a_playback_get_track_count)(self.handle) as isize
+    pub fn get_track_count(&self) -> usize {
+        (self.factory.k4a_playback_get_track_count)(self.handle) as usize
     }
 
     /// Gets the track at a specific index.
-    pub fn get_track(&self, track_index: isize) -> Result<PlaybackTrack, Error> {
-        Ok(PlaybackTrack::new(&self,get_k4a_cstring(&|track_name, track_name_size| {
-            (self.factory.k4a_playback_get_track_name)(
-                self.handle,
-                track_index as size_t,
-                track_name,
-                track_name_size as *mut size_t,
-            )
-        })?))
+    pub fn get_track(&self, track_index: usize) -> Result<PlaybackTrack, Error> {
+        Ok(PlaybackTrack::new(
+            &self,
+            get_k4a_cstring(&|track_name, track_name_size| {
+                (self.factory.k4a_playback_get_track_name)(
+                    self.handle,
+                    track_index as size_t,
+                    track_name,
+                    track_name_size as *mut size_t,
+                )
+            })?,
+        ))
     }
 }
 

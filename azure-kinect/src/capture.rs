@@ -3,7 +3,7 @@ use std::ptr;
 
 pub struct Capture<'a> {
     factory: &'a Factory,
-    handle: k4a_capture_t,
+    pub(crate) handle: k4a_capture_t,
 }
 
 impl Capture<'_> {

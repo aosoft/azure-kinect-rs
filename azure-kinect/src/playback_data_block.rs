@@ -7,7 +7,10 @@ pub struct PlaybackDataBlock<'a> {
 }
 
 impl PlaybackDataBlock<'_> {
-    pub(crate) fn from_handle(factory: &FactoryRecord, handle: k4a_playback_data_block_t) -> PlaybackDataBlock {
+    pub(crate) fn from_handle(
+        factory: &FactoryRecord,
+        handle: k4a_playback_data_block_t,
+    ) -> PlaybackDataBlock {
         PlaybackDataBlock {
             factory: factory,
             handle: handle,
@@ -16,7 +19,9 @@ impl PlaybackDataBlock<'_> {
 
     /// Get the time stamp in micro seconds for the given data_block
     pub fn get_device_timestamp_usec(&self) -> u64 {
-        (self.factory.k4a_playback_data_block_get_device_timestamp_usec)(self.handle)
+        (self
+            .factory
+            .k4a_playback_data_block_get_device_timestamp_usec)(self.handle)
     }
 
     /// Get the size of the data_block buffer.

@@ -14,7 +14,8 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
     let device = factory.device_open(0)?;
     let camera_config = k4a_device_configuration_t {
         depth_mode: k4a_depth_mode_t::K4A_DEPTH_MODE_NFOV_2X2BINNED,
-        ..k4a_device_configuration_t::default()};
+        ..k4a_device_configuration_t::default()
+    };
     let camera = device.start_cameras(&camera_config)?;
 
     #[cfg(feature = "depth-view")]
@@ -66,7 +67,9 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
                     let width = depth_image.get_width_pixels();
                     unsafe {
                         for y in 0..depth_image.get_height_pixels() as usize {
-                            let p = depth_image.get_buffer().add(y * depth_image.get_stride_bytes() as usize)
+                            let p = depth_image
+                                .get_buffer()
+                                .add(y * depth_image.get_stride_bytes() as usize)
                                 as *const u16;
                             let p2 = buffer.as_mut_ptr().add(y * pitch) as *mut u32;
                             for x in 0..width as isize {
