@@ -2,16 +2,24 @@ use azure_kinect::bindings::k4a_color_resolution_t::K4A_COLOR_RESOLUTION_OFF;
 use azure_kinect::bindings::k4a_depth_mode_t::K4A_DEPTH_MODE_OFF;
 use azure_kinect::*;
 
-#[derive(Clone, Copy, Debug)]
-pub(crate) struct Error<'a> {
-    pub message: &'a str,
+#[derive(Debug)]
+pub(crate) enum Error<'a> {
+    ErrorStr(&'a str),
+    Error(String),
 }
 
 impl std::error::Error for Error<'_> {}
 
 impl std::fmt::Display for Error<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        write!(
+            f,
+            "{}",
+            match self {
+                Error::ErrorStr(s) => s,
+                Error::Error(s) => s,
+            }
+        )
     }
 }
 
@@ -29,17 +37,15 @@ pub(crate) fn do_recording(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let installed_devices = factory.device_get_installed_count();
     if device_index >= installed_devices {
-        return Err(Box::new(Error {
-            message: "Device not found.",
-        }));
+        return Err(Box::new(Error::ErrorStr("Device not found.")));
     }
 
     let device = match factory.device_open(device_index) {
         Ok(device) => device,
         Err(_) => {
-            return Err(Box::new(Error {
-                message: "Runtime error: k4a_device_open() failed ",
-            }))
+            return Err(Box::new(Error::ErrorStr(
+                "Runtime error: k4a_device_open() failed ",
+            )))
         }
     };
 
@@ -76,9 +82,9 @@ pub(crate) fn do_recording(
         || (device_config.color_resolution == K4A_COLOR_RESOLUTION_OFF
             && device_config.depth_mode == K4A_DEPTH_MODE_OFF)
     {
-        return Err(Box::new(Error {
-            message: "Either the color or depth modes must be enabled to record.",
-        }));
+        return Err(Box::new(Error::ErrorStr(
+            "Either the color or depth modes must be enabled to record.",
+        )));
     }
 
     if absoluteExposureValue != DEFAULT_EXPOSURE_AUTO {
@@ -87,9 +93,9 @@ pub(crate) fn do_recording(
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
             absoluteExposureValue,
         ) {
-            return Err(Box::new(Error {
-                message: "Runtime error: k4a_device_set_color_control() for manual exposure failed ",
-            }));
+            return Err(Box::new(Error::ErrorStr(
+                "Runtime error: k4a_device_set_color_control() for manual exposure failed ",
+            )));
         }
     } else {
         if let Err(_) = device.set_color_control(
@@ -97,9 +103,9 @@ pub(crate) fn do_recording(
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO,
             0,
         ) {
-            return Err(Box::new(Error {
-                message: "Runtime error: k4a_device_set_color_control() for auto exposure failed ",
-            }));
+            return Err(Box::new(Error::ErrorStr(
+                "Runtime error: k4a_device_set_color_control() for auto exposure failed ",
+            )));
         }
     }
 
@@ -109,9 +115,9 @@ pub(crate) fn do_recording(
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
             gain,
         ) {
-            return Err(Box::new(Error {
-                message: "Runtime error: k4a_device_set_color_control() for manual gain failed ",
-            }));
+            return Err(Box::new(Error::ErrorStr(
+                "Runtime error: k4a_device_set_color_control() for manual gain failed ",
+            )));
         }
     } else {
         if let Err(_) = device.set_color_control(
@@ -119,13 +125,45 @@ pub(crate) fn do_recording(
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO,
             0,
         ) {
-            return Err(Box::new(Error {
-                message: "Runtime error: k4a_device_set_color_control() for auto gain failed ",
-            }));
+            return Err(Box::new(Error::ErrorStr(
+                "Runtime error: k4a_device_set_color_control() for auto gain failed ",
+            )));
         }
     }
 
-    device.start_cameras(&device_config)?;
+    let camera = device.start_cameras(&device_config)?;
+    let imu = if record_imu {
+        Option::Some(camera.start_imu()?)
+    } else {
+        Option::None
+    };
+
+    println!("Device started");
+
+    let recording = match factory.record_create(recording_filename, &device, &device_config) {
+        Ok(recording) => recording,
+        Err(_) => {
+            return Err(Box::new(Error::Error(format!(
+                "Unable to create recording file: {}",
+                recording_filename
+            ))))
+        }
+    };
+
+    if imu.is_some() {
+        recording.add_imu_track()?;
+    }
+    recording.write_header()?;
+
+    // Wait for the first capture before starting recording.
+    let timeout_sec_for_first_capture = if device_config.wired_sync_mode
+        == k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_SUBORDINATE
+    {
+        println!("[subordinate mode] Waiting for signal from master");
+        360
+    } else {
+        60
+    };
 
     Ok(())
 }
