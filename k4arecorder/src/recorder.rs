@@ -1,3 +1,5 @@
+use azure_kinect::bindings::k4a_color_resolution_t::K4A_COLOR_RESOLUTION_OFF;
+use azure_kinect::bindings::k4a_depth_mode_t::K4A_DEPTH_MODE_OFF;
 use azure_kinect::*;
 
 #[derive(Clone, Copy, Debug)]
@@ -12,6 +14,9 @@ impl std::fmt::Display for Error<'_> {
         write!(f, "{:?}", self)
     }
 }
+
+const DEFAULT_EXPOSURE_AUTO: i32 = -12;
+const DEFAULT_GAIN_AUTO: i32 = -1;
 
 pub(crate) fn do_recording(
     factory: &FactoryRecord,
@@ -65,6 +70,62 @@ pub(crate) fn do_recording(
         "; A: {}.{}.{}",
         version_info.audio.major, version_info.audio.minor, version_info.audio.iteration
     );
+
+    let camera_fps = device_config.camera_fps.get_u32();
+    if camera_fps <= 0
+        || (device_config.color_resolution == K4A_COLOR_RESOLUTION_OFF
+            && device_config.depth_mode == K4A_DEPTH_MODE_OFF)
+    {
+        return Err(Box::new(Error {
+            message: "Either the color or depth modes must be enabled to record.",
+        }));
+    }
+
+    if absoluteExposureValue != DEFAULT_EXPOSURE_AUTO {
+        if let Err(_) = device.set_color_control(
+            k4a_color_control_command_t::K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+            k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
+            absoluteExposureValue,
+        ) {
+            return Err(Box::new(Error {
+                message: "Runtime error: k4a_device_set_color_control() for manual exposure failed ",
+            }));
+        }
+    } else {
+        if let Err(_) = device.set_color_control(
+            k4a_color_control_command_t::K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+            k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO,
+            0,
+        ) {
+            return Err(Box::new(Error {
+                message: "Runtime error: k4a_device_set_color_control() for auto exposure failed ",
+            }));
+        }
+    }
+
+    if gain != DEFAULT_GAIN_AUTO {
+        if let Err(_) = device.set_color_control(
+            k4a_color_control_command_t::K4A_COLOR_CONTROL_GAIN,
+            k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
+            gain,
+        ) {
+            return Err(Box::new(Error {
+                message: "Runtime error: k4a_device_set_color_control() for manual gain failed ",
+            }));
+        }
+    } else {
+        if let Err(_) = device.set_color_control(
+            k4a_color_control_command_t::K4A_COLOR_CONTROL_GAIN,
+            k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO,
+            0,
+        ) {
+            return Err(Box::new(Error {
+                message: "Runtime error: k4a_device_set_color_control() for auto gain failed ",
+            }));
+        }
+    }
+
+    device.start_cameras(&device_config)?;
 
     Ok(())
 }

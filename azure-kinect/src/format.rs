@@ -118,3 +118,14 @@ impl k4a_depth_mode_t {
         }
     }
 }
+
+impl k4a_fps_t {
+    pub fn get_u32(&self) -> u32 {
+        match self {
+            K4A_FRAMES_PER_SECOND_5 => 5,
+            K4A_FRAMES_PER_SECOND_15 => 15,
+            K4A_FRAMES_PER_SECOND_30 => 30,
+            _ => 0,
+        }
+    }
+}
