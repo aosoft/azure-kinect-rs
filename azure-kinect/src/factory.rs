@@ -316,7 +316,7 @@ impl Factory {
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: k4a_device_t = ptr::null_mut();
         Error::from((self.k4a_device_open)(index, &mut handle))
-            .to_result_fn(&|| Device::from_handle(self, handle))
+            .to_result_fn(|| Device::from_handle(self, handle))
     }
 }
 
@@ -572,7 +572,7 @@ impl FactoryRecord {
         let mut handle: k4a_playback_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
         Error::from((self.k4a_playback_open)(path.as_ptr(), &mut handle))
-            .to_result_fn(&|| Playback::from_handle(self, handle))
+            .to_result_fn(|| Playback::from_handle(self, handle))
     }
 
     /// Opens a new recording file for writing
@@ -590,7 +590,7 @@ impl FactoryRecord {
             *device_configuration,
             &mut handle,
         ))
-        .to_result_fn(&|| Record::from_handle(self, handle))
+        .to_result_fn(|| Record::from_handle(self, handle))
     }
 }
 

@@ -26,7 +26,7 @@ impl Camera<'_> {
             &mut handle,
             timeout_in_ms,
         ))
-        .to_result_fn(&|| Capture::from_handle(self.device.factory, handle))
+        .to_result_fn(|| Capture::from_handle(self.device.factory, handle))
     }
 
     /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.

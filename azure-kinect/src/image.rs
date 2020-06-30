@@ -30,7 +30,7 @@ impl Image<'_> {
             stride_bytes,
             &mut handle,
         ))
-        .to_result_fn(&|| Image::from_handle(factory, handle))
+        .to_result_fn(|| Image::from_handle(factory, handle))
     }
 
     /// Create an image from a pre-allocated buffer
@@ -57,7 +57,7 @@ impl Image<'_> {
             buffer_release_cb_context,
             &mut handle,
         ))
-        .to_result_fn(&|| Image::from_handle(factory, handle))
+        .to_result_fn(|| Image::from_handle(factory, handle))
     }
 
     /// Get the image buffer

@@ -35,7 +35,7 @@ impl Playback<'_> {
             self.handle,
             &mut calibaraion,
         ))
-        .to_result_fn(&|| Calibration::from_handle(&self.factory.k4a, calibaraion))
+        .to_result_fn(|| Calibration::from_handle(&self.factory.k4a, calibaraion))
     }
 
     /// Gets the configuration of the recording
@@ -55,7 +55,7 @@ impl Playback<'_> {
             self.handle,
             &mut handle,
         ))
-        .to_result_fn(&|| Capture::from_handle(&self.factory.k4a, handle))
+        .to_result_fn(|| Capture::from_handle(&self.factory.k4a, handle))
     }
 
     /// Get the previous capture in the recording.
@@ -65,7 +65,7 @@ impl Playback<'_> {
             self.handle,
             &mut handle,
         ))
-        .to_result_fn(&|| Capture::from_handle(&self.factory.k4a, handle))
+        .to_result_fn(|| Capture::from_handle(&self.factory.k4a, handle))
     }
 
     /// Reads the value of a tag from the recording
@@ -140,7 +140,7 @@ impl Playback<'_> {
             track.as_ptr(),
             &mut block_handle,
         ))
-        .to_result_fn(&|| PlaybackDataBlock::from_handle(&self.factory, block_handle))
+        .to_result_fn(|| PlaybackDataBlock::from_handle(&self.factory, block_handle))
     }
 
     /// Get the previous data block from the recording.
@@ -153,7 +153,7 @@ impl Playback<'_> {
             track.as_ptr(),
             &mut block_handle,
         ))
-        .to_result_fn(&|| PlaybackDataBlock::from_handle(&self.factory, block_handle))
+        .to_result_fn(|| PlaybackDataBlock::from_handle(&self.factory, block_handle))
     }
 
     /// Get the attachment block from the recording.

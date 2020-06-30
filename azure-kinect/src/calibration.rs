@@ -27,7 +27,7 @@ impl Calibration<'_> {
             target_color_resolution,
             &mut calibration,
         ))
-        .to_result_fn(&|| Calibration::from_handle(factory, calibration))
+        .to_result_fn(|| Calibration::from_handle(factory, calibration))
     }
 
     /// Transform a 3d point of a source coordinate system into a 3d point of the target coordinate system.

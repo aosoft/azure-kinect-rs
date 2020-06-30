@@ -18,7 +18,7 @@ impl Error {
         }
     }
 
-    pub(crate) fn to_result_fn<T>(self, ok: &dyn Fn() -> T) -> Result<T, Error> {
+    pub(crate) fn to_result_fn<T, F: FnOnce() -> T>(self, ok: F) -> Result<T, Error> {
         match self {
             Error::Succeeded => Ok(ok()),
             _ => Err(self),

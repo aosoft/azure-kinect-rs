@@ -111,7 +111,7 @@ impl Device<'_> {
             color_resolution,
             &mut calibaraion,
         ))
-        .to_result_fn(&|| Calibration::from_handle(self.factory, calibaraion))
+        .to_result_fn(|| Calibration::from_handle(self.factory, calibaraion))
     }
 
     /// Get the device jack status for the synchronization connectors

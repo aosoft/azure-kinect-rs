@@ -1,6 +1,5 @@
-use azure_kinect::bindings::k4a_color_resolution_t::K4A_COLOR_RESOLUTION_OFF;
-use azure_kinect::bindings::k4a_depth_mode_t::K4A_DEPTH_MODE_OFF;
 use azure_kinect::*;
+use std::time::Instant;
 
 #[derive(Debug)]
 pub(crate) enum Error<'a> {
@@ -17,7 +16,7 @@ impl std::fmt::Display for Error<'_> {
             "{}",
             match self {
                 Error::ErrorStr(s) => s,
-                Error::Error(s) => s,
+                Error::Error(s) => s.as_str(),
             }
         )
     }
@@ -30,6 +29,7 @@ pub(crate) fn do_recording(
     factory: &FactoryRecord,
     device_index: u32,
     recording_filename: &str,
+    recording_length: i32,
     device_config: &k4a_device_configuration_t,
     record_imu: bool,
     absoluteExposureValue: i32,
@@ -79,8 +79,8 @@ pub(crate) fn do_recording(
 
     let camera_fps = device_config.camera_fps.get_u32();
     if camera_fps <= 0
-        || (device_config.color_resolution == K4A_COLOR_RESOLUTION_OFF
-            && device_config.depth_mode == K4A_DEPTH_MODE_OFF)
+        || (device_config.color_resolution == k4a_color_resolution_t::K4A_COLOR_RESOLUTION_OFF
+            && device_config.depth_mode == k4a_depth_mode_t::K4A_DEPTH_MODE_OFF)
     {
         return Err(Box::new(Error::ErrorStr(
             "Either the color or depth modes must be enabled to record.",
@@ -160,10 +160,52 @@ pub(crate) fn do_recording(
         == k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_SUBORDINATE
     {
         println!("[subordinate mode] Waiting for signal from master");
-        360
+        360u64
     } else {
-        60
+        60u64
     };
+
+    let first_capture_start = Instant::now();
+    let mut first_captured = false;
+    while first_capture_start.elapsed().as_secs() < timeout_sec_for_first_capture {
+        let capture = camera.get_capture(100);
+        if let Err(azure_kinect::Error::Timeout) = capture {
+            continue;
+        }
+        let capture = capture?;
+        first_captured = true;
+        break;
+    }
+
+    if !first_captured {
+        return Err(Box::new(Error::ErrorStr(
+            "Timed out waiting for first capture.",
+        )));
+    }
+
+    println!("Started recording");
+    if recording_length <= 0 {
+        println!("Press Ctrl-C to stop recording.");
+    }
+
+    let recording_start = Instant::now();
+    let timeout_ms = 1000 / camera_fps;
+
+    while true {
+        let capture = match camera.get_capture(timeout_ms as i32) {
+            Ok(c) => c,
+            Err(azure_kinect::Error::Timeout) => continue,
+            Err(_) => return Err(Box::new(Error::ErrorStr(
+                "Runtime error: k4a_imu_get_sample() returned",
+            )))
+        };
+
+        if recording.write_capture(&capture).is_err() {
+            return Err(Box::new(Error::ErrorStr(
+                "Runtime error: k4a_record_write_imu_sample() returned ",
+            )))
+        }
+    }
 
     Ok(())
 }
