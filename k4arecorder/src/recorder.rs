@@ -1,6 +1,5 @@
 use azure_kinect::*;
-use std::borrow::Borrow;
-use std::time::Instant;
+use std::time::{Instant, Duration};
 
 #[derive(Debug)]
 pub(crate) enum Error<'a> {
@@ -26,11 +25,39 @@ impl std::fmt::Display for Error<'_> {
 const DEFAULT_EXPOSURE_AUTO: i32 = -12;
 const DEFAULT_GAIN_AUTO: i32 = -1;
 
+struct Processing {
+    timer: Instant,
+    requested_abort: bool,
+    duration: Option<Duration>
+}
+
+impl Processing {
+    pub fn new(recording_length: Option<Duration>) -> Processing {
+        Processing {
+            timer: Instant::now(),
+            requested_abort: false,
+            duration: recording_length
+        }
+    }
+
+    pub fn request_abort(&mut self) {
+        self.requested_abort = true;
+    }
+
+    pub fn is_timeout(&self) -> bool {
+        self.duration.is_some() && self.timer.elapsed() >= self.duration.unwrap()
+    }
+
+    pub fn is_processing(&self) -> bool {
+        !(self.requested_abort || self.is_timeout())
+    }
+}
+
 pub(crate) fn do_recording(
     factory: &FactoryRecord,
     device_index: u32,
     recording_filename: &str,
-    recording_length: i32,
+    recording_length: Option<Duration>,
     device_config: &k4a_device_configuration_t,
     record_imu: bool,
     absoluteExposureValue: i32,
@@ -166,9 +193,9 @@ pub(crate) fn do_recording(
         60u64
     };
 
-    let first_capture_start = Instant::now();
+    let first_capture = Processing::new(Some(Duration::from_secs(timeout_sec_for_first_capture)));
     let mut first_captured = false;
-    while first_capture_start.elapsed().as_secs() < timeout_sec_for_first_capture {
+    while first_capture.is_processing() {
         match camera.get_capture(100) {
             Err(azure_kinect::Error::Timeout) => continue,
             Err(e) => return Err(Box::new(Error::Error(format!(
@@ -188,15 +215,15 @@ pub(crate) fn do_recording(
     }
 
     println!("Started recording");
-    if recording_length <= 0 {
+    if recording_length.is_none() {
         println!("Press Ctrl-C to stop recording.");
     }
 
-    let recording_start = Instant::now();
-    let timeout_ms = 1000 / camera_fps;
+    let camera_timeout_ms = 1000 / camera_fps;
 
-    while true {
-        let capture = match camera.get_capture(timeout_ms as i32) {
+    let recording_process = Processing::new(recording_length);
+    while recording_process.is_processing() {
+        let capture = match camera.get_capture(camera_timeout_ms as i32) {
             Ok(c) => c,
             Err(azure_kinect::Error::Timeout) => continue,
             Err(e) => {
@@ -218,22 +245,40 @@ pub(crate) fn do_recording(
         };
 
         if imu.is_some() {
-            let sample = match imu.as_ref().unwrap().get_imu_sample(0) {
-                Ok(s) => s,
-                Err(azure_kinect::Error::Timeout) => continue,
-                Err(e) => {
-                    return Err(Box::new(Error::Error(format!(
-                        "Runtime error: k4a_imu_get_sample() returned {}",
-                        e
-                    ))))
-                }
-            };
-        }
+            while recording_process.is_processing() {
+                let sample = match imu.as_ref().unwrap().get_imu_sample(0) {
+                    Ok(s) => s,
+                    Err(azure_kinect::Error::Timeout) => continue,
+                    Err(e) => {
+                        return Err(Box::new(Error::Error(format!(
+                            "Runtime error: k4a_imu_get_sample() returned {}",
+                            e
+                        ))))
+                    }
+                };
 
-        if recording_start.elapsed().as_secs() >= recording_length as u64 {
-            break;
+                match recording.write_imu_sample(sample) {
+                    Err(e) => {
+                        return Err(Box::new(Error::Error(format!(
+                            "Runtime error: k4a_record_write_imu_sample() returned {}",
+                            e
+                        ))))
+                    }
+                    _ => (),
+                };
+            }
         }
     }
 
+    println!("Stopping recording...");
+
+    let imu = ();
+    let camera = ();
+
+    println!("Saving recording...");
+    recording.flush()?;
+    let recording = ();
+
+    println!("Done");
     Ok(())
 }
