@@ -1,4 +1,5 @@
 use azure_kinect::*;
+use std::borrow::Borrow;
 use std::time::Instant;
 
 #[derive(Debug)]
@@ -168,11 +169,14 @@ pub(crate) fn do_recording(
     let first_capture_start = Instant::now();
     let mut first_captured = false;
     while first_capture_start.elapsed().as_secs() < timeout_sec_for_first_capture {
-        let capture = camera.get_capture(100);
-        if let Err(azure_kinect::Error::Timeout) = capture {
-            continue;
-        }
-        let capture = capture?;
+        match camera.get_capture(100) {
+            Err(azure_kinect::Error::Timeout) => continue,
+            Err(e) => return Err(Box::new(Error::Error(format!(
+                "Runtime error: k4a_device_get_capture() returned error: {}",
+                e
+            )))),
+            _ => (),
+        };
         first_captured = true;
         break;
     }
@@ -195,15 +199,39 @@ pub(crate) fn do_recording(
         let capture = match camera.get_capture(timeout_ms as i32) {
             Ok(c) => c,
             Err(azure_kinect::Error::Timeout) => continue,
-            Err(_) => return Err(Box::new(Error::ErrorStr(
-                "Runtime error: k4a_imu_get_sample() returned",
-            )))
+            Err(e) => {
+                return Err(Box::new(Error::Error(format!(
+                    "Runtime error: k4a_device_get_capture() returned {}",
+                    e
+                ))))
+            }
         };
 
-        if recording.write_capture(&capture).is_err() {
-            return Err(Box::new(Error::ErrorStr(
-                "Runtime error: k4a_record_write_imu_sample() returned ",
-            )))
+        match recording.write_capture(&capture) {
+            Err(e) => {
+                return Err(Box::new(Error::Error(format!(
+                    "Runtime error: k4a_record_write_imu_sample() returned {}",
+                    e
+                ))))
+            }
+            _ => (),
+        };
+
+        if imu.is_some() {
+            let sample = match imu.as_ref().unwrap().get_imu_sample(0) {
+                Ok(s) => s,
+                Err(azure_kinect::Error::Timeout) => continue,
+                Err(e) => {
+                    return Err(Box::new(Error::Error(format!(
+                        "Runtime error: k4a_imu_get_sample() returned {}",
+                        e
+                    ))))
+                }
+            };
+        }
+
+        if recording_start.elapsed().as_secs() >= recording_length as u64 {
+            break;
         }
     }
 
