@@ -62,6 +62,7 @@ pub(crate) fn do_recording(
     record_imu: bool,
     absoluteExposureValue: i32,
     gain: i32,
+    request_abort: fn() -> bool
 ) -> Result<(), Box<dyn std::error::Error>> {
     let installed_devices = factory.device_get_installed_count();
     if device_index >= installed_devices {
@@ -195,7 +196,7 @@ pub(crate) fn do_recording(
 
     let first_capture = Processing::new(Some(Duration::from_secs(timeout_sec_for_first_capture)));
     let mut first_captured = false;
-    while first_capture.is_processing() {
+    while first_capture.is_processing() && !request_abort() {
         match camera.get_capture(100) {
             Err(azure_kinect::Error::Timeout) => continue,
             Err(e) => return Err(Box::new(Error::Error(format!(
@@ -208,7 +209,9 @@ pub(crate) fn do_recording(
         break;
     }
 
-    if !first_captured {
+    if request_abort() {
+        return Ok(());
+    } else if !first_captured {
         return Err(Box::new(Error::ErrorStr(
             "Timed out waiting for first capture.",
         )));
@@ -222,7 +225,7 @@ pub(crate) fn do_recording(
     let camera_timeout_ms = 1000 / camera_fps;
 
     let recording_process = Processing::new(recording_length);
-    while recording_process.is_processing() {
+    while recording_process.is_processing() && !request_abort() {
         let capture = match camera.get_capture(camera_timeout_ms as i32) {
             Ok(c) => c,
             Err(azure_kinect::Error::Timeout) => continue,
@@ -245,7 +248,7 @@ pub(crate) fn do_recording(
         };
 
         if imu.is_some() {
-            while recording_process.is_processing() {
+            while recording_process.is_processing() && !request_abort() {
                 let sample = match imu.as_ref().unwrap().get_imu_sample(0) {
                     Ok(s) => s,
                     Err(azure_kinect::Error::Timeout) => continue,
@@ -270,7 +273,9 @@ pub(crate) fn do_recording(
         }
     }
 
-    println!("Stopping recording...");
+    if !request_abort() {
+        println!("Stopping recording...");
+    }
 
     let imu = ();
     let camera = ();
