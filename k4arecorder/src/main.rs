@@ -1,3 +1,4 @@
+mod param;
 mod recorder;
 
 fn main() {
