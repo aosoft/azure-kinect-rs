@@ -1,6 +1,6 @@
 use azure_kinect::*;
-use std::time::{Instant, Duration};
 use clap::{App, Arg, ArgMatches, SubCommand};
+use std::time::{Duration, Instant};
 
 pub struct Parameter {
     pub list_device: bool,
@@ -9,8 +9,29 @@ pub struct Parameter {
     pub recording_length: Option<Duration>,
     pub device_config: k4a_device_configuration_t,
     pub record_imu: bool,
-    pub absoluteExposureValue: i32,
-    pub gain: i32,
+    pub absoluteExposureValue: Option<i32>,
+    pub gain: Option<i32>,
+}
+
+pub fn correct_param<T: Ord + core::str::FromStr, U: Ord, F: Fn(T) -> U>(
+    value: Option<&str>,
+    f: F,
+) -> Option<U> {
+    match value {
+        Some(value) => match value.parse() {
+            Ok(value) => Some(f(value)),
+            Err(_) => None,
+        },
+        None => None,
+    }
+}
+
+pub fn correct_param_range<T: Ord + core::str::FromStr + Copy + Clone>(
+    value: Option<&str>,
+    min: T,
+    max: T,
+) -> Option<T> {
+    correct_param(value, |value| std::cmp::max(min, std::cmp::min(max, value)))
 }
 
 impl Parameter {
@@ -20,18 +41,26 @@ impl Parameter {
 
     fn from<'a>(args: ArgMatches<'a>) -> Parameter {
         Parameter {
-            list_device: false,
-            device_index: 0,
-            recording_filename: "".to_string(),
-            recording_length: None,
+            list_device: args.is_present("list"),
+            device_index: args.value_of("device").unwrap_or("0").parse().unwrap_or(0),
+            recording_filename: args.value_of("OUTPUT").unwrap_or("").to_string(),
+            recording_length: correct_param::<u64, _, _>(args.value_of("record-length"), |value| {
+                Duration::from_secs(std::cmp::max(0, value))
+            }),
             device_config: Default::default(),
-            record_imu: false,
-            absoluteExposureValue: 0,
-            gain: 0
+            record_imu: args
+                .value_of("imu")
+                .unwrap_or("ON")
+                .eq_ignore_ascii_case("ON"),
+            absoluteExposureValue: correct_param_range(
+                args.value_of("exposure-control"),
+                2,
+                200000,
+            ),
+            gain: correct_param_range(args.value_of("gain"), 0, 255),
         }
     }
 }
-
 
 fn create_app<'a, 'b>() -> App<'a, 'b> {
     App::new("k4arecorder")
