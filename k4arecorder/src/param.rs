@@ -15,11 +15,11 @@ pub struct Parameter {
 }
 
 impl Parameter {
-    pub fn new() -> Result<Parameter, Error> {
+    pub fn new<'a>() -> Result<Parameter, Error<'a>> {
         Parameter::from(create_app().get_matches())
     }
 
-    fn from<'a>(args: ArgMatches<'a>) -> Result<Parameter, Error> {
+    fn from<'a, 'b>(args: ArgMatches<'a>) -> Result<Parameter, Error<'b>> {
         let format_resolution = to_format_and_resolution(args.value_of("color-mode").unwrap())?;
         Ok(Parameter {
             list_device: args.is_present("list"),
@@ -29,8 +29,8 @@ impl Parameter {
                 Duration::from_secs(std::cmp::max(0, value))
             }),
             device_config: k4a_device_configuration_t{
-                color_format: format_resolution[0],
-                color_resolution: format_resolution[1],
+                color_format: format_resolution.0,
+                color_resolution: format_resolution.1,
                 depth_mode: to_depth_mode(args.value_of("depth-mode").unwrap())?,
                 camera_fps: to_frame_rate(args.value_of("rate").unwrap())?,
                 synchronized_images_only: false,
@@ -133,9 +133,9 @@ fn correct_param_range<T: Ord + core::str::FromStr + Copy + Clone>(
     correct_param(value, |value| std::cmp::max(min, std::cmp::min(max, value)))
 }
 
-fn to_format_and_resolution(
+fn to_format_and_resolution<'a>(
     value: &str,
-) -> Result<(k4a_image_format_t, k4a_color_resolution_t), Error> {
+) -> Result<(k4a_image_format_t, k4a_color_resolution_t), Error<'a>> {
     match value.to_ascii_lowercase().as_str() {
         "3072p" => Ok((
             k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
@@ -180,7 +180,7 @@ fn to_format_and_resolution(
     }
 }
 
-fn to_depth_mode(value: &str) -> Result<k4a_depth_mode_t, Error> {
+fn to_depth_mode<'a>(value: &str) -> Result<k4a_depth_mode_t, Error<'a>> {
     match value.to_ascii_uppercase().as_str() {
         "NFOV_2X2BINNED" => Ok(k4a_depth_mode_t::K4A_DEPTH_MODE_NFOV_2X2BINNED),
         "NFOV_UNBINNED" => Ok(k4a_depth_mode_t::K4A_DEPTH_MODE_NFOV_UNBINNED),
@@ -195,7 +195,7 @@ fn to_depth_mode(value: &str) -> Result<k4a_depth_mode_t, Error> {
     }
 }
 
-fn to_frame_rate(value: &str) -> Result<k4a_fps_t, Error> {
+fn to_frame_rate<'a>(value: &str) -> Result<k4a_fps_t, Error<'a>> {
     match value {
         "30" => Ok(k4a_fps_t::K4A_FRAMES_PER_SECOND_30),
         "15" => Ok(k4a_fps_t::K4A_FRAMES_PER_SECOND_15),
@@ -207,7 +207,7 @@ fn to_frame_rate(value: &str) -> Result<k4a_fps_t, Error> {
     }
 }
 
-fn to_imu_mode(value: &str) -> Result<bool, Error> {
+fn to_imu_mode<'a>(value: &str) -> Result<bool, Error<'a>> {
     match value.to_ascii_uppercase().as_str() {
         "ON" => Ok(true),
         "OFF" => Ok(false),
@@ -218,7 +218,7 @@ fn to_imu_mode(value: &str) -> Result<bool, Error> {
     }
 }
 
-fn to_external_sync(value: &str) -> Result<k4a_wired_sync_mode_t, Error> {
+fn to_external_sync<'a>(value: &str) -> Result<k4a_wired_sync_mode_t, Error<'a>> {
     match value.to_ascii_lowercase().as_str() {
         "master" => Ok(k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_MASTER),
         "subordinate" => Ok(k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_SUBORDINATE),

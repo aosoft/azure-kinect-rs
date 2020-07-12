@@ -2,7 +2,7 @@ use azure_kinect::*;
 use std::time::{Instant, Duration};
 
 #[derive(Debug)]
-pub(crate) enum Error<'a> {
+pub enum Error<'a> {
     ErrorStr(&'a str),
     Error(String),
 }
