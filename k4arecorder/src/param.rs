@@ -10,7 +10,7 @@ pub struct Parameter {
     pub recording_length: Option<Duration>,
     pub device_config: k4a_device_configuration_t,
     pub record_imu: bool,
-    pub absoluteExposureValue: Option<i32>,
+    pub absolute_exposure_value: Option<i32>,
     pub gain: Option<i32>,
 }
 
@@ -28,22 +28,30 @@ impl Parameter {
             recording_length: correct_param::<u64, _, _>(args.value_of("record-length"), |value| {
                 Duration::from_secs(std::cmp::max(0, value))
             }),
-            device_config: k4a_device_configuration_t{
+            device_config: k4a_device_configuration_t {
                 color_format: format_resolution.0,
                 color_resolution: format_resolution.1,
                 depth_mode: to_depth_mode(args.value_of("depth-mode").unwrap())?,
                 camera_fps: to_frame_rate(args.value_of("rate").unwrap())?,
                 synchronized_images_only: false,
-                depth_delay_off_color_usec: args.value_of("depth-delay").unwrap_or("0").parse().unwrap_or(0),
+                depth_delay_off_color_usec: args
+                    .value_of("depth-delay")
+                    .unwrap_or("0")
+                    .parse()
+                    .unwrap_or(0),
                 wired_sync_mode: to_external_sync(args.value_of("external-sync").unwrap())?,
-                subordinate_delay_off_master_usec: args.value_of("sync-delay").unwrap_or("0").parse().unwrap_or(0),
-                disable_streaming_indicator: false
+                subordinate_delay_off_master_usec: args
+                    .value_of("sync-delay")
+                    .unwrap_or("0")
+                    .parse()
+                    .unwrap_or(0),
+                disable_streaming_indicator: false,
             },
             record_imu: args
                 .value_of("imu")
                 .unwrap_or("ON")
                 .eq_ignore_ascii_case("ON"),
-            absoluteExposureValue: correct_param_range(
+            absolute_exposure_value: correct_param_range(
                 args.value_of("exposure-control"),
                 2,
                 200000,
@@ -229,4 +237,117 @@ fn to_external_sync<'a>(value: &str) -> Result<k4a_wired_sync_mode_t, Error<'a>>
             value
         ))),
     }
+}
+
+#[test]
+fn conv_param_test() {
+    assert!(
+        to_format_and_resolution("3072p").unwrap()
+            == (
+                k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+                k4a_color_resolution_t::K4A_COLOR_RESOLUTION_3072P
+            )
+    );
+    assert!(
+        to_format_and_resolution("2160p").unwrap()
+            == (
+                k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+                k4a_color_resolution_t::K4A_COLOR_RESOLUTION_2160P
+            )
+    );
+    assert!(
+        to_format_and_resolution("1536p").unwrap()
+            == (
+                k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+                k4a_color_resolution_t::K4A_COLOR_RESOLUTION_1536P
+            )
+    );
+    assert!(
+        to_format_and_resolution("1440p").unwrap()
+            == (
+                k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+                k4a_color_resolution_t::K4A_COLOR_RESOLUTION_1440P
+            )
+    );
+    assert!(
+        to_format_and_resolution("1080p").unwrap()
+            == (
+                k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+                k4a_color_resolution_t::K4A_COLOR_RESOLUTION_1080P
+            )
+    );
+    assert!(
+        to_format_and_resolution("720p").unwrap()
+            == (
+                k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+                k4a_color_resolution_t::K4A_COLOR_RESOLUTION_720P
+            )
+    );
+    assert!(to_format_and_resolution("720p_nv12").is_ok());
+    assert!(to_format_and_resolution("720p_yuy2").is_ok());
+    assert!(
+        to_format_and_resolution("720p_NV12").unwrap()
+            == (
+                k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_NV12,
+                k4a_color_resolution_t::K4A_COLOR_RESOLUTION_720P
+            )
+    );
+    assert!(
+        to_format_and_resolution("720p_YUY2").unwrap()
+            == (
+                k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_YUY2,
+                k4a_color_resolution_t::K4A_COLOR_RESOLUTION_720P
+            )
+    );
+    assert!(
+        to_format_and_resolution("OFF").unwrap()
+            == (
+                k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+                k4a_color_resolution_t::K4A_COLOR_RESOLUTION_OFF
+            )
+    );
+    assert!(to_format_and_resolution("asdqv").is_err());
+
+    assert!(
+        to_depth_mode("NFOV_2X2BINNED").unwrap() == k4a_depth_mode_t::K4A_DEPTH_MODE_NFOV_2X2BINNED
+    );
+    assert!(
+        to_depth_mode("NFOV_UNBINNED").unwrap() == k4a_depth_mode_t::K4A_DEPTH_MODE_NFOV_UNBINNED
+    );
+    assert!(
+        to_depth_mode("WFOV_2X2BINNED").unwrap() == k4a_depth_mode_t::K4A_DEPTH_MODE_WFOV_2X2BINNED
+    );
+    assert!(
+        to_depth_mode("WFOV_UNBINNED").unwrap() == k4a_depth_mode_t::K4A_DEPTH_MODE_WFOV_UNBINNED
+    );
+    assert!(to_depth_mode("PASSIVE_IR").unwrap() == k4a_depth_mode_t::K4A_DEPTH_MODE_PASSIVE_IR);
+    assert!(to_depth_mode("OFF").unwrap() == k4a_depth_mode_t::K4A_DEPTH_MODE_OFF);
+    assert!(to_depth_mode("off").is_ok());
+    assert!(to_depth_mode("asdwergsdgsdfds").is_err());
+
+    assert!(to_frame_rate("30").unwrap() == k4a_fps_t::K4A_FRAMES_PER_SECOND_30);
+    assert!(to_frame_rate("15").unwrap() == k4a_fps_t::K4A_FRAMES_PER_SECOND_15);
+    assert!(to_frame_rate("5").unwrap() == k4a_fps_t::K4A_FRAMES_PER_SECOND_5);
+    assert!(to_frame_rate("1").is_err());
+
+    assert!(to_imu_mode("ON").unwrap());
+    assert!(!to_imu_mode("OFF").unwrap());
+    assert!(to_imu_mode("On").unwrap());
+    assert!(to_imu_mode("poasdas").is_err());
+
+    assert!(
+        to_external_sync("master").unwrap() == k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_MASTER
+    );
+    assert!(
+        to_external_sync("Subordinate").unwrap()
+            == k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_SUBORDINATE
+    );
+    assert!(
+        to_external_sync("SUB").unwrap() == k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_SUBORDINATE
+    );
+    assert!(
+        to_external_sync("STANDALONE").unwrap()
+            == k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_STANDALONE
+    );
+    assert!(to_external_sync("as098kasd").is_err());
 }

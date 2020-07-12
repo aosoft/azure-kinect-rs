@@ -60,7 +60,7 @@ pub(crate) fn do_recording(
     recording_length: Option<Duration>,
     device_config: &k4a_device_configuration_t,
     record_imu: bool,
-    absoluteExposureValue: i32,
+    absolute_exposure_value: i32,
     gain: i32,
     request_abort: fn() -> bool
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -116,11 +116,11 @@ pub(crate) fn do_recording(
         )));
     }
 
-    if absoluteExposureValue != DEFAULT_EXPOSURE_AUTO {
+    if absolute_exposure_value != DEFAULT_EXPOSURE_AUTO {
         if let Err(_) = device.set_color_control(
             k4a_color_control_command_t::K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
-            absoluteExposureValue,
+            absolute_exposure_value,
         ) {
             return Err(Box::new(Error::ErrorStr(
                 "Runtime error: k4a_device_set_color_control() for manual exposure failed ",
