@@ -1,5 +1,6 @@
+use crate::param::Parameter;
 use azure_kinect::*;
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
 
 #[derive(Debug)]
 pub enum Error<'a> {
@@ -22,13 +23,10 @@ impl std::fmt::Display for Error<'_> {
     }
 }
 
-const DEFAULT_EXPOSURE_AUTO: i32 = -12;
-const DEFAULT_GAIN_AUTO: i32 = -1;
-
 struct Processing {
     timer: Instant,
     requested_abort: bool,
-    duration: Option<Duration>
+    duration: Option<Duration>,
 }
 
 impl Processing {
@@ -36,7 +34,7 @@ impl Processing {
         Processing {
             timer: Instant::now(),
             requested_abort: false,
-            duration: recording_length
+            duration: recording_length,
         }
     }
 
@@ -55,21 +53,15 @@ impl Processing {
 
 pub(crate) fn do_recording(
     factory: &FactoryRecord,
-    device_index: u32,
-    recording_filename: &str,
-    recording_length: Option<Duration>,
-    device_config: &k4a_device_configuration_t,
-    record_imu: bool,
-    absolute_exposure_value: i32,
-    gain: i32,
-    request_abort: fn() -> bool
+    param: &Parameter,
+    request_abort: fn() -> bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let installed_devices = factory.device_get_installed_count();
-    if device_index >= installed_devices {
+    if param.device_index >= installed_devices {
         return Err(Box::new(Error::ErrorStr("Device not found.")));
     }
 
-    let device = match factory.device_open(device_index) {
+    let device = match factory.device_open(param.device_index) {
         Ok(device) => device,
         Err(_) => {
             return Err(Box::new(Error::ErrorStr(
@@ -106,17 +98,18 @@ pub(crate) fn do_recording(
         version_info.audio.major, version_info.audio.minor, version_info.audio.iteration
     );
 
-    let camera_fps = device_config.camera_fps.get_u32();
+    let camera_fps = param.device_config.camera_fps.get_u32();
     if camera_fps <= 0
-        || (device_config.color_resolution == k4a_color_resolution_t::K4A_COLOR_RESOLUTION_OFF
-            && device_config.depth_mode == k4a_depth_mode_t::K4A_DEPTH_MODE_OFF)
+        || (param.device_config.color_resolution
+            == k4a_color_resolution_t::K4A_COLOR_RESOLUTION_OFF
+            && param.device_config.depth_mode == k4a_depth_mode_t::K4A_DEPTH_MODE_OFF)
     {
         return Err(Box::new(Error::ErrorStr(
             "Either the color or depth modes must be enabled to record.",
         )));
     }
 
-    if absolute_exposure_value != DEFAULT_EXPOSURE_AUTO {
+    if let Some(absolute_exposure_value) = param.absolute_exposure_value {
         if let Err(_) = device.set_color_control(
             k4a_color_control_command_t::K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
@@ -138,7 +131,7 @@ pub(crate) fn do_recording(
         }
     }
 
-    if gain != DEFAULT_GAIN_AUTO {
+    if let Some(gain) = param.gain {
         if let Err(_) = device.set_color_control(
             k4a_color_control_command_t::K4A_COLOR_CONTROL_GAIN,
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
@@ -160,8 +153,8 @@ pub(crate) fn do_recording(
         }
     }
 
-    let camera = device.start_cameras(&device_config)?;
-    let imu = if record_imu {
+    let camera = device.start_cameras(&param.device_config)?;
+    let imu = if param.record_imu {
         Option::Some(camera.start_imu()?)
     } else {
         Option::None
@@ -169,12 +162,16 @@ pub(crate) fn do_recording(
 
     println!("Device started");
 
-    let recording = match factory.record_create(recording_filename, &device, &device_config) {
+    let recording = match factory.record_create(
+        param.recording_filename.as_str(),
+        &device,
+        &param.device_config,
+    ) {
         Ok(recording) => recording,
         Err(_) => {
             return Err(Box::new(Error::Error(format!(
                 "Unable to create recording file: {}",
-                recording_filename
+                param.recording_filename
             ))))
         }
     };
@@ -185,7 +182,7 @@ pub(crate) fn do_recording(
     recording.write_header()?;
 
     // Wait for the first capture before starting recording.
-    let timeout_sec_for_first_capture = if device_config.wired_sync_mode
+    let timeout_sec_for_first_capture = if param.device_config.wired_sync_mode
         == k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_SUBORDINATE
     {
         println!("[subordinate mode] Waiting for signal from master");
@@ -199,10 +196,12 @@ pub(crate) fn do_recording(
     while first_capture.is_processing() && !request_abort() {
         match camera.get_capture(100) {
             Err(azure_kinect::Error::Timeout) => continue,
-            Err(e) => return Err(Box::new(Error::Error(format!(
-                "Runtime error: k4a_device_get_capture() returned error: {}",
-                e
-            )))),
+            Err(e) => {
+                return Err(Box::new(Error::Error(format!(
+                    "Runtime error: k4a_device_get_capture() returned error: {}",
+                    e
+                ))))
+            }
             _ => (),
         };
         first_captured = true;
@@ -218,13 +217,13 @@ pub(crate) fn do_recording(
     }
 
     println!("Started recording");
-    if recording_length.is_none() {
+    if param.recording_length.is_none() {
         println!("Press Ctrl-C to stop recording.");
     }
 
     let camera_timeout_ms = 1000 / camera_fps;
 
-    let recording_process = Processing::new(recording_length);
+    let recording_process = Processing::new(param.recording_length);
     while recording_process.is_processing() && !request_abort() {
         let capture = match camera.get_capture(camera_timeout_ms as i32) {
             Ok(c) => c,
