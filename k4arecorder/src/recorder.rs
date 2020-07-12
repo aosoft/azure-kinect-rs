@@ -276,12 +276,12 @@ pub(crate) fn do_recording(
         println!("Stopping recording...");
     }
 
-    let imu = ();
-    let camera = ();
+    std::mem::drop(imu);
+    std::mem::drop(camera);
 
     println!("Saving recording...");
     recording.flush()?;
-    let recording = ();
+    std::mem::drop(recording);
 
     println!("Done");
     Ok(())
