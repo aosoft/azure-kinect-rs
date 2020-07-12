@@ -1,7 +1,7 @@
 use crate::recorder::Error;
 use azure_kinect::*;
-use clap::{App, Arg, ArgMatches, SubCommand};
-use std::time::{Duration, Instant};
+use clap::{App, Arg, ArgMatches};
+use std::time::Duration;
 
 pub struct Parameter {
     pub list_device: bool,
@@ -15,19 +15,30 @@ pub struct Parameter {
 }
 
 impl Parameter {
-    pub fn new() -> Parameter {
+    pub fn new() -> Result<Parameter, Error> {
         Parameter::from(create_app().get_matches())
     }
 
-    fn from<'a>(args: ArgMatches<'a>) -> Parameter {
-        Parameter {
+    fn from<'a>(args: ArgMatches<'a>) -> Result<Parameter, Error> {
+        let format_resolution = to_format_and_resolution(args.value_of("color-mode").unwrap())?;
+        Ok(Parameter {
             list_device: args.is_present("list"),
             device_index: args.value_of("device").unwrap_or("0").parse().unwrap_or(0),
             recording_filename: args.value_of("OUTPUT").unwrap_or("").to_string(),
             recording_length: correct_param::<u64, _, _>(args.value_of("record-length"), |value| {
                 Duration::from_secs(std::cmp::max(0, value))
             }),
-            device_config: Default::default(),
+            device_config: k4a_device_configuration_t{
+                color_format: format_resolution[0],
+                color_resolution: format_resolution[1],
+                depth_mode: to_depth_mode(args.value_of("depth-mode").unwrap())?,
+                camera_fps: to_frame_rate(args.value_of("rate").unwrap())?,
+                synchronized_images_only: false,
+                depth_delay_off_color_usec: args.value_of("depth-delay").unwrap_or("0").parse().unwrap_or(0),
+                wired_sync_mode: to_external_sync(args.value_of("external-sync").unwrap())?,
+                subordinate_delay_off_master_usec: args.value_of("sync-delay").unwrap_or("0").parse().unwrap_or(0),
+                disable_streaming_indicator: false
+            },
             record_imu: args
                 .value_of("imu")
                 .unwrap_or("ON")
@@ -38,7 +49,7 @@ impl Parameter {
                 200000,
             ),
             gain: correct_param_range(args.value_of("gain"), 0, 255),
-        }
+        })
     }
 }
 
@@ -98,7 +109,7 @@ fn create_app<'a, 'b>() -> App<'a, 'b> {
         .arg(Arg::with_name("OUTPUT")
             .help("Sets the output file")
             .required(true)
-            .default_value(("output.mkv")))
+            .default_value("output.mkv"))
 }
 
 fn correct_param<T: Ord + core::str::FromStr, U: Ord, F: Fn(T) -> U>(
