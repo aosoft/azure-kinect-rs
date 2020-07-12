@@ -1,3 +1,4 @@
+use crate::recorder::Error;
 use azure_kinect::*;
 use clap::{App, Arg, ArgMatches, SubCommand};
 use std::time::{Duration, Instant};
@@ -11,27 +12,6 @@ pub struct Parameter {
     pub record_imu: bool,
     pub absoluteExposureValue: Option<i32>,
     pub gain: Option<i32>,
-}
-
-pub fn correct_param<T: Ord + core::str::FromStr, U: Ord, F: Fn(T) -> U>(
-    value: Option<&str>,
-    f: F,
-) -> Option<U> {
-    match value {
-        Some(value) => match value.parse() {
-            Ok(value) => Some(f(value)),
-            Err(_) => None,
-        },
-        None => None,
-    }
-}
-
-pub fn correct_param_range<T: Ord + core::str::FromStr + Copy + Clone>(
-    value: Option<&str>,
-    min: T,
-    max: T,
-) -> Option<T> {
-    correct_param(value, |value| std::cmp::max(min, std::cmp::min(max, value)))
 }
 
 impl Parameter {
@@ -119,4 +99,123 @@ fn create_app<'a, 'b>() -> App<'a, 'b> {
             .help("Sets the output file")
             .required(true)
             .default_value(("output.mkv")))
+}
+
+fn correct_param<T: Ord + core::str::FromStr, U: Ord, F: Fn(T) -> U>(
+    value: Option<&str>,
+    f: F,
+) -> Option<U> {
+    match value {
+        Some(value) => match value.parse() {
+            Ok(value) => Some(f(value)),
+            Err(_) => None,
+        },
+        None => None,
+    }
+}
+
+fn correct_param_range<T: Ord + core::str::FromStr + Copy + Clone>(
+    value: Option<&str>,
+    min: T,
+    max: T,
+) -> Option<T> {
+    correct_param(value, |value| std::cmp::max(min, std::cmp::min(max, value)))
+}
+
+fn to_format_and_resolution(
+    value: &str,
+) -> Result<(k4a_image_format_t, k4a_color_resolution_t), Error> {
+    match value.to_ascii_lowercase().as_str() {
+        "3072p" => Ok((
+            k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+            k4a_color_resolution_t::K4A_COLOR_RESOLUTION_3072P,
+        )),
+        "2160p" => Ok((
+            k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+            k4a_color_resolution_t::K4A_COLOR_RESOLUTION_2160P,
+        )),
+        "1536p" => Ok((
+            k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+            k4a_color_resolution_t::K4A_COLOR_RESOLUTION_1536P,
+        )),
+        "1440p" => Ok((
+            k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+            k4a_color_resolution_t::K4A_COLOR_RESOLUTION_1440P,
+        )),
+        "1080p" => Ok((
+            k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+            k4a_color_resolution_t::K4A_COLOR_RESOLUTION_1080P,
+        )),
+        "720p" => Ok((
+            k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+            k4a_color_resolution_t::K4A_COLOR_RESOLUTION_720P,
+        )),
+        "720p_nv12" => Ok((
+            k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_NV12,
+            k4a_color_resolution_t::K4A_COLOR_RESOLUTION_720P,
+        )),
+        "720p_yuy2" => Ok((
+            k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_YUY2,
+            k4a_color_resolution_t::K4A_COLOR_RESOLUTION_720P,
+        )),
+        "off" => Ok((
+            k4a_image_format_t::K4A_IMAGE_FORMAT_COLOR_MJPG,
+            k4a_color_resolution_t::K4A_COLOR_RESOLUTION_OFF,
+        )),
+        _ => Err(Error::Error(format!(
+            "Unknown color mode specified: {}",
+            value
+        ))),
+    }
+}
+
+fn to_depth_mode(value: &str) -> Result<k4a_depth_mode_t, Error> {
+    match value.to_ascii_uppercase().as_str() {
+        "NFOV_2X2BINNED" => Ok(k4a_depth_mode_t::K4A_DEPTH_MODE_NFOV_2X2BINNED),
+        "NFOV_UNBINNED" => Ok(k4a_depth_mode_t::K4A_DEPTH_MODE_NFOV_UNBINNED),
+        "WFOV_2X2BINNED" => Ok(k4a_depth_mode_t::K4A_DEPTH_MODE_WFOV_2X2BINNED),
+        "WFOV_UNBINNED" => Ok(k4a_depth_mode_t::K4A_DEPTH_MODE_WFOV_UNBINNED),
+        "PASSIVE_IR" => Ok(k4a_depth_mode_t::K4A_DEPTH_MODE_PASSIVE_IR),
+        "OFF" => Ok(k4a_depth_mode_t::K4A_DEPTH_MODE_OFF),
+        _ => Err(Error::Error(format!(
+            "Unknown depth mode specified: {}",
+            value
+        ))),
+    }
+}
+
+fn to_frame_rate(value: &str) -> Result<k4a_fps_t, Error> {
+    match value {
+        "30" => Ok(k4a_fps_t::K4A_FRAMES_PER_SECOND_30),
+        "15" => Ok(k4a_fps_t::K4A_FRAMES_PER_SECOND_15),
+        "5" => Ok(k4a_fps_t::K4A_FRAMES_PER_SECOND_5),
+        _ => Err(Error::Error(format!(
+            "Unknown frame rate specified: {}",
+            value
+        ))),
+    }
+}
+
+fn to_imu_mode(value: &str) -> Result<bool, Error> {
+    match value.to_ascii_uppercase().as_str() {
+        "ON" => Ok(true),
+        "OFF" => Ok(false),
+        _ => Err(Error::Error(format!(
+            "Unknown imu mode specified: {}",
+            value
+        ))),
+    }
+}
+
+fn to_external_sync(value: &str) -> Result<k4a_wired_sync_mode_t, Error> {
+    match value.to_ascii_lowercase().as_str() {
+        "master" => Ok(k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_MASTER),
+        "subordinate" => Ok(k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_SUBORDINATE),
+        "sub" => Ok(k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_SUBORDINATE),
+        "standalone" => Ok(k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_STANDALONE),
+        _ => Err(Error::Error(format!(
+            "Unknown external sync mode specified: {}",
+            value
+        ))),
+    }
 }
