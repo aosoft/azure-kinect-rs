@@ -105,9 +105,7 @@ pub(crate) fn do_recording(
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
             absolute_exposure_value,
         ) {
-            return Err(Box::new(Error::ErrorStr(
-                "Runtime error: k4a_device_set_color_control() for manual exposure failed ",
-            )));
+            eprintln!("Runtime error: k4a_device_set_color_control() for manual exposure failed ");
         }
     } else {
         if let Err(_) = device.set_color_control(
@@ -115,9 +113,7 @@ pub(crate) fn do_recording(
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO,
             0,
         ) {
-            return Err(Box::new(Error::ErrorStr(
-                "Runtime error: k4a_device_set_color_control() for auto exposure failed ",
-            )));
+            eprintln!("Runtime error: k4a_device_set_color_control() for auto exposure failed ");
         }
     }
 
@@ -127,9 +123,7 @@ pub(crate) fn do_recording(
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
             gain,
         ) {
-            return Err(Box::new(Error::ErrorStr(
-                "Runtime error: k4a_device_set_color_control() for manual gain failed ",
-            )));
+            eprintln!("Runtime error: k4a_device_set_color_control() for manual gain failed ");
         }
     } else {
         if let Err(_) = device.set_color_control(
@@ -137,9 +131,7 @@ pub(crate) fn do_recording(
             k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO,
             0,
         ) {
-            return Err(Box::new(Error::ErrorStr(
-                "Runtime error: k4a_device_set_color_control() for auto gain failed ",
-            )));
+            eprintln!("Runtime error: k4a_device_set_color_control() for auto gain failed ");
         }
     }
 
