@@ -1,10 +1,29 @@
 mod param;
 mod recorder;
+use crate::recorder::do_recording;
 use azure_kinect::*;
 
 fn main() {
-    let factory = FactoryRecord::new().unwrap();
-    list_devices(&factory);
+    std::process::exit(match main2() {
+        Ok(_) => 0,
+        Err(e) => {
+            eprintln!("{}", e);
+            1
+        }
+    });
+}
+
+fn main2() -> Result<(), Box<dyn std::error::Error>> {
+    let param = param::Parameter::new()?;
+
+    let factory = FactoryRecord::new()?;
+    if param.list_device {
+        list_devices(&factory);
+    } else {
+        do_recording(&factory, &param, || -> bool { false })?;
+    }
+
+    Ok(())
 }
 
 fn list_devices(factory: &FactoryRecord) {

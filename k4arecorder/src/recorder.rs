@@ -81,22 +81,12 @@ pub(crate) fn do_recording(
             "Dbg"
         }
     );
+    print!("; C: {}", version_info.rgb);
     print!(
-        "; C: {}.{}.{}",
-        version_info.rgb.major, version_info.rgb.minor, version_info.rgb.iteration
+        "; D: {}[{}.{}]",
+        version_info.depth, version_info.depth_sensor.major, version_info.depth_sensor.minor
     );
-    print!(
-        "; D: {}.{}.{}[{}.{}]",
-        version_info.depth.major,
-        version_info.depth.minor,
-        version_info.depth.iteration,
-        version_info.depth_sensor.major,
-        version_info.depth_sensor.minor
-    );
-    println!(
-        "; A: {}.{}.{}",
-        version_info.audio.major, version_info.audio.minor, version_info.audio.iteration
-    );
+    println!("; A: {}", version_info.audio);
 
     let camera_fps = param.device_config.camera_fps.get_u32();
     if camera_fps <= 0

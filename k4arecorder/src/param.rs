@@ -21,7 +21,7 @@ impl Parameter {
 
     fn from<'a, 'b>(args: ArgMatches<'a>) -> Result<Parameter, Error<'b>> {
         let format_resolution = to_format_and_resolution(args.value_of("color-mode").unwrap())?;
-        Ok(Parameter {
+        let param = Parameter {
             list_device: args.is_present("list"),
             device_index: args.value_of("device").unwrap_or("0").parse().unwrap_or(0),
             recording_filename: args.value_of("OUTPUT").unwrap_or("").to_string(),
@@ -57,7 +57,28 @@ impl Parameter {
                 200000,
             ),
             gain: correct_param_range(args.value_of("gain"), 0, 255),
-        })
+        };
+
+        if param.device_config.camera_fps == k4a_fps_t::K4A_FRAMES_PER_SECOND_30
+            && (param.device_config.depth_mode == k4a_depth_mode_t::K4A_DEPTH_MODE_WFOV_UNBINNED
+                || param.device_config.color_resolution
+                    == k4a_color_resolution_t::K4A_COLOR_RESOLUTION_3072P)
+        {
+            return Err(Error::ErrorStr(
+                "Error: 30 Frames per second is not supported by this camera mode.",
+            ));
+        }
+
+        if param.device_config.subordinate_delay_off_master_usec > 0
+            && param.device_config.wired_sync_mode
+                != k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_SUBORDINATE
+        {
+            return Err(Error::ErrorStr(
+                "--sync-delay is only valid if --external-sync is set to Subordinate.",
+            ));
+        }
+
+        Ok(param)
     }
 }
 
@@ -93,6 +114,7 @@ fn create_app<'a, 'b>() -> App<'a, 'b> {
         .arg(Arg::with_name("rate")
             .long("rate")
             .short("r")
+            .default_value("30")
             .help("Set the camera frame rate in Frames per Second\nDefault is the maximum rate supported by the camera modes.\nAvailable options: 30, 15, 5"))
         .arg(Arg::with_name("imu")
             .long("imu")
