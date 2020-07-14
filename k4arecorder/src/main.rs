@@ -2,6 +2,7 @@ mod param;
 mod recorder;
 use crate::recorder::do_recording;
 use azure_kinect::*;
+use std::sync::atomic;
 
 fn main() {
     std::process::exit(match main2() {
@@ -20,7 +21,16 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
     if param.list_device {
         list_devices(&factory);
     } else {
-        do_recording(&factory, &param, || -> bool { false })?;
+        let request_abort1 = std::sync::Arc::new(atomic::AtomicBool::new(false));
+        let request_abort2 = request_abort1.clone();
+        ctrlc::set_handler(move || {
+            request_abort2.store(true, atomic::Ordering::SeqCst);
+        })
+        .expect("Error setting Ctrl-C handler");
+
+        do_recording(&factory, &param, || -> bool {
+            request_abort1.load(atomic::Ordering::SeqCst)
+        })?;
     }
 
     Ok(())

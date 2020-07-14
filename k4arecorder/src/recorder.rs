@@ -51,10 +51,10 @@ impl Processing {
     }
 }
 
-pub(crate) fn do_recording(
+pub(crate) fn do_recording<F: Fn() -> bool>(
     factory: &FactoryRecord,
     param: &Parameter,
-    request_abort: fn() -> bool,
+    request_abort: F,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let installed_devices = factory.device_get_installed_count();
     if param.device_index >= installed_devices {

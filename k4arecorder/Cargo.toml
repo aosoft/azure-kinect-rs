@@ -10,4 +10,4 @@ edition = "2018"
 
 azure-kinect = { path = "../azure-kinect" }
 clap = "2.33.1"
-
+ctrlc = "3.1.5"

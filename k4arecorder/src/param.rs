@@ -15,8 +15,18 @@ pub struct Parameter {
 }
 
 impl Parameter {
-    pub fn new<'a>() -> Result<Parameter, Error<'a>> {
-        Parameter::from(create_app().get_matches())
+    pub fn new<'a>() -> Result<Parameter, Error<'a>>
+    {
+        let p = Parameter::from(create_app().get_matches());
+
+        if let Ok(r) = p.as_ref() {
+            if !r.list_device && r.recording_filename.len() == 0 {
+                create_app().print_help();
+                std::process::exit(1);
+            }
+        }
+
+        p
     }
 
     fn from<'a, 'b>(args: ArgMatches<'a>) -> Result<Parameter, Error<'b>> {
@@ -137,9 +147,7 @@ fn create_app<'a, 'b>() -> App<'a, 'b> {
             .short("g")
             .help("Set cameras manual gain. The valid range is 0 to 255. (default: auto)"))
         .arg(Arg::with_name("OUTPUT")
-            .help("Sets the output file")
-            .required(true)
-            .default_value("output.mkv"))
+            .help("Sets the output file"))
 }
 
 fn correct_param<T: Ord + core::str::FromStr, U: Ord, F: Fn(T) -> U>(
