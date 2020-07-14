@@ -232,7 +232,7 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
             while recording_process.is_processing() && !request_abort() {
                 let sample = match imu.as_ref().unwrap().get_imu_sample(0) {
                     Ok(s) => s,
-                    Err(azure_kinect::Error::Timeout) => continue,
+                    Err(azure_kinect::Error::Timeout) => break,
                     Err(e) => {
                         return Err(Box::new(Error::Error(format!(
                             "Runtime error: k4a_imu_get_sample() returned {}",
