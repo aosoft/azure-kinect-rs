@@ -10,8 +10,8 @@ fn main() {
 }
 
 fn main2() -> Result<(), Box<dyn std::error::Error>> {
-    let factory = Factory::new()?;
-    let device = factory.device_open(0)?;
+    let api = Api::new()?;
+    let device = api.device_open(0)?;
     let camera_config = k4a_device_configuration_t {
         depth_mode: k4a_depth_mode_t::K4A_DEPTH_MODE_NFOV_2X2BINNED,
         ..k4a_device_configuration_t::default()

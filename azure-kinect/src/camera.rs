@@ -10,7 +10,7 @@ impl Camera<'_> {
         device: &'a Device<'a>,
         configuration: &k4a_device_configuration_t,
     ) -> Result<Camera<'a>, Error> {
-        Error::from((device.factory.k4a_device_start_cameras)(
+        Error::from((device.api.k4a_device_start_cameras)(
             device.handle,
             configuration,
         ))
@@ -21,12 +21,12 @@ impl Camera<'_> {
     /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
     pub fn get_capture(&self, timeout_in_ms: i32) -> Result<Capture, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
-        Error::from((self.device.factory.k4a_device_get_capture)(
+        Error::from((self.device.api.k4a_device_get_capture)(
             self.device.handle,
             &mut handle,
             timeout_in_ms,
         ))
-        .to_result_fn(|| Capture::from_handle(self.device.factory, handle))
+        .to_result_fn(|| Capture::from_handle(self.device.api, handle))
     }
 
     /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
@@ -42,6 +42,6 @@ impl Camera<'_> {
 
 impl Drop for Camera<'_> {
     fn drop(&mut self) {
-        (self.device.factory.k4a_device_stop_cameras)(self.device.handle);
+        (self.device.api.k4a_device_stop_cameras)(self.device.handle);
     }
 }

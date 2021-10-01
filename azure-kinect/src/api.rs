@@ -23,7 +23,7 @@ extern "stdcall" {
 
 pub type DebugMessageHandler = Box<dyn Fn(k4a_log_level_t, &str, raw::c_int, &str)>;
 
-pub struct Factory {
+pub struct Api {
     handle: *const c_void,
     require_free_library: bool,
     debug_message_handler: Option<DebugMessageHandler>,
@@ -130,10 +130,10 @@ macro_rules! proc_address {
     };
 }
 
-impl Factory {
-    fn with_handle(handle: *const c_void, require_free_library: bool) -> Result<Factory, Error> {
+impl Api {
+    fn with_handle(handle: *const c_void, require_free_library: bool) -> Result<Api, Error> {
         unsafe {
-            Ok(Factory {
+            Ok(Api {
                 handle: handle,
                 require_free_library: require_free_library,
                 debug_message_handler: None,
@@ -245,7 +245,7 @@ impl Factory {
         }
     }
 
-    pub fn new() -> Result<Factory, Error> {
+    pub fn new() -> Result<Api, Error> {
         Ok(Self::with_library_directory(
             std::env::current_exe()
                 .map_err(|_| Error::Failed)?
@@ -256,9 +256,9 @@ impl Factory {
         )?)
     }
 
-    pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
+    pub fn with_library_directory(lib_dir: &str) -> Result<Api, Error> {
         let h = load_library(lib_dir, K4A_LIBNAME)?;
-        let r = Factory::with_handle(h, true);
+        let r = Api::with_handle(h, true);
         if let Err(_) = r {
             unsafe {
                 FreeLibrary(h);
@@ -316,7 +316,7 @@ impl Factory {
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: k4a_device_t = ptr::null_mut();
         Error::from((self.k4a_device_open)(index, &mut handle))
-            .to_result_fn(|| Device::from_handle(self, handle))
+            .to_result_fn(|| Device::from_handle(&self, handle))
     }
 }
 
@@ -342,7 +342,7 @@ extern "C" fn debug_message_handler_func(
     }
 }
 
-impl Drop for Factory {
+impl Drop for Api {
     fn drop(&mut self) {
         if self.handle != ptr::null() && self.require_free_library {
             unsafe {
@@ -353,9 +353,9 @@ impl Drop for Factory {
     }
 }
 
-pub struct FactoryRecord {
+pub struct ApiRecord {
     handle: *const c_void,
-    pub(crate) k4a: Factory,
+    pub(crate) k4a: Api,
     pub(crate) k4a_playback_open: k4a_playback_open,
     pub(crate) k4a_playback_get_raw_calibration: k4a_playback_get_raw_calibration,
     pub(crate) k4a_playback_get_calibration: k4a_playback_get_calibration,
@@ -399,10 +399,10 @@ pub struct FactoryRecord {
     pub(crate) k4a_record_close: k4a_record_close,
 }
 
-impl FactoryRecord {
-    fn with_handle(handle: *const c_void, k4a: Factory) -> Result<FactoryRecord, Error> {
+impl ApiRecord {
+    fn with_handle(handle: *const c_void, k4a: Api) -> Result<ApiRecord, Error> {
         unsafe {
-            Ok(FactoryRecord {
+            Ok(ApiRecord {
                 handle: handle,
                 k4a: k4a,
                 k4a_playback_open: proc_address!(handle, k4a_playback_open),
@@ -509,7 +509,7 @@ impl FactoryRecord {
         }
     }
 
-    pub fn new() -> Result<FactoryRecord, Error> {
+    pub fn new() -> Result<ApiRecord, Error> {
         Ok(Self::with_library_directory(
             std::env::current_exe()
                 .map_err(|_| Error::Failed)?
@@ -520,7 +520,7 @@ impl FactoryRecord {
         )?)
     }
 
-    pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
+    pub fn with_library_directory(lib_dir: &str) -> Result<ApiRecord, Error> {
         let h = load_library(lib_dir, K4ARECORD_LIBNAME)?;
         let h2 = unsafe {
             GetModuleHandleW(
@@ -531,7 +531,7 @@ impl FactoryRecord {
                     .as_ptr(),
             )
         };
-        let r = FactoryRecord::with_handle(h, Factory::with_handle(h2, false)?);
+        let r = ApiRecord::with_handle(h, Api::with_handle(h2, false)?);
         if let Err(_) = r {
             unsafe {
                 FreeLibrary(h);
@@ -572,7 +572,7 @@ impl FactoryRecord {
         let mut handle: k4a_playback_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
         Error::from((self.k4a_playback_open)(path.as_ptr(), &mut handle))
-            .to_result_fn(|| Playback::from_handle(self, handle))
+            .to_result_fn(|| Playback::from_handle(&self, handle))
     }
 
     /// Opens a new recording file for writing
@@ -594,7 +594,7 @@ impl FactoryRecord {
     }
 }
 
-impl Drop for FactoryRecord {
+impl Drop for ApiRecord {
     fn drop(&mut self) {
         if self.handle != ptr::null() {
             unsafe {
@@ -621,7 +621,7 @@ mod tests {
 
     #[test]
     fn test() -> std::result::Result<(), Box<dyn std::error::Error>> {
-        let manager = Factory::with_library_directory(
+        let manager = Api::with_library_directory(
             std::env::current_dir()?.to_str().ok_or(Error::Failed)?,
         );
         assert!(manager.is_ok());

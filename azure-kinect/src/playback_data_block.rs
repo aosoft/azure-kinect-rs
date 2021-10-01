@@ -2,13 +2,13 @@ use super::*;
 use std::ptr;
 
 pub struct PlaybackDataBlock<'a> {
-    pub(crate) factory: &'a FactoryRecord,
+    pub(crate) factory: &'a ApiRecord,
     pub(crate) handle: k4a_playback_data_block_t,
 }
 
 impl PlaybackDataBlock<'_> {
     pub(crate) fn from_handle(
-        factory: &FactoryRecord,
+        factory: &ApiRecord,
         handle: k4a_playback_data_block_t,
     ) -> PlaybackDataBlock {
         PlaybackDataBlock {
