@@ -1,24 +1,25 @@
 use super::*;
+use std::sync::Arc;
 
-pub struct Calibration<'a> {
-    api: &'a Api,
+pub struct Calibration {
+    api: Arc<Api>,
     pub(crate) calibration: k4a_calibration_t,
 }
 
-impl Calibration<'_> {
-    pub(crate) fn from_handle(api: &Api, calibration: k4a_calibration_t) -> Calibration {
+impl Calibration {
+    pub(crate) fn from_handle(api: Arc<Api>, calibration: k4a_calibration_t) -> Calibration {
         Calibration {
             api: api,
             calibration: calibration,
         }
     }
 
-    pub fn from_raw<'a>(
-        api: &'a Api,
+    pub fn from_raw(
+        api: Arc<Api>,
         raw_calibration: &Vec<u8>,
         target_depth_mode: k4a_depth_mode_t,
         target_color_resolution: k4a_color_resolution_t,
-    ) -> Result<Calibration<'a>, Error> {
+    ) -> Result<Calibration, Error> {
         let mut calibration = k4a_calibration_t::default();
         Error::from((api.k4a_calibration_get_from_raw)(
             raw_calibration.as_ptr() as *mut i8,

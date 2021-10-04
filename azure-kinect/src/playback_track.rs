@@ -3,7 +3,7 @@ use super::*;
 use crate::playback::Playback;
 
 pub struct PlaybackTrack<'a> {
-    pub(crate) playback: &'a Playback<'a>,
+    pub(crate) playback: &'a Playback,
     name: std::ffi::CString,
 }
 

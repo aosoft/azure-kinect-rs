@@ -1,11 +1,11 @@
 use super::*;
 
 pub struct Imu<'a> {
-    device: &'a Device<'a>,
+    device: &'a Device,
 }
 
 impl Imu<'_> {
-    pub(crate) fn new<'a>(device: &'a Device<'a>) -> Result<Imu<'a>, Error> {
+    pub(crate) fn new<'a>(device: &'a Device) -> Result<Imu<'a>, Error> {
         Error::from((device.api.k4a_device_start_imu)(device.handle)).to_result(())?;
         Ok(Imu { device })
     }

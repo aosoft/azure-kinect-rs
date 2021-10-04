@@ -1,9 +1,11 @@
 use super::utility::*;
 use super::*;
 use std::ptr;
+use std::sync::Arc;
 
-pub struct Device<'a> {
-    pub(crate) api: &'a Api,
+pub struct Device {
+//    pub(crate) api: &'a Api,
+    pub(crate) api: Arc<Api>,
     pub(crate) handle: k4a_device_t,
 }
 
@@ -17,12 +19,24 @@ pub struct ColorControlCapabilities {
     default_mode: k4a_color_control_mode_t,
 }
 
-impl Device<'_> {
-    pub(crate) fn from_handle(api: &Api, handle: k4a_device_t) -> Device {
-        Device {
-            api: api,
-            handle: handle,
-        }
+impl Device {
+    // pub(crate) fn from_handle(api: &Api, handle: k4a_device_t) -> Device {
+    //     Device {
+    //         api: api,
+    //         handle: handle,
+    //     }
+    // }
+
+    /// Open a k4a device.
+    pub fn new(api: Arc<Api>, index: u32) -> Result<Device, Error> {
+        let mut handle: k4a_device_t = ptr::null_mut();
+        Error::from((api.k4a_device_open)(index, &mut handle))
+            .to_result_fn(|| {
+                Self {
+                    api: api, 
+                    handle
+                }
+            })
     }
 
     /// Starts the K4A device's cameras
@@ -111,7 +125,7 @@ impl Device<'_> {
             color_resolution,
             &mut calibaraion,
         ))
-        .to_result_fn(|| Calibration::from_handle(self.api, calibaraion))
+        .to_result_fn(|| Calibration::from_handle(self.api.clone(), calibaraion))
     }
 
     /// Get the device jack status for the synchronization connectors
@@ -147,7 +161,7 @@ impl Device<'_> {
     }
 }
 
-impl Drop for Device<'_> {
+impl Drop for Device {
     fn drop(&mut self) {
         (self.api.k4a_device_close)(self.handle);
         self.handle = ptr::null_mut();

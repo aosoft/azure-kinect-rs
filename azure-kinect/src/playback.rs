@@ -3,18 +3,25 @@ use super::*;
 use crate::playback_data_block::PlaybackDataBlock;
 use crate::playback_track::PlaybackTrack;
 use std::ptr;
+use std::sync::Arc;
 
-pub struct Playback<'a> {
-    pub(crate) api_record: &'a ApiRecord,
+pub struct Playback {
+    pub(crate) api: Arc<Api>,
+    pub(crate) api_record: Arc<ApiRecord>,
     pub(crate) handle: k4a_playback_t,
 }
 
-impl Playback<'_> {
-    pub(crate) fn from_handle(api_record: &ApiRecord, handle: k4a_playback_t) -> Playback {
-        Playback {
-            api_record: api_record,
-            handle: handle,
-        }
+impl Playback {
+    /// Opens a K4A recording for playback.
+    pub fn playback_open(api: Arc<Api>, api_record: Arc<ApiRecord>, path: &str) -> Result<Playback, Error> {
+        let mut handle: k4a_playback_t = ptr::null_mut();
+        let path = std::ffi::CString::new(path).unwrap_or_default();
+        Error::from((api_record.k4a_playback_open)(path.as_ptr(), &mut handle))
+            .to_result_fn(|| Self{
+                api,
+                api_record,
+                handle
+            })
     }
 
     /// Get the raw calibration blob for the K4A device that made the recording.
@@ -35,7 +42,7 @@ impl Playback<'_> {
             self.handle,
             &mut calibaraion,
         ))
-        .to_result_fn(|| Calibration::from_handle(&self.api_record.k4a, calibaraion))
+        .to_result_fn(|| Calibration::from_handle(self.api.clone(), calibaraion))
     }
 
     /// Gets the configuration of the recording
@@ -55,7 +62,7 @@ impl Playback<'_> {
             self.handle,
             &mut handle,
         ))
-        .to_result_fn(|| Capture::from_handle(&self.api_record.k4a, handle))
+        .to_result_fn(|| Capture::from_handle(self.api.clone(), handle))
     }
 
     /// Get the previous capture in the recording.
@@ -65,7 +72,7 @@ impl Playback<'_> {
             self.handle,
             &mut handle,
         ))
-        .to_result_fn(|| Capture::from_handle(&self.api_record.k4a, handle))
+        .to_result_fn(|| Capture::from_handle(self.api.clone(), handle))
     }
 
     /// Reads the value of a tag from the recording
@@ -190,7 +197,7 @@ impl Playback<'_> {
     }
 }
 
-impl Drop for Playback<'_> {
+impl Drop for Playback {
     fn drop(&mut self) {
         (self.api_record.k4a_playback_close)(self.handle);
         self.handle = ptr::null_mut();

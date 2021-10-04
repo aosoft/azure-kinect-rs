@@ -2,12 +2,12 @@ use super::*;
 use std::ptr;
 
 pub struct Camera<'a> {
-    pub(crate) device: &'a Device<'a>,
+    pub(crate) device: &'a Device,
 }
 
 impl Camera<'_> {
     pub(crate) fn new<'a>(
-        device: &'a Device<'a>,
+        device: &'a Device,
         configuration: &k4a_device_configuration_t,
     ) -> Result<Camera<'a>, Error> {
         Error::from((device.api.k4a_device_start_cameras)(
@@ -26,7 +26,7 @@ impl Camera<'_> {
             &mut handle,
             timeout_in_ms,
         ))
-        .to_result_fn(|| Capture::from_handle(self.device.api, handle))
+        .to_result_fn(|| Capture::from_handle(self.device.api.clone(), handle))
     }
 
     /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.

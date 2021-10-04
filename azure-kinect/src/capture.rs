@@ -1,19 +1,20 @@
 use super::*;
 use std::ptr;
+use std::sync::Arc;
 
-pub struct Capture<'a> {
-    api: &'a Api,
+pub struct Capture {
+    api: Arc<Api>,
     pub(crate) handle: k4a_capture_t,
 }
 
-impl Capture<'_> {
-    pub fn new(api: &Api) -> Result<Capture, Error> {
+impl Capture {
+    pub fn new(api: Arc<Api>) -> Result<Capture, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
         Error::from((api.k4a_capture_create)(&mut handle))
             .to_result_fn(|| Capture::from_handle(api, handle))
     }
 
-    pub(crate) fn from_handle(api: &Api, handle: k4a_capture_t) -> Capture {
+    pub(crate) fn from_handle(api: Arc<Api>, handle: k4a_capture_t) -> Capture {
         Capture {
             api: api,
             handle: handle,
@@ -23,7 +24,7 @@ impl Capture<'_> {
     /// Get the color image associated with the capture
     pub fn get_color_image(&self) -> Image {
         Image::from_handle(
-            self.api,
+            self.api.clone(),
             (self.api.k4a_capture_get_color_image)(self.handle),
         )
     }
@@ -31,7 +32,7 @@ impl Capture<'_> {
     /// Get the depth image associated with the capture
     pub fn get_depth_image(&self) -> Image {
         Image::from_handle(
-            self.api,
+            self.api.clone(),
             (self.api.k4a_capture_get_depth_image)(self.handle),
         )
     }
@@ -39,7 +40,7 @@ impl Capture<'_> {
     /// Get the IR image associated with the capture
     pub fn get_ir_image(&self) -> Image {
         Image::from_handle(
-            self.api,
+            self.api.clone(),
             (self.api.k4a_capture_get_ir_image)(self.handle),
         )
     }
@@ -70,16 +71,16 @@ impl Capture<'_> {
     }
 }
 
-impl Drop for Capture<'_> {
+impl Drop for Capture {
     fn drop(&mut self) {
         (self.api.k4a_capture_release)(self.handle);
         self.handle = ptr::null_mut();
     }
 }
 
-impl Clone for Capture<'_> {
+impl Clone for Capture {
     fn clone(&self) -> Self {
         (self.api.k4a_capture_reference)(self.handle);
-        Capture::from_handle(self.api, self.handle)
+        Capture::from_handle(self.api.clone(), self.handle)
     }
 }

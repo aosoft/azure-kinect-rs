@@ -1,11 +1,11 @@
 use super::error::ToResult;
 use super::k4a_functions::*;
 use super::*;
-use crate::playback::Playback;
 use crate::record::Record;
 use std::ffi::{c_void, CString};
 use std::os::raw;
 use std::ptr;
+use std::sync::Arc;
 
 #[link(name = "kernel32")]
 #[no_mangle]
@@ -18,7 +18,6 @@ extern "stdcall" {
     ) -> *const c_void;
     fn FreeLibrary(hLibModule: *const c_void) -> i32;
     fn GetProcAddress(hModule: *const c_void, lpProcName: *const u8) -> *const c_void;
-    fn GetModuleHandleW(lpModuleName: *const u16) -> *const c_void;
 }
 
 pub type DebugMessageHandler = Box<dyn Fn(k4a_log_level_t, &str, raw::c_int, &str)>;
@@ -245,15 +244,15 @@ impl Api {
         }
     }
 
-    pub fn new() -> Result<Api, Error> {
-        Ok(Self::with_library_directory(
+    pub fn new() -> Result<Arc<Api>, Error> {
+        Ok(Arc::new(Self::with_library_directory(
             std::env::current_exe()
                 .map_err(|_| Error::Failed)?
                 .parent()
                 .ok_or(Error::Failed)?
                 .to_str()
                 .ok_or(Error::Failed)?,
-        )?)
+        )?))
     }
 
     pub fn with_library_directory(lib_dir: &str) -> Result<Api, Error> {
@@ -311,13 +310,6 @@ impl Api {
     pub fn device_get_installed_count(&self) -> u32 {
         (self.k4a_device_get_installed_count)()
     }
-
-    /// Open a k4a device.
-    pub fn device_open(&self, index: u32) -> Result<Device, Error> {
-        let mut handle: k4a_device_t = ptr::null_mut();
-        Error::from((self.k4a_device_open)(index, &mut handle))
-            .to_result_fn(|| Device::from_handle(&self, handle))
-    }
 }
 
 extern "C" fn debug_message_handler_func(
@@ -355,7 +347,6 @@ impl Drop for Api {
 
 pub struct ApiRecord {
     handle: *const c_void,
-    pub(crate) k4a: Api,
     pub(crate) k4a_playback_open: k4a_playback_open,
     pub(crate) k4a_playback_get_raw_calibration: k4a_playback_get_raw_calibration,
     pub(crate) k4a_playback_get_calibration: k4a_playback_get_calibration,
@@ -400,11 +391,10 @@ pub struct ApiRecord {
 }
 
 impl ApiRecord {
-    fn with_handle(handle: *const c_void, k4a: Api) -> Result<ApiRecord, Error> {
+    fn with_handle(handle: *const c_void) -> Result<ApiRecord, Error> {
         unsafe {
             Ok(ApiRecord {
                 handle: handle,
-                k4a: k4a,
                 k4a_playback_open: proc_address!(handle, k4a_playback_open),
                 k4a_playback_get_raw_calibration: proc_address!(
                     handle,
@@ -522,57 +512,13 @@ impl ApiRecord {
 
     pub fn with_library_directory(lib_dir: &str) -> Result<ApiRecord, Error> {
         let h = load_library(lib_dir, K4ARECORD_LIBNAME)?;
-        let h2 = unsafe {
-            GetModuleHandleW(
-                K4A_LIBNAME
-                    .encode_utf16()
-                    .chain(Some(0))
-                    .collect::<Vec<u16>>()
-                    .as_ptr(),
-            )
-        };
-        let r = ApiRecord::with_handle(h, Api::with_handle(h2, false)?);
+        let r = ApiRecord::with_handle(h);
         if let Err(_) = r {
             unsafe {
                 FreeLibrary(h);
             }
         }
         r
-    }
-
-    /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
-    pub fn set_debug_message_handler(
-        mut self,
-        debug_message_handler: DebugMessageHandler,
-        min_level: k4a_log_level_t,
-    ) -> Self {
-        self.k4a
-            .set_debug_message_handler_internal(debug_message_handler, min_level);
-        self
-    }
-
-    /// Clears the callback function to receive debug messages from the Azure Kinect device.
-    pub fn reset_debug_message_handler(mut self) -> Self {
-        self.k4a.reset_debug_message_handler_internal();
-        self
-    }
-
-    /// Gets the number of connected devices
-    pub fn device_get_installed_count(&self) -> u32 {
-        self.k4a.device_get_installed_count()
-    }
-
-    /// Open a k4a device.
-    pub fn device_open(&self, index: u32) -> Result<Device, Error> {
-        self.k4a.device_open(index)
-    }
-
-    /// Opens a K4A recording for playback.
-    pub fn playback_open(&self, path: &str) -> Result<Playback, Error> {
-        let mut handle: k4a_playback_t = ptr::null_mut();
-        let path = CString::new(path).unwrap_or_default();
-        Error::from((self.k4a_playback_open)(path.as_ptr(), &mut handle))
-            .to_result_fn(|| Playback::from_handle(&self, handle))
     }
 
     /// Opens a new recording file for writing

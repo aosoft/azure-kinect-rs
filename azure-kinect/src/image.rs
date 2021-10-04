@@ -1,13 +1,14 @@
 use super::*;
 use std::ptr;
+use std::sync::Arc;
 
-pub struct Image<'a> {
-    api: &'a Api,
+pub struct Image {
+    api: Arc<Api>,
     pub(crate) handle: k4a_image_t,
 }
 
-impl Image<'_> {
-    pub(crate) fn from_handle(api: &Api, handle: k4a_image_t) -> Image {
+impl Image {
+    pub(crate) fn from_handle(api: Arc<Api>, handle: k4a_image_t) -> Image {
         Image {
             api: api,
             handle: handle,
@@ -16,7 +17,7 @@ impl Image<'_> {
 
     /// Create a blank image
     pub fn with_format(
-        api: &Api,
+        api: Arc<Api>,
         format: k4a_image_format_t,
         width_pixels: i32,
         height_pixels: i32,
@@ -35,7 +36,7 @@ impl Image<'_> {
 
     /// Create an image from a pre-allocated buffer
     pub fn with_buffer(
-        api: &Api,
+        api: Arc<Api>,
         format: k4a_image_format_t,
         width_pixels: i32,
         height_pixels: i32,
@@ -146,16 +147,16 @@ impl Image<'_> {
     }
 }
 
-impl Drop for Image<'_> {
+impl Drop for Image {
     fn drop(&mut self) {
         (self.api.k4a_image_release)(self.handle);
         self.handle = ptr::null_mut();
     }
 }
 
-impl Clone for Image<'_> {
+impl Clone for Image {
     fn clone(&self) -> Self {
         (self.api.k4a_image_reference)(self.handle);
-        Image::from_handle(self.api, self.handle)
+        Image::from_handle(self.api.clone(), self.handle)
     }
 }
