@@ -1,4 +1,5 @@
-use super::*;
+use azure_kinect_sys::k4a::*;
+use azure_kinect_sys::k4arecord::k4a_stream_result_t;
 
 #[derive(Clone, Copy, Debug)]
 pub enum Error {

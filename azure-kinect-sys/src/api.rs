@@ -1,5 +1,5 @@
-use super::Error;
-use super::loader::Module;
+use crate::Error;
+use crate::loader::Module;
 
 const K4A_LIBNAME: &'static str = "k4a.dll";
 const K4ARECORD_LIBNAME: &'static str = "k4arecord.dll";

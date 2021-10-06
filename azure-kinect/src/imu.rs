@@ -1,4 +1,4 @@
-use super::*;
+use crate::*;
 
 pub struct Imu<'a> {
     device: &'a Device<'a>,

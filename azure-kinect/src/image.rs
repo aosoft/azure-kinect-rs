@@ -1,4 +1,4 @@
-use super::*;
+use crate::*;
 use std::ptr;
 
 pub struct Image<'a> {

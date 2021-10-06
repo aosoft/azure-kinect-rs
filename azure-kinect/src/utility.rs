@@ -1,4 +1,4 @@
-use super::*;
+use crate::*;
 use std::ffi::CString;
 use std::ptr;
 
@@ -77,7 +77,7 @@ pub(crate) fn get_k4a_binary_data(
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::*;
 
     #[test]
     fn test() {

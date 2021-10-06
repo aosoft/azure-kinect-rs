@@ -1,11 +1,11 @@
-use super::error::ToResult;
-use super::k4a_functions::*;
-use super::*;
+use crate::error::ToResult;
+use crate::*;
 use crate::playback::Playback;
 use crate::record::Record;
 use std::ffi::{c_void, CString};
 use std::os::raw;
 use std::ptr;
+use azure_kinect_sys::k4a::k4a_log_level_t;
 
 
 pub type DebugMessageHandler = Box<dyn Fn(k4a_log_level_t, &str, raw::c_int, &str)>;
@@ -71,10 +71,9 @@ impl DebugMessageHandlerRegister<'_> {
 }
 
 
-
 pub struct Factory<'a> {
+    pub(crate) api: azure_kinect_sys::api::Api,
     debug_message_handler: DebugMessageHandlerRegister<'a>,
-    api: azure_kinect_sys::api::Api,
 }
 
 impl Factory<'_> {
@@ -114,7 +113,7 @@ impl Factory<'_> {
 
     /// Open a k4a device.
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
-        let mut handle: k4a_device_t = ptr::null_mut();
+        let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
         Error::from((self.api.k4a().k4a_device_open)(index, &mut handle))
             .to_result_fn(|| Device::from_handle(self, handle))
     }
@@ -123,7 +122,7 @@ impl Factory<'_> {
 
 
 pub struct FactoryRecord<'a> {
-    api: azure_kinect_sys::api::ApiRecord,
+    pub(crate) api: azure_kinect_sys::api::ApiRecord,
     debug_message_handler: DebugMessageHandlerRegister<'a>,
 }
 
@@ -179,14 +178,14 @@ impl FactoryRecord<'_> {
         &self,
         path: &str,
         device: &Device,
-        device_configuration: &k4a_device_configuration_t,
+        device_configuration: &azure_kinect_sys::k4a::k4a_device_configuration_t,
     ) -> Result<Record, Error> {
-        let mut handle: k4a_record_t = ptr::null_mut();
+        let mut handle: azure_kinect_sys::k4arecord::k4a_record_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
         Error::from((self.api.k4arecord().k4a_record_create)(
             path.as_ptr(),
-            device.handle,
-            *device_configuration,
+            device.handle as _,
+            *device_configuration as _,
             &mut handle,
         ))
             .to_result_fn(|| Record::from_handle(self, handle))
@@ -196,7 +195,7 @@ impl FactoryRecord<'_> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::*;
 
     #[test]
     fn test() -> std::result::Result<(), Box<dyn std::error::Error>> {

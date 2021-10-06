@@ -1,4 +1,4 @@
-use super::*;
+use crate::*;
 use crate::Capture;
 use std::ffi::CString;
 use std::ptr;

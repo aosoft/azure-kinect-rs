@@ -1,4 +1,4 @@
-use super::bindings::*;
+use crate::bindings::*;
 
 pub(crate) type k4a_device_get_installed_count = fn() -> u32;
 

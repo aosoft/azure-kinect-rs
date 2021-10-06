@@ -1,4 +1,4 @@
-use super::*;
+use crate::*;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Dimension {

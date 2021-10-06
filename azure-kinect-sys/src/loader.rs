@@ -1,6 +1,6 @@
 use std::ffi::c_void;
 use std::ptr;
-use super::Error;
+use crate::Error;
 
 #[link(name = "kernel32")]
 extern "stdcall" {

@@ -1,4 +1,5 @@
-use super::*;
+/*
+use crate::*;
 use std::fmt::{Display, Formatter, Result};
 use crate::bindings::k4a_version_t;
 
@@ -21,3 +22,4 @@ impl Display for k4a_version_t {
         write!(f, "{}.{}.{}", self.major, self.minor, self.iteration)
     }
 }
+*/
