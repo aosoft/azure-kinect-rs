@@ -72,7 +72,13 @@ impl Module {
         }
     }
 
-    pub fn get_proc_address(&self, lpProcName: *const u8) -> *const c_void {
-        unsafe { GetProcAddress(self.handle, lpProcName) }
+    pub fn get_proc_address(&self, lpProcName: *const u8) -> Result<*const c_void, Error> {
+        unsafe { let p = GetProcAddress(self.handle, lpProcName);
+            if p != ptr::null() {
+                Ok(p)
+            } else {
+                Err(Error::Win32Error(GetLastError()))
+            }
+        }
     }
 }
