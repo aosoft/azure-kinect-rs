@@ -1,4 +1,5 @@
 use crate::*;
+use azure_kinect_sys::k4a::*;
 use std::ptr;
 
 pub struct Camera<'a> {

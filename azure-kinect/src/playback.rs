@@ -2,15 +2,17 @@ use crate::utility::*;
 use crate::*;
 use crate::playback_data_block::PlaybackDataBlock;
 use crate::playback_track::PlaybackTrack;
+use azure_kinect_sys::k4a::*;
+use azure_kinect_sys::k4arecord::{k4a_playback_data_block_t, k4a_playback_seek_origin_t, k4a_playback_t, k4a_record_configuration_t};
 use std::ptr;
 
 pub struct Playback<'a> {
-    pub(crate) factory: &'a FactoryRecord,
+    pub(crate) factory: &'a FactoryRecord<'a>,
     pub(crate) handle: k4a_playback_t,
 }
 
 impl Playback<'_> {
-    pub(crate) fn from_handle(factory: &FactoryRecord, handle: azure_kinect_sys::k4arecord::k4a_playback_t) -> Playback {
+    pub(crate) fn from_handle<'a>(factory: &'a FactoryRecord, handle: azure_kinect_sys::k4arecord::k4a_playback_t) -> Playback<'a> {
         Playback {
             factory: factory,
             handle: handle,
@@ -35,7 +37,7 @@ impl Playback<'_> {
             self.handle,
             &mut calibaraion,
         ))
-        .to_result_fn(|| Calibration::from_handle(&self.factory.k4a, calibaraion))
+            .to_result_fn(|| Calibration::from_handle(&self.factory.k4a, calibaraion))
     }
 
     /// Gets the configuration of the recording
@@ -45,7 +47,7 @@ impl Playback<'_> {
             self.handle,
             &mut configuration,
         ))
-        .to_result(configuration)
+            .to_result(configuration)
     }
 
     /// Get the next capture in the recording.
@@ -55,7 +57,7 @@ impl Playback<'_> {
             self.handle,
             &mut handle,
         ))
-        .to_result_fn(|| Capture::from_handle(&self.factory.k4a, handle))
+            .to_result_fn(|| Capture::from_handle(&self.factory.k4a, handle))
     }
 
     /// Get the previous capture in the recording.
@@ -65,7 +67,7 @@ impl Playback<'_> {
             self.handle,
             &mut handle,
         ))
-        .to_result_fn(|| Capture::from_handle(&self.factory.k4a, handle))
+            .to_result_fn(|| Capture::from_handle(&self.factory.k4a, handle))
     }
 
     /// Reads the value of a tag from the recording
@@ -88,7 +90,7 @@ impl Playback<'_> {
             self.handle,
             &mut imu_sample,
         ))
-        .to_result(imu_sample)
+            .to_result(imu_sample)
     }
 
     /// Get the previous IMU sample in the recording.
@@ -98,7 +100,7 @@ impl Playback<'_> {
             self.handle,
             &mut imu_sample,
         ))
-        .to_result(imu_sample)
+            .to_result(imu_sample)
     }
 
     /// Seeks to a specific time point in the recording
@@ -112,7 +114,7 @@ impl Playback<'_> {
             offset_usec,
             origin,
         ))
-        .to_result(())
+            .to_result(())
     }
 
     /// Get the last valid timestamp in the recording
@@ -127,7 +129,7 @@ impl Playback<'_> {
             self.handle,
             format,
         ))
-        .to_result(())
+            .to_result(())
     }
 
     /// Get the next data block in the recording.
@@ -140,7 +142,7 @@ impl Playback<'_> {
             track.as_ptr(),
             &mut block_handle,
         ))
-        .to_result_fn(|| PlaybackDataBlock::from_handle(&self.factory, block_handle))
+            .to_result_fn(|| PlaybackDataBlock::from_handle(&self.factory, block_handle))
     }
 
     /// Get the previous data block from the recording.
@@ -153,7 +155,7 @@ impl Playback<'_> {
             track.as_ptr(),
             &mut block_handle,
         ))
-        .to_result_fn(|| PlaybackDataBlock::from_handle(&self.factory, block_handle))
+            .to_result_fn(|| PlaybackDataBlock::from_handle(&self.factory, block_handle))
     }
 
     /// Get the attachment block from the recording.

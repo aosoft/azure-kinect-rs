@@ -19,7 +19,7 @@ pub struct ColorControlCapabilities {
 }
 
 impl Device<'_> {
-    pub(crate) fn from_handle(factory: &Factory, handle: k4a_device_t) -> Device {
+    pub(crate) fn from_handle<'a>(factory: &'a Factory, handle: k4a_device_t) -> Device<'a> {
         Device {
             factory: factory,
             handle: handle,

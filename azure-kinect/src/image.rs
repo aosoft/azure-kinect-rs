@@ -1,13 +1,14 @@
 use crate::*;
+use azure_kinect_sys::k4a::*;
 use std::ptr;
 
 pub struct Image<'a> {
-    factory: &'a Factory,
+    factory: &'a Factory<'a>,
     pub(crate) handle: k4a_image_t,
 }
 
 impl Image<'_> {
-    pub(crate) fn from_handle(factory: &Factory, handle: k4a_image_t) -> Image {
+    pub(crate) fn from_handle<'a>(factory: &'a Factory, handle: k4a_image_t) -> Image<'a> {
         Image {
             factory: factory,
             handle: handle,
@@ -15,13 +16,13 @@ impl Image<'_> {
     }
 
     /// Create a blank image
-    pub fn with_format(
-        factory: &Factory,
+    pub fn with_format<'a>(
+        factory: &'a Factory,
         format: k4a_image_format_t,
         width_pixels: i32,
         height_pixels: i32,
         stride_bytes: i32,
-    ) -> Result<Image, Error> {
+    ) -> Result<Image<'a>, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
         Error::from((factory.k4a_image_create)(
             format,
@@ -34,8 +35,8 @@ impl Image<'_> {
     }
 
     /// Create an image from a pre-allocated buffer
-    pub fn with_buffer(
-        factory: &Factory,
+    pub fn with_buffer<'a>(
+        factory: &'a Factory,
         format: k4a_image_format_t,
         width_pixels: i32,
         height_pixels: i32,
@@ -44,7 +45,7 @@ impl Image<'_> {
         buffer_size: usize,
         buffer_release_cb: k4a_memory_destroy_cb_t,
         buffer_release_cb_context: *mut (),
-    ) -> Result<Image, Error> {
+    ) -> Result<Image<'a>, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
         Error::from((factory.k4a_image_create_from_buffer)(
             format,

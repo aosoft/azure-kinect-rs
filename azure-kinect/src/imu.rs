@@ -1,4 +1,5 @@
 use crate::*;
+use azure_kinect_sys::k4a::*;
 
 pub struct Imu<'a> {
     device: &'a Device<'a>,

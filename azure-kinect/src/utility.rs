@@ -1,4 +1,5 @@
 use crate::*;
+use azure_kinect_sys::k4a::*;
 use std::ffi::CString;
 use std::ptr;
 

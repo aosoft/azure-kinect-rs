@@ -49,7 +49,7 @@ impl DebugMessageHandlerRegister<'_> {
 
     extern "C" fn debug_message_handler_func(
         context: *mut ::std::os::raw::c_void,
-        level: azure_kinect_sys::api::Api::k4a_log_level_t,
+        level: azure_kinect_sys::k4a::k4a_log_level_t,
         file: *const ::std::os::raw::c_char,
         line: ::std::os::raw::c_int,
         message: *const ::std::os::raw::c_char,
@@ -77,7 +77,7 @@ pub struct Factory<'a> {
 }
 
 impl Factory<'_> {
-    pub fn new() -> Result<Factory, Error> {
+    pub fn new<'a>() -> Result<Factory<'a>, Error> {
         let api = azure_kinect_sys::api::Api::new()?;
         Ok(Factory {
             debug_message_handler: DebugMessageHandlerRegister::new(api.k4a()),
@@ -127,7 +127,7 @@ pub struct FactoryRecord<'a> {
 }
 
 impl FactoryRecord<'_> {
-    pub fn new() -> Result<FactoryRecord, Error> {
+    pub fn new<'a>() -> Result<FactoryRecord<'a>, Error> {
         let api = azure_kinect_sys::api::ApiRecord::new()?;
         Ok(FactoryRecord {
             debug_message_handler: DebugMessageHandlerRegister::new(api.k4a()),

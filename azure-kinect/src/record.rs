@@ -1,15 +1,17 @@
 use crate::*;
 use crate::Capture;
+use azure_kinect_sys::k4a::*;
+use azure_kinect_sys::k4arecord::{k4a_record_subtitle_settings_t, k4a_record_t, k4a_record_video_settings_t};
 use std::ffi::CString;
 use std::ptr;
 
 pub struct Record<'a> {
-    pub(crate) factory: &'a FactoryRecord,
+    pub(crate) factory: &'a FactoryRecord<'a>,
     pub(crate) handle: k4a_record_t,
 }
 
 impl Record<'_> {
-    pub(crate) fn from_handle(factory: &FactoryRecord, handle: k4a_record_t) -> Record {
+    pub(crate) fn from_handle<'a>(factory: &'a FactoryRecord, handle: k4a_record_t) -> Record<'a> {
         Record {
             factory: factory,
             handle: handle,

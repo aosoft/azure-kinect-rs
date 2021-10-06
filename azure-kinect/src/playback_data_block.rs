@@ -1,16 +1,18 @@
 use crate::*;
+use azure_kinect_sys::k4a::*;
+use azure_kinect_sys::k4arecord::k4a_playback_data_block_t;
 use std::ptr;
 
 pub struct PlaybackDataBlock<'a> {
-    pub(crate) factory: &'a FactoryRecord,
+    pub(crate) factory: &'a FactoryRecord<'a>,
     pub(crate) handle: k4a_playback_data_block_t,
 }
 
 impl PlaybackDataBlock<'_> {
-    pub(crate) fn from_handle(
-        factory: &FactoryRecord,
+    pub(crate) fn from_handle<'a>(
+        factory: &'a FactoryRecord,
         handle: k4a_playback_data_block_t,
-    ) -> PlaybackDataBlock {
+    ) -> PlaybackDataBlock<'a> {
         PlaybackDataBlock {
             factory: factory,
             handle: handle,

@@ -1,19 +1,20 @@
 use crate::*;
+use azure_kinect_sys::k4a::*;
 use std::ptr;
 
 pub struct Capture<'a> {
-    factory: &'a Factory,
+    factory: &'a Factory<'a>,
     pub(crate) handle: k4a_capture_t,
 }
 
 impl Capture<'_> {
-    pub fn new(factory: &Factory) -> Result<Capture, Error> {
+    pub fn new<'a>(factory: &'a Factory<'a>) -> Result<Capture<'a>, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
         Error::from((factory.k4a_capture_create)(&mut handle))
             .to_result_fn(|| Capture::from_handle(factory, handle))
     }
 
-    pub(crate) fn from_handle(factory: &Factory, handle: k4a_capture_t) -> Capture {
+    pub(crate) fn from_handle<'a>(factory: &'a Factory, handle: k4a_capture_t) -> Capture<'a> {
         Capture {
             factory: factory,
             handle: handle,

@@ -1,12 +1,13 @@
 use crate::*;
+use azure_kinect_sys::k4a::*;
 
 pub struct Calibration<'a> {
-    factory: &'a Factory,
+    factory: &'a Factory<'a>,
     pub(crate) calibration: k4a_calibration_t,
 }
 
 impl Calibration<'_> {
-    pub(crate) fn from_handle(factory: &Factory, calibration: k4a_calibration_t) -> Calibration {
+    pub(crate) fn from_handle<'a>(factory: &'a Factory, calibration: k4a_calibration_t) -> Calibration<'a> {
         Calibration {
             factory: factory,
             calibration: calibration,
