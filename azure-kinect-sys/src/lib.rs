@@ -2,7 +2,7 @@ pub mod k4a;
 pub mod k4arecord;
 
 pub mod loader;
-pub mod Factory;
+pub mod api;
 
 #[derive(Clone, Copy, Debug)]
 pub enum Error {

@@ -12,13 +12,13 @@ macro_rules! proc_address {
     };
 }
 
-pub struct Factory {
+pub struct Api {
     module: Module,
     k4a: super::k4a::Funcs,
 }
 
-impl Factory {
-    pub(crate) fn with_module(module: Module) -> Result<Factory, Error> {
+impl Api {
+    pub(crate) fn with_module(module: Module) -> Result<Api, Error> {
         unsafe {
             let funcs = super::k4a::Funcs {
                 k4a_device_get_installed_count: proc_address!(module, k4a_device_get_installed_count),
@@ -88,14 +88,14 @@ impl Factory {
                 k4a_transformation_depth_image_to_point_cloud: proc_address!(module, k4a_transformation_depth_image_to_point_cloud),
             };
 
-            Ok(Factory {
+            Ok(Api {
                 module: module,
                 k4a: funcs,
             })
         }
     }
 
-    pub fn new() -> Result<Factory, Error> {
+    pub fn new() -> Result<Api, Error> {
         Self::with_library_directory(
             std::env::current_exe()
                 .map_err(|_| Error::Failed)?
@@ -106,21 +106,21 @@ impl Factory {
         )
     }
 
-    pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
+    pub fn with_library_directory(lib_dir: &str) -> Result<Api, Error> {
         Self::with_module(Module::load_library(lib_dir, K4A_LIBNAME)?)
     }
 
     pub fn k4a(&self) -> &super::k4a::Funcs { &self.k4a }
 }
 
-pub struct FactoryRecord {
+pub struct ApiRecord {
     module: Module,
-    k4a: Factory,
+    k4a: Api,
     k4arecord: super::k4arecord::Funcs,
 }
 
-impl FactoryRecord {
-    pub(crate) fn with_module(module: Module) -> Result<FactoryRecord, Error> {
+impl ApiRecord {
+    pub(crate) fn with_module(module: Module) -> Result<ApiRecord, Error> {
         unsafe {
             let funcs = super::k4arecord::Funcs {
                 k4a_record_create: proc_address!(module, k4a_record_create),
@@ -165,15 +165,15 @@ impl FactoryRecord {
                 k4a_playback_close: proc_address!(module, k4a_playback_close),
             };
 
-            Ok(FactoryRecord {
+            Ok(ApiRecord {
                 module: module,
-                k4a: Factory::with_module(Module::get_module(K4A_LIBNAME)?)?,
+                k4a: Api::with_module(Module::get_module(K4A_LIBNAME)?)?,
                 k4arecord: funcs,
             })
         }
     }
 
-    pub fn new() -> Result<FactoryRecord, Error> {
+    pub fn new() -> Result<ApiRecord, Error> {
         Self::with_library_directory(
             std::env::current_exe()
                 .map_err(|_| Error::Failed)?
@@ -184,7 +184,7 @@ impl FactoryRecord {
         )
     }
 
-    pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
+    pub fn with_library_directory(lib_dir: &str) -> Result<ApiRecord, Error> {
         Self::with_module(Module::load_library(lib_dir, K4ARECORD_LIBNAME)?)
     }
 
