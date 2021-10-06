@@ -10,7 +10,7 @@ pub struct Playback<'a> {
 }
 
 impl Playback<'_> {
-    pub(crate) fn from_handle(factory: &FactoryRecord, handle: k4a_playback_t) -> Playback {
+    pub(crate) fn from_handle(factory: &FactoryRecord, handle: azure_kinect_sys::k4arecord::k4a_playback_t) -> Playback {
         Playback {
             factory: factory,
             handle: handle,

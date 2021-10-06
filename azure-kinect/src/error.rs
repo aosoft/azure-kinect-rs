@@ -26,6 +26,15 @@ impl Error {
     }
 }
 
+impl From<azure_kinect_sys::Error> for Error {
+    fn from(e: azure_kinect_sys::Error) -> Self {
+        match e {
+            azure_kinect_sys::Error::Failed => { Self::Failed },
+            azure_kinect_sys::Error::Win32Error(code) => { Self::Win32Error(code)}
+        }
+    }
+}
+
 impl std::error::Error for Error {}
 
 impl std::fmt::Display for Error {
