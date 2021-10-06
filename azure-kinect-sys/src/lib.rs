@@ -1,7 +1,10 @@
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
-include!("k4a.rs");
+pub mod k4a;
+pub mod k4arecord;
 
-pub fn test() {
+pub mod loader;
+
+#[derive(Clone, Copy, Debug)]
+pub enum Error {
+    Failed,
+    Win32Error(u32),
 }
