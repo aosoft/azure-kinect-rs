@@ -43,7 +43,7 @@ impl DebugMessageHandlerRegister<'_> {
         (self.funcs.k4a_set_debug_message_handler)(
             None,
             ptr::null_mut(),
-            azure_kinect_sys::k4a::k4a_log_level_t::K4A_LOG_LEVEL_OFF,
+            azure_kinect_sys::k4a::k4a_log_level_t_K4A_LOG_LEVEL_OFF,
         );
     }
 
@@ -114,7 +114,7 @@ impl Factory<'_> {
     /// Open a k4a device.
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
-        Error::from((self.api.k4a().k4a_device_open)(index, &mut handle))
+        Error::from_k4a_result_t((self.api.k4a().k4a_device_open)(index, &mut handle))
             .to_result_fn(|| Device::from_handle(self, handle))
     }
 }
@@ -157,19 +157,21 @@ impl FactoryRecord<'_> {
 
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {
-        self.api.k4a().device_get_installed_count()
+        (self.api.k4a().k4a_device_get_installed_count)()
     }
 
     /// Open a k4a device.
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
-        self.api.k4a().device_open(index)
+        let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
+        Error::from_k4a_result_t((self.api.k4a().k4a_device_open)(index, &mut handle))
+            .to_result_fn(|| Device::from_handle(&self, handle))
     }
 
     /// Opens a K4A recording for playback.
     pub fn playback_open(&self, path: &str) -> Result<Playback, Error> {
         let mut handle: azure_kinect_sys::k4arecord::k4a_playback_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
-        Error::from((self.api.k4arecord().k4a_playback_open)(path.as_ptr(), &mut handle))
+        Error::from_k4a_result_t((self.api.k4arecord().k4a_playback_open)(path.as_ptr(), &mut handle))
             .to_result_fn(|| Playback::from_handle(self, handle))
     }
 
@@ -182,7 +184,7 @@ impl FactoryRecord<'_> {
     ) -> Result<Record, Error> {
         let mut handle: azure_kinect_sys::k4arecord::k4a_record_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
-        Error::from((self.api.k4arecord().k4a_record_create)(
+        Error::from_k4a_result_t((self.api.k4arecord().k4a_record_create)(
             path.as_ptr(),
             device.handle as _,
             *device_configuration as _,

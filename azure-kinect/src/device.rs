@@ -47,7 +47,7 @@ impl Device<'_> {
         command: k4a_color_control_command_t,
     ) -> Result<(k4a_color_control_mode_t, i32), Error> {
         let mut mode: k4a_color_control_mode_t =
-            k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO;
+            k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_AUTO;
         let mut value: i32 = 0;
         Error::from_k4a_result_t((self.factory.api.k4a().k4a_device_get_color_control)(
             self.handle,
@@ -106,7 +106,7 @@ impl Device<'_> {
         color_resolution: k4a_color_resolution_t,
     ) -> Result<Calibration, Error> {
         let mut calibaraion = k4a_calibration_t::default();
-        Error::from((self.factory.api.k4a().k4a_device_get_calibration)(
+        Error::from_k4a_result_t((self.factory.api.k4a().k4a_device_get_calibration)(
             self.handle,
             depth_mode,
             color_resolution,
@@ -119,7 +119,7 @@ impl Device<'_> {
     pub fn is_sync_connected(&self) -> Result<(bool, bool), Error> {
         let mut sync_in_jack_connected = false;
         let mut sync_out_jack_connected = false;
-        Error::from((self.factory.api.k4a().k4a_device_get_sync_jack)(
+        Error::from_k4a_result_t((self.factory.api.k4a().k4a_device_get_sync_jack)(
             self.handle,
             &mut sync_in_jack_connected,
             &mut sync_out_jack_connected,
@@ -140,7 +140,7 @@ impl Device<'_> {
     /// Get the version numbers of the K4A subsystems' firmware
     pub fn get_version(&self) -> Result<k4a_hardware_version_t, Error> {
         let mut version = k4a_hardware_version_t::default();
-        Error::from((self.factory.api.k4a().k4a_device_get_version)(
+        Error::from_k4a_result_t((self.factory.api.k4a().k4a_device_get_version)(
             self.handle,
             &mut version,
         ))
