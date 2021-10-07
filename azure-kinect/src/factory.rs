@@ -115,7 +115,7 @@ impl Factory<'_> {
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
         Error::from_k4a_result_t((self.api.k4a().k4a_device_open)(index, &mut handle))
-            .to_result_fn(|| Device::from_handle(self, handle))
+            .to_result_fn(|| Device::from_handle(&self.api, handle))
     }
 }
 
@@ -164,7 +164,7 @@ impl FactoryRecord<'_> {
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
         Error::from_k4a_result_t((self.api.k4a().k4a_device_open)(index, &mut handle))
-            .to_result_fn(|| Device::from_handle(&self, handle))
+            .to_result_fn(|| Device::from_handle(&self.api, handle))
     }
 
     /// Opens a K4A recording for playback.
