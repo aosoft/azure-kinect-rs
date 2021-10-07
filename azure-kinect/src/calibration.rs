@@ -21,9 +21,9 @@ impl Calibration<'_> {
         target_color_resolution: k4a_color_resolution_t,
     ) -> Result<Calibration<'a>, Error> {
         let mut calibration = k4a_calibration_t::default();
-        Error::from((factory.k4a_calibration_get_from_raw)(
+        Error::from_k4a_result_t((factory.api.k4a().k4a_calibration_get_from_raw)(
             raw_calibration.as_ptr() as *mut i8,
-            raw_calibration.len(),
+            raw_calibration.len() as _,
             target_depth_mode,
             target_color_resolution,
             &mut calibration,
@@ -39,7 +39,7 @@ impl Calibration<'_> {
         target_camera: k4a_calibration_type_t,
     ) -> Result<k4a_float3_t, Error> {
         let mut target_point3d = k4a_float3_t::default();
-        Error::from((self.factory.k4a_calibration_3d_to_3d)(
+        Error::from_k4a_result_t((self.factory.api.k4a().k4a_calibration_3d_to_3d)(
             &self.calibration,
             source_point3d,
             source_camera,
@@ -60,7 +60,7 @@ impl Calibration<'_> {
     ) -> Result<(k4a_float3_t, bool), Error> {
         let mut target_point3d = k4a_float3_t::default();
         let mut valid: i32 = 0;
-        Error::from((self.factory.k4a_calibration_2d_to_3d)(
+        Error::from_k4a_result_t((self.factory.api.k4a().k4a_calibration_2d_to_3d)(
             &self.calibration,
             source_point2d,
             source_depth,
@@ -82,7 +82,7 @@ impl Calibration<'_> {
     ) -> Result<(k4a_float2_t, bool), Error> {
         let mut target_point2d = k4a_float2_t::default();
         let mut valid: i32 = 0;
-        Error::from((self.factory.k4a_calibration_3d_to_2d)(
+        Error::from_k4a_result_t((self.factory.api.k4a().k4a_calibration_3d_to_2d)(
             &self.calibration,
             source_point3d,
             source_camera,
@@ -104,7 +104,7 @@ impl Calibration<'_> {
     ) -> Result<(k4a_float2_t, bool), Error> {
         let mut target_point2d = k4a_float2_t::default();
         let mut valid: i32 = 0;
-        Error::from((self.factory.k4a_calibration_2d_to_2d)(
+        Error::from_k4a_result_t((self.factory.api.k4a().k4a_calibration_2d_to_2d)(
             &self.calibration,
             source_point2d,
             source_depth,
@@ -126,7 +126,7 @@ impl Calibration<'_> {
     ) -> Result<(k4a_float2_t, bool), Error> {
         let mut target_point2d = k4a_float2_t::default();
         let mut valid: i32 = 0;
-        Error::from((self.factory.k4a_calibration_color_2d_to_depth_2d)(
+        Error::from_k4a_result_t((self.factory.api.k4a().k4a_calibration_color_2d_to_depth_2d)(
             &self.calibration,
             source_point2d,
             depth_image.handle,
