@@ -5,7 +5,7 @@ use std::ptr;
 use azure_kinect_sys::api::Api;
 
 pub struct Device<'a> {
-    pub(crate) api: &'a Api,
+    pub(crate) funcs: &'a azure_kinect_sys::k4a::Funcs,
     pub(crate) handle: k4a_device_t,
 }
 
@@ -20,9 +20,9 @@ pub struct ColorControlCapabilities {
 }
 
 impl Device<'_> {
-    pub(crate) fn from_handle<'a>(api: &'a Api, handle: k4a_device_t) -> Device<'a> {
+    pub(crate) fn from_handle<'a>(funcs: &'a azure_kinect_sys::k4a::Funcs, handle: k4a_device_t) -> Device<'a> {
         Device {
-            api: api,
+            funcs: funcs,
             handle: handle,
         }
     }
@@ -38,7 +38,7 @@ impl Device<'_> {
     /// Get the K4A device serial number
     pub fn get_serialnum(&self) -> Result<String, Error> {
         get_k4a_string(&|serialnum, buffer| {
-            (self.api.k4a().k4a_device_get_serialnum)(self.handle, serialnum, buffer)
+            (self.funcs.k4a_device_get_serialnum)(self.handle, serialnum, buffer)
         })
     }
 
@@ -50,7 +50,7 @@ impl Device<'_> {
         let mut mode: k4a_color_control_mode_t =
             k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_AUTO;
         let mut value: i32 = 0;
-        Error::from_k4a_result_t((self.api.k4a().k4a_device_get_color_control)(
+        Error::from_k4a_result_t((self.funcs.k4a_device_get_color_control)(
             self.handle,
             command,
             &mut mode,
@@ -66,7 +66,7 @@ impl Device<'_> {
         mode: k4a_color_control_mode_t,
         value: i32,
     ) -> Result<(), Error> {
-        Error::from_k4a_result_t((self.api.k4a().k4a_device_set_color_control)(
+        Error::from_k4a_result_t((self.funcs.k4a_device_set_color_control)(
             self.handle,
             command,
             mode,
@@ -80,7 +80,7 @@ impl Device<'_> {
         command: k4a_color_control_command_t,
     ) -> Result<ColorControlCapabilities, Error> {
         let mut capabilties = ColorControlCapabilities::default();
-        Error::from_k4a_result_t((self.api.k4a().k4a_device_get_color_control_capabilities)(
+        Error::from_k4a_result_t((self.funcs.k4a_device_get_color_control_capabilities)(
             self.handle,
             command,
             &mut capabilties.supports_auto,
@@ -96,7 +96,7 @@ impl Device<'_> {
     /// Get the raw calibration blob for the entire K4A device.
     pub fn get_raw_calibration(&self) -> Result<Vec<u8>, Error> {
         get_k4a_binary_data(&|calibration, buffer| {
-            (self.api.k4a().k4a_device_get_raw_calibration)(self.handle, calibration, buffer)
+            (self.funcs.k4a_device_get_raw_calibration)(self.handle, calibration, buffer)
         })
     }
 
@@ -107,20 +107,20 @@ impl Device<'_> {
         color_resolution: k4a_color_resolution_t,
     ) -> Result<Calibration, Error> {
         let mut calibaraion = k4a_calibration_t::default();
-        Error::from_k4a_result_t((self.api.k4a().k4a_device_get_calibration)(
+        Error::from_k4a_result_t((self.funcs.k4a_device_get_calibration)(
             self.handle,
             depth_mode,
             color_resolution,
             &mut calibaraion,
         ))
-        .to_result_fn(|| Calibration::from_handle(self.api, calibaraion))
+        .to_result_fn(|| Calibration::from_handle(self.funcs, calibaraion))
     }
 
     /// Get the device jack status for the synchronization connectors
     pub fn is_sync_connected(&self) -> Result<(bool, bool), Error> {
         let mut sync_in_jack_connected = false;
         let mut sync_out_jack_connected = false;
-        Error::from_k4a_result_t((self.api.k4a().k4a_device_get_sync_jack)(
+        Error::from_k4a_result_t((self.funcs.k4a_device_get_sync_jack)(
             self.handle,
             &mut sync_in_jack_connected,
             &mut sync_out_jack_connected,
@@ -141,7 +141,7 @@ impl Device<'_> {
     /// Get the version numbers of the K4A subsystems' firmware
     pub fn get_version(&self) -> Result<k4a_hardware_version_t, Error> {
         let mut version = k4a_hardware_version_t::default();
-        Error::from_k4a_result_t((self.api.k4a().k4a_device_get_version)(
+        Error::from_k4a_result_t((self.funcs.k4a_device_get_version)(
             self.handle,
             &mut version,
         ))
@@ -151,7 +151,7 @@ impl Device<'_> {
 
 impl Drop for Device<'_> {
     fn drop(&mut self) {
-        (self.api.k4a().k4a_device_close)(self.handle);
+        (self.funcs.k4a_device_close)(self.handle);
         self.handle = ptr::null_mut();
     }
 }

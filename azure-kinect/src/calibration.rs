@@ -3,14 +3,14 @@ use crate::*;
 use azure_kinect_sys::k4a::*;
 
 pub struct Calibration<'a> {
-    api: &'a Api,
+    funcs: &'a azure_kinect_sys::k4a::Funcs,
     pub(crate) calibration: k4a_calibration_t,
 }
 
 impl Calibration<'_> {
-    pub(crate) fn from_handle<'a>(api: &'a Api, calibration: k4a_calibration_t) -> Calibration<'a> {
+    pub(crate) fn from_handle<'a>(funcs: &'a azure_kinect_sys::k4a::Funcs, calibration: k4a_calibration_t) -> Calibration<'a> {
         Calibration {
-            api: api,
+            funcs: funcs,
             calibration: calibration,
         }
     }
@@ -29,7 +29,7 @@ impl Calibration<'_> {
             target_color_resolution,
             &mut calibration,
         ))
-        .to_result_fn(|| Calibration::from_handle(&factory.api, calibration))
+        .to_result_fn(|| Calibration::from_handle(&factory.api.k4a(), calibration))
     }
 
     /// Transform a 3d point of a source coordinate system into a 3d point of the target coordinate system.
@@ -40,7 +40,7 @@ impl Calibration<'_> {
         target_camera: k4a_calibration_type_t,
     ) -> Result<k4a_float3_t, Error> {
         let mut target_point3d = k4a_float3_t::default();
-        Error::from_k4a_result_t((self.api.k4a().k4a_calibration_3d_to_3d)(
+        Error::from_k4a_result_t((self.funcs.k4a_calibration_3d_to_3d)(
             &self.calibration,
             source_point3d,
             source_camera,
@@ -61,7 +61,7 @@ impl Calibration<'_> {
     ) -> Result<(k4a_float3_t, bool), Error> {
         let mut target_point3d = k4a_float3_t::default();
         let mut valid: i32 = 0;
-        Error::from_k4a_result_t((self.api.k4a().k4a_calibration_2d_to_3d)(
+        Error::from_k4a_result_t((self.funcs.k4a_calibration_2d_to_3d)(
             &self.calibration,
             source_point2d,
             source_depth,
@@ -83,7 +83,7 @@ impl Calibration<'_> {
     ) -> Result<(k4a_float2_t, bool), Error> {
         let mut target_point2d = k4a_float2_t::default();
         let mut valid: i32 = 0;
-        Error::from_k4a_result_t((self.api.k4a().k4a_calibration_3d_to_2d)(
+        Error::from_k4a_result_t((self.funcs.k4a_calibration_3d_to_2d)(
             &self.calibration,
             source_point3d,
             source_camera,
@@ -105,7 +105,7 @@ impl Calibration<'_> {
     ) -> Result<(k4a_float2_t, bool), Error> {
         let mut target_point2d = k4a_float2_t::default();
         let mut valid: i32 = 0;
-        Error::from_k4a_result_t((self.api.k4a().k4a_calibration_2d_to_2d)(
+        Error::from_k4a_result_t((self.funcs.k4a_calibration_2d_to_2d)(
             &self.calibration,
             source_point2d,
             source_depth,
@@ -127,7 +127,7 @@ impl Calibration<'_> {
     ) -> Result<(k4a_float2_t, bool), Error> {
         let mut target_point2d = k4a_float2_t::default();
         let mut valid: i32 = 0;
-        Error::from_k4a_result_t((self.api.k4a().k4a_calibration_color_2d_to_depth_2d)(
+        Error::from_k4a_result_t((self.funcs.k4a_calibration_color_2d_to_depth_2d)(
             &self.calibration,
             source_point2d,
             depth_image.handle,

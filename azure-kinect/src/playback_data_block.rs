@@ -4,7 +4,7 @@ use azure_kinect_sys::k4arecord::k4a_playback_data_block_t;
 use std::ptr;
 
 pub struct PlaybackDataBlock<'a> {
-    pub(crate) factory: &'a FactoryRecord<'a>,
+    pub(crate) funcs: &'a azure_kinect_sys::k4a::Funcs,
     pub(crate) handle: k4a_playback_data_block_t,
 }
 

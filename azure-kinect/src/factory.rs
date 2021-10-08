@@ -115,14 +115,13 @@ impl Factory<'_> {
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
         Error::from_k4a_result_t((self.api.k4a().k4a_device_open)(index, &mut handle))
-            .to_result_fn(|| Device::from_handle(&self.api, handle))
+            .to_result_fn(|| Device::from_handle(&self.api.k4a(), handle))
     }
 }
 
 
 
 pub struct FactoryRecord<'a> {
-    pub(crate) api: azure_kinect_sys::api::Api,
     pub(crate) api_record: azure_kinect_sys::api::ApiRecord,
     debug_message_handler: DebugMessageHandlerRegister<'a>,
 }
@@ -130,7 +129,6 @@ pub struct FactoryRecord<'a> {
 impl FactoryRecord<'_> {
     pub fn new<'a>() -> Result<FactoryRecord<'a>, Error> {
         let api_record = azure_kinect_sys::api::ApiRecord::new()?;
-        let api = azure_kinect_sys::api::Api::with_library_directory()
         Ok(FactoryRecord {
             debug_message_handler: DebugMessageHandlerRegister::new(api_record.k4a()),
             api_record: api_record,
@@ -166,7 +164,7 @@ impl FactoryRecord<'_> {
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
         Error::from_k4a_result_t((self.api_record.k4a().k4a_device_open)(index, &mut handle))
-            .to_result_fn(|| Device::from_handle(&self.api, handle))
+            .to_result_fn(|| Device::from_handle(&self.api_record.k4a(), handle))
     }
 
     /// Opens a K4A recording for playback.
@@ -174,7 +172,7 @@ impl FactoryRecord<'_> {
         let mut handle: azure_kinect_sys::k4arecord::k4a_playback_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
         Error::from_k4a_result_t((self.api_record.k4arecord().k4a_playback_open)(path.as_ptr(), &mut handle))
-            .to_result_fn(|| Playback::from_handle(&self.api_record, handle))
+            .to_result_fn(|| Playback::from_handle(&self.api_record.k4arecord(), handle))
     }
 
     /// Opens a new recording file for writing
@@ -192,7 +190,7 @@ impl FactoryRecord<'_> {
             *device_configuration as _,
             &mut handle,
         ))
-            .to_result_fn(|| Record::from_handle(&self.api_record, handle))
+            .to_result_fn(|| Record::from_handle(&self.api_record.k4arecord(), handle))
     }
 }
 

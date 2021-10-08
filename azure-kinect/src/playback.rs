@@ -7,14 +7,14 @@ use azure_kinect_sys::k4arecord::{k4a_playback_data_block_t, k4a_playback_seek_o
 use std::ptr;
 
 pub struct Playback<'a> {
-    pub(crate) factory: &'a FactoryRecord<'a>,
+    pub(crate) funcs: &'a azure_kinect_sys::k4arecord::Funcs,
     pub(crate) handle: k4a_playback_t,
 }
 
 impl Playback<'_> {
-    pub(crate) fn from_handle<'a>(factory: &'a FactoryRecord, handle: azure_kinect_sys::k4arecord::k4a_playback_t) -> Playback<'a> {
+    pub(crate) fn from_handle<'a>(funcs: &'a azure_kinect_sys::k4arecord::Funcs, handle: azure_kinect_sys::k4arecord::k4a_playback_t) -> Playback<'a> {
         Playback {
-            factory: factory,
+            funcs: funcs,
             handle: handle,
         }
     }
