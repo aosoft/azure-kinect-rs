@@ -38,7 +38,7 @@ impl Error {
         }
     }
 
-    pub(crate) fn k4a_stream_result_t(s: k4a_stream_result_t) -> Error {
+    pub(crate) fn from_k4a_stream_result_t(s: k4a_stream_result_t) -> Error {
         match s {
             K4A_STREAM_RESULT_SUCCEEDED => Error::Succeeded,
             K4A_STREAM_RESULT_FAILED => Error::Failed,

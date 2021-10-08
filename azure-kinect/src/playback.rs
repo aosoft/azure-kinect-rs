@@ -35,7 +35,7 @@ impl Playback<'_> {
         let mut calibaraion = k4a_calibration_t::default();
         Error::from_k4a_result_t((self.api_record.funcs.k4a_playback_get_calibration)(
             self.handle,
-            &mut calibaraion as &mut _,
+            unsafe { std::mem::transmute(&mut calibaraion) },
         ))
             .to_result_fn(|| Calibration::from_handle(&self.api_record.k4a, calibaraion))
     }
@@ -53,21 +53,21 @@ impl Playback<'_> {
     /// Get the next capture in the recording.
     pub fn get_next_capture(&self) -> Result<Capture, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
-        Error::from((self.api_record.funcs.k4a_playback_get_next_capture)(
+        Error::from_k4a_stream_result_t((self.api_record.funcs.k4a_playback_get_next_capture)(
             self.handle,
-            &mut handle,
+            unsafe { std::mem::transmute(&mut handle) },
         ))
-            .to_result_fn(|| Capture::from_handle(&self.api_record.funcs.k4a, handle))
+            .to_result_fn(|| Capture::from_handle(&self.api_record.k4a, handle))
     }
 
     /// Get the previous capture in the recording.
     pub fn get_previous_capture(&self) -> Result<Capture, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
-        Error::from((self.api_record.funcs.k4a_playback_get_previous_capture)(
+        Error::from_k4a_stream_result_t((self.api_record.funcs.k4a_playback_get_previous_capture)(
             self.handle,
-            &mut handle,
+            unsafe { std::mem::transmute(&mut handle) },
         ))
-            .to_result_fn(|| Capture::from_handle(&self.api_record.funcs.k4a, handle))
+            .to_result_fn(|| Capture::from_handle(&self.api_record.k4a, handle))
     }
 
     /// Reads the value of a tag from the recording
@@ -86,9 +86,9 @@ impl Playback<'_> {
     /// Get the next IMU sample in the recording.
     pub fn get_next_imu_sample(&self) -> Result<k4a_imu_sample_t, Error> {
         let mut imu_sample = k4a_imu_sample_t::default();
-        Error::from((self.api_record.funcs.k4a_playback_get_next_imu_sample)(
+        Error::from_k4a_stream_result_t((self.api_record.funcs.k4a_playback_get_next_imu_sample)(
             self.handle,
-            &mut imu_sample,
+            unsafe { std::mem::transmute(&mut imu_sample) },
         ))
             .to_result(imu_sample)
     }
@@ -98,7 +98,7 @@ impl Playback<'_> {
         let mut imu_sample = k4a_imu_sample_t::default();
         Error::from_k4a_stream_result_t((self.api_record.funcs.k4a_playback_get_previous_imu_sample)(
             self.handle,
-            &mut imu_sample,
+            unsafe { std::mem::transmute(&mut imu_sample) },
         ))
             .to_result(imu_sample)
     }
@@ -125,7 +125,7 @@ impl Playback<'_> {
     /// Set the image format that color captures will be converted to. By default the conversion format will be the
     /// same as the image format stored in the recording file, and no conversion will occur.
     pub fn set_color_conversion(&self, format: k4a_image_format_t) -> Result<(), Error> {
-        Error::from((self.api_record.funcs.k4a_playback_set_color_conversion)(
+        Error::from_k4a_result_t((self.api_record.funcs.k4a_playback_set_color_conversion)(
             self.handle,
             format,
         ))
@@ -137,12 +137,12 @@ impl Playback<'_> {
         let mut block_handle: k4a_playback_data_block_t = ptr::null_mut();
         let track = std::ffi::CString::new(track).unwrap_or_default();
 
-        Error::from((self.api_record.funcs.k4a_playback_get_next_data_block)(
+        Error::from_k4a_stream_result_t((self.api_record.funcs.k4a_playback_get_next_data_block)(
             self.handle,
             track.as_ptr(),
             &mut block_handle,
         ))
-            .to_result_fn(|| PlaybackDataBlock::from_handle(&self.factory, block_handle))
+            .to_result_fn(|| PlaybackDataBlock::from_handle(&self.api_record, block_handle))
     }
 
     /// Get the previous data block from the recording.
@@ -150,12 +150,12 @@ impl Playback<'_> {
         let mut block_handle: k4a_playback_data_block_t = ptr::null_mut();
         let track = std::ffi::CString::new(track).unwrap_or_default();
 
-        Error::from((self.api_record.funcs.k4a_playback_get_previous_data_block)(
+        Error::from_k4a_stream_result_t((self.api_record.funcs.k4a_playback_get_previous_data_block)(
             self.handle,
             track.as_ptr(),
             &mut block_handle,
         ))
-            .to_result_fn(|| PlaybackDataBlock::from_handle(&self.factory, block_handle))
+            .to_result_fn(|| PlaybackDataBlock::from_handle(&self.api_record, block_handle))
     }
 
     /// Get the attachment block from the recording.
