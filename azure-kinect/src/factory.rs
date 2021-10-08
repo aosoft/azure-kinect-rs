@@ -180,14 +180,14 @@ impl FactoryRecord<'_> {
         &self,
         path: &str,
         device: &Device,
-        device_configuration: &azure_kinect_sys::k4a::k4a_device_configuration_t,
+        device_configuration: &azure_kinect_sys::k4arecord::k4a_device_configuration_t,
     ) -> Result<Record, Error> {
         let mut handle: azure_kinect_sys::k4arecord::k4a_record_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
         Error::from_k4a_result_t((self.api_record.k4arecord().k4a_record_create)(
             path.as_ptr(),
             device.handle as _,
-            *device_configuration as _,
+            *device_configuration,
             &mut handle,
         ))
             .to_result_fn(|| Record::from_handle(&self.api_record.k4arecord(), handle))

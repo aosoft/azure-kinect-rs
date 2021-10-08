@@ -30,17 +30,17 @@ pub(crate) fn get_k4a_cstring(
 }
 
 pub(crate) fn get_k4a_string(
-    f: &dyn Fn(*mut ::std::os::raw::c_char, *mut size_t) -> k4a_buffer_result_t,
+    f: &dyn Fn(*mut ::std::os::raw::c_char, *mut usize) -> k4a_buffer_result_t,
 ) -> Result<String, Error> {
     unsafe {
-        let mut buffer: size_t = 0;
+        let mut buffer: usize = 0;
         let r = (f)(ptr::null_mut(), &mut buffer);
         match r {
             k4a_buffer_result_t::K4A_BUFFER_RESULT_SUCCEEDED => Ok(String::new()),
             k4a_buffer_result_t::K4A_BUFFER_RESULT_TOO_SMALL => {
                 if buffer > 1 {
-                    let mut retstr = String::with_capacity(buffer as _);
-                    retstr.as_mut_vec().set_len(buffer as _ - 1);
+                    let mut retstr = String::with_capacity(buffer);
+                    retstr.as_mut_vec().set_len(buffer - 1);
                     Error::from((f)(
                         retstr.as_mut_ptr() as *mut ::std::os::raw::c_char,
                         &mut buffer,
@@ -56,17 +56,17 @@ pub(crate) fn get_k4a_string(
 }
 
 pub(crate) fn get_k4a_binary_data(
-    f: &dyn Fn(*mut u8, *mut size_t) -> k4a_buffer_result_t,
+    f: &dyn Fn(*mut u8, *mut usize) -> k4a_buffer_result_t,
 ) -> Result<Vec<u8>, Error> {
     unsafe {
-        let mut buffer: size_t = 0;
+        let mut buffer: usize = 0;
         let r = (f)(ptr::null_mut(), &mut buffer);
         match r {
             k4a_buffer_result_t::K4A_BUFFER_RESULT_SUCCEEDED => Ok(Vec::<u8>::new()),
             k4a_buffer_result_t::K4A_BUFFER_RESULT_TOO_SMALL => {
                 if buffer > 1 {
-                    let mut retbuf = Vec::<u8>::with_capacity(buffer as _);
-                    retbuf.set_len(buffer as _);
+                    let mut retbuf = Vec::<u8>::with_capacity(buffer);
+                    retbuf.set_len(buffer);
                     Error::from((f)(retbuf.as_mut_ptr(), &mut buffer)).to_result(retbuf)
                 } else {
                     Err(Error::from(r))

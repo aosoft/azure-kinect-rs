@@ -24,7 +24,7 @@ impl Calibration<'_> {
         let mut calibration = k4a_calibration_t::default();
         Error::from_k4a_result_t((factory.api.k4a().k4a_calibration_get_from_raw)(
             raw_calibration.as_ptr() as *mut i8,
-            raw_calibration.len() as _,
+            raw_calibration.len(),
             target_depth_mode,
             target_color_resolution,
             &mut calibration,

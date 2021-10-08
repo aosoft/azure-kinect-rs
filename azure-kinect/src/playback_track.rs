@@ -58,7 +58,7 @@ impl PlaybackTrack<'_> {
                 self.playback.handle,
                 self.name.as_ptr(),
                 codec_id,
-                codec_id_size as *mut size_t,
+                codec_id_size,
             )
         })
     }
@@ -70,7 +70,7 @@ impl PlaybackTrack<'_> {
                 self.playback.handle,
                 self.name.as_ptr(),
                 codec_context,
-                codec_context_size as *mut size_t,
+                codec_context_size,
             )
         })
     }

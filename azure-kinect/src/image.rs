@@ -25,14 +25,14 @@ impl Image<'_> {
         stride_bytes: i32,
     ) -> Result<Image<'a>, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
-        Error::from((factory.k4a_image_create)(
+        Error::from_k4a_result_t((factory.api.k4a().k4a_image_create)(
             format,
             width_pixels,
             height_pixels,
             stride_bytes,
             &mut handle,
         ))
-        .to_result_fn(|| Image::from_handle(factory, handle))
+        .to_result_fn(|| Image::from_handle(factory.api.k4a(), handle))
     }
 
     /// Create an image from a pre-allocated buffer
@@ -48,7 +48,7 @@ impl Image<'_> {
         buffer_release_cb_context: *mut (),
     ) -> Result<Image<'a>, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
-        Error::from((factory.k4a_image_create_from_buffer)(
+        Error::from_k4a_result_t((factory.api.k4a().k4a_image_create_from_buffer)(
             format,
             width_pixels,
             height_pixels,
@@ -56,10 +56,10 @@ impl Image<'_> {
             buffer,
             buffer_size,
             buffer_release_cb,
-            buffer_release_cb_context,
+            buffer_release_cb_context as _,
             &mut handle,
         ))
-        .to_result_fn(|| Image::from_handle(factory, handle))
+        .to_result_fn(|| Image::from_handle(factory.api.k4a(), handle))
     }
 
     /// Get the image buffer

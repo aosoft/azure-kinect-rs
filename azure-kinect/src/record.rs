@@ -47,7 +47,7 @@ impl Record<'_> {
             self.handle,
             attachment_name.as_ptr(),
             buffer.as_ptr(),
-            buffer.len() as size_t,
+            buffer.len(),
         ))
         .to_result(())
     }
@@ -67,7 +67,7 @@ impl Record<'_> {
             track_name.as_ptr(),
             codec_id.as_ptr(),
             codec_context.as_ptr(),
-            codec_context.len() as size_t,
+            codec_context.len(),
             track_settings,
         ))
         .to_result(())
@@ -88,7 +88,7 @@ impl Record<'_> {
             track_name.as_ptr(),
             codec_id.as_ptr(),
             codec_context.as_ptr(),
-            codec_context.len() as size_t,
+            codec_context.len(),
             track_settings,
         ))
         .to_result(())
@@ -129,7 +129,7 @@ impl Record<'_> {
             track_name.as_ptr(),
             device_timestamp_usec,
             custom_data.as_ptr() as *mut u8,
-            custom_data.len() as size_t,
+            custom_data.len(),
         ))
         .to_result(())
     }

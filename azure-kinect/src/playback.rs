@@ -25,7 +25,7 @@ impl Playback<'_> {
             (self.factory.k4a_playback_get_raw_calibration)(
                 self.handle,
                 calibration,
-                buffer as *mut size_t,
+                buffer,
             )
         })
     }
@@ -78,7 +78,7 @@ impl Playback<'_> {
                 self.handle,
                 name.as_ptr(),
                 tag,
-                buffer as *mut size_t,
+                buffer,
             )
         })
     }
@@ -166,7 +166,7 @@ impl Playback<'_> {
                 self.handle,
                 attachment.as_ptr(),
                 data,
-                data_size as *mut size_t,
+                data_size,
             )
         })
     }
@@ -183,9 +183,9 @@ impl Playback<'_> {
             get_k4a_cstring(&|track_name, track_name_size| {
                 (self.factory.k4a_playback_get_track_name)(
                     self.handle,
-                    track_index as size_t,
+                    track_index,
                     track_name,
-                    track_name_size as *mut size_t,
+                    track_name_size,
                 )
             })?,
         ))
