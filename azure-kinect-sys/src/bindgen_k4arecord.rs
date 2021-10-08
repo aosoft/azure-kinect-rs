@@ -9,11 +9,10 @@ pub type __int32_t = ::std::os::raw::c_int;
 pub type __uint32_t = ::std::os::raw::c_uint;
 pub type __int64_t = ::std::os::raw::c_long;
 pub type __uint64_t = ::std::os::raw::c_ulong;
-pub type size_t = ::std::os::raw::c_ulong;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct _k4a_device_t {
-    pub _rsvd: size_t,
+    pub _rsvd: usize,
 }
 #[test]
 fn bindgen_test_layout__k4a_device_t() {
@@ -42,7 +41,7 @@ pub type k4a_device_t = *mut _k4a_device_t;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct _k4a_capture_t {
-    pub _rsvd: size_t,
+    pub _rsvd: usize,
 }
 #[test]
 fn bindgen_test_layout__k4a_capture_t() {
@@ -1485,7 +1484,7 @@ pub type k4a_imu_sample_t = _k4a_imu_sample_t;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct _k4a_record_t {
-    pub _rsvd: size_t,
+    pub _rsvd: usize,
 }
 #[test]
 fn bindgen_test_layout__k4a_record_t() {
@@ -1514,7 +1513,7 @@ pub type k4a_record_t = *mut _k4a_record_t;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct _k4a_playback_t {
-    pub _rsvd: size_t,
+    pub _rsvd: usize,
 }
 #[test]
 fn bindgen_test_layout__k4a_playback_t() {
@@ -1543,7 +1542,7 @@ pub type k4a_playback_t = *mut _k4a_playback_t;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct _k4a_playback_data_block_t {
-    pub _rsvd: size_t,
+    pub _rsvd: usize,
 }
 #[test]
 fn bindgen_test_layout__k4a_playback_data_block_t() {
@@ -1972,14 +1971,14 @@ pub struct Funcs {
         recording_handle: k4a_record_t,
         attachment_name: *const ::std::os::raw::c_char,
         buffer: *const u8,
-        buffer_size: size_t,
+        buffer_size: usize,
     ) -> k4a_result_t,
     pub k4a_record_add_custom_video_track: unsafe extern "C" fn(
         recording_handle: k4a_record_t,
         track_name: *const ::std::os::raw::c_char,
         codec_id: *const ::std::os::raw::c_char,
         codec_context: *const u8,
-        codec_context_size: size_t,
+        codec_context_size: usize,
         track_settings: *const k4a_record_video_settings_t,
     ) -> k4a_result_t,
     pub k4a_record_add_custom_subtitle_track: unsafe extern "C" fn(
@@ -1987,7 +1986,7 @@ pub struct Funcs {
         track_name: *const ::std::os::raw::c_char,
         codec_id: *const ::std::os::raw::c_char,
         codec_context: *const u8,
-        codec_context_size: size_t,
+        codec_context_size: usize,
         track_settings: *const k4a_record_subtitle_settings_t,
     ) -> k4a_result_t,
     pub k4a_record_write_header:
@@ -2005,7 +2004,7 @@ pub struct Funcs {
         track_name: *const ::std::os::raw::c_char,
         device_timestamp_usec: u64,
         custom_data: *mut u8,
-        custom_data_size: size_t,
+        custom_data_size: usize,
     ) -> k4a_result_t,
     pub k4a_record_flush: unsafe extern "C" fn(recording_handle: k4a_record_t) -> k4a_result_t,
     pub k4a_record_close: unsafe extern "C" fn(recording_handle: k4a_record_t),
@@ -2016,7 +2015,7 @@ pub struct Funcs {
     pub k4a_playback_get_raw_calibration: unsafe extern "C" fn(
         playback_handle: k4a_playback_t,
         data: *mut u8,
-        data_size: *mut size_t,
+        data_size: *mut usize,
     ) -> k4a_buffer_result_t,
     pub k4a_playback_get_calibration: unsafe extern "C" fn(
         playback_handle: k4a_playback_t,
@@ -2031,12 +2030,12 @@ pub struct Funcs {
         track_name: *const ::std::os::raw::c_char,
     ) -> bool,
     pub k4a_playback_get_track_count:
-        unsafe extern "C" fn(playback_handle: k4a_playback_t) -> size_t,
+        unsafe extern "C" fn(playback_handle: k4a_playback_t) -> usize,
     pub k4a_playback_get_track_name: unsafe extern "C" fn(
         playback_handle: k4a_playback_t,
-        track_index: size_t,
+        track_index: usize,
         track_name: *mut ::std::os::raw::c_char,
-        track_name_size: *mut size_t,
+        track_name_size: *mut usize,
     ) -> k4a_buffer_result_t,
     pub k4a_playback_track_is_builtin: unsafe extern "C" fn(
         playback_handle: k4a_playback_t,
@@ -2051,19 +2050,19 @@ pub struct Funcs {
         playback_handle: k4a_playback_t,
         track_name: *const ::std::os::raw::c_char,
         codec_id: *mut ::std::os::raw::c_char,
-        codec_id_size: *mut size_t,
+        codec_id_size: *mut usize,
     ) -> k4a_buffer_result_t,
     pub k4a_playback_track_get_codec_context: unsafe extern "C" fn(
         playback_handle: k4a_playback_t,
         track_name: *const ::std::os::raw::c_char,
         codec_context: *mut u8,
-        codec_context_size: *mut size_t,
+        codec_context_size: *mut usize,
     ) -> k4a_buffer_result_t,
     pub k4a_playback_get_tag: unsafe extern "C" fn(
         playback_handle: k4a_playback_t,
         name: *const ::std::os::raw::c_char,
         value: *mut ::std::os::raw::c_char,
-        value_size: *mut size_t,
+        value_size: *mut usize,
     ) -> k4a_buffer_result_t,
     pub k4a_playback_set_color_conversion: unsafe extern "C" fn(
         playback_handle: k4a_playback_t,
@@ -2073,7 +2072,7 @@ pub struct Funcs {
         playback_handle: k4a_playback_t,
         file_name: *const ::std::os::raw::c_char,
         data: *mut u8,
-        data_size: *mut size_t,
+        data_size: *mut usize,
     ) -> k4a_buffer_result_t,
     pub k4a_playback_get_next_capture: unsafe extern "C" fn(
         playback_handle: k4a_playback_t,
@@ -2104,7 +2103,7 @@ pub struct Funcs {
     pub k4a_playback_data_block_get_device_timestamp_usec:
         unsafe extern "C" fn(data_block_handle: k4a_playback_data_block_t) -> u64,
     pub k4a_playback_data_block_get_buffer_size:
-        unsafe extern "C" fn(data_block_handle: k4a_playback_data_block_t) -> size_t,
+        unsafe extern "C" fn(data_block_handle: k4a_playback_data_block_t) -> usize,
     pub k4a_playback_data_block_get_buffer:
         unsafe extern "C" fn(data_block_handle: k4a_playback_data_block_t) -> *mut u8,
     pub k4a_playback_data_block_release:

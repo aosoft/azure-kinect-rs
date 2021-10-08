@@ -12,11 +12,10 @@ pub type __uint8_t = ::std::os::raw::c_uchar;
 pub type __int32_t = ::std::os::raw::c_int;
 pub type __uint32_t = ::std::os::raw::c_uint;
 pub type __uint64_t = ::std::os::raw::c_ulong;
-pub type size_t = ::std::os::raw::c_ulong;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct _k4a_device_t {
-    pub _rsvd: size_t,
+    pub _rsvd: usize,
 }
 #[test]
 fn bindgen_test_layout__k4a_device_t() {
@@ -45,7 +44,7 @@ pub type k4a_device_t = *mut _k4a_device_t;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct _k4a_capture_t {
-    pub _rsvd: size_t,
+    pub _rsvd: usize,
 }
 #[test]
 fn bindgen_test_layout__k4a_capture_t() {
@@ -74,7 +73,7 @@ pub type k4a_capture_t = *mut _k4a_capture_t;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct _k4a_image_t {
-    pub _rsvd: size_t,
+    pub _rsvd: usize,
 }
 #[test]
 fn bindgen_test_layout__k4a_image_t() {
@@ -103,7 +102,7 @@ pub type k4a_image_t = *mut _k4a_image_t;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct _k4a_transformation_t {
-    pub _rsvd: size_t,
+    pub _rsvd: usize,
 }
 #[test]
 fn bindgen_test_layout__k4a_transformation_t() {
@@ -2213,13 +2212,13 @@ pub struct Funcs {
         height_pixels: ::std::os::raw::c_int,
         stride_bytes: ::std::os::raw::c_int,
         buffer: *mut u8,
-        buffer_size: size_t,
+        buffer_size: usize,
         buffer_release_cb: k4a_memory_destroy_cb_t,
         buffer_release_cb_context: *mut ::std::os::raw::c_void,
         image_handle: *mut k4a_image_t,
     ) -> k4a_result_t,
     pub k4a_image_get_buffer: unsafe extern "C" fn(image_handle: k4a_image_t) -> *mut u8,
-    pub k4a_image_get_size: unsafe extern "C" fn(image_handle: k4a_image_t) -> size_t,
+    pub k4a_image_get_size: unsafe extern "C" fn(image_handle: k4a_image_t) -> usize,
     pub k4a_image_get_format: unsafe extern "C" fn(image_handle: k4a_image_t) -> k4a_image_format_t,
     pub k4a_image_get_width_pixels:
         unsafe extern "C" fn(image_handle: k4a_image_t) -> ::std::os::raw::c_int,
@@ -2258,7 +2257,7 @@ pub struct Funcs {
     pub k4a_device_get_serialnum: unsafe extern "C" fn(
         device_handle: k4a_device_t,
         serial_number: *mut ::std::os::raw::c_char,
-        serial_number_size: *mut size_t,
+        serial_number_size: *mut usize,
     ) -> k4a_buffer_result_t,
     pub k4a_device_get_version: unsafe extern "C" fn(
         device_handle: k4a_device_t,
@@ -2289,7 +2288,7 @@ pub struct Funcs {
     pub k4a_device_get_raw_calibration: unsafe extern "C" fn(
         device_handle: k4a_device_t,
         data: *mut u8,
-        data_size: *mut size_t,
+        data_size: *mut usize,
     ) -> k4a_buffer_result_t,
     pub k4a_device_get_calibration: unsafe extern "C" fn(
         device_handle: k4a_device_t,
@@ -2304,7 +2303,7 @@ pub struct Funcs {
     ) -> k4a_result_t,
     pub k4a_calibration_get_from_raw: unsafe extern "C" fn(
         raw_calibration: *mut ::std::os::raw::c_char,
-        raw_calibration_size: size_t,
+        raw_calibration_size: usize,
         depth_mode: k4a_depth_mode_t,
         color_resolution: k4a_color_resolution_t,
         calibration: *mut k4a_calibration_t,
