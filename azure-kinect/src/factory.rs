@@ -122,16 +122,18 @@ impl Factory<'_> {
 
 
 pub struct FactoryRecord<'a> {
-    pub(crate) api: azure_kinect_sys::api::ApiRecord,
+    pub(crate) api: azure_kinect_sys::api::Api,
+    pub(crate) api_record: azure_kinect_sys::api::ApiRecord,
     debug_message_handler: DebugMessageHandlerRegister<'a>,
 }
 
 impl FactoryRecord<'_> {
     pub fn new<'a>() -> Result<FactoryRecord<'a>, Error> {
-        let api = azure_kinect_sys::api::ApiRecord::new()?;
+        let api_record = azure_kinect_sys::api::ApiRecord::new()?;
+        let api = azure_kinect_sys::api::Api::with_library_directory()
         Ok(FactoryRecord {
-            debug_message_handler: DebugMessageHandlerRegister::new(api.k4a()),
-            api,
+            debug_message_handler: DebugMessageHandlerRegister::new(api_record.k4a()),
+            api_record: api_record,
         })
     }
 
@@ -139,7 +141,7 @@ impl FactoryRecord<'_> {
         let api = azure_kinect_sys::api::ApiRecord::with_library_directory(lib_dir)?;
         Ok(FactoryRecord {
             debug_message_handler: DebugMessageHandlerRegister::new(api.k4a()),
-            api,
+            api_record: api,
         })
     }
 
@@ -157,13 +159,13 @@ impl FactoryRecord<'_> {
 
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {
-        (self.api.k4a().k4a_device_get_installed_count)()
+        (self.api_record.k4a().k4a_device_get_installed_count)()
     }
 
     /// Open a k4a device.
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
-        Error::from_k4a_result_t((self.api.k4a().k4a_device_open)(index, &mut handle))
+        Error::from_k4a_result_t((self.api_record.k4a().k4a_device_open)(index, &mut handle))
             .to_result_fn(|| Device::from_handle(&self.api, handle))
     }
 
@@ -171,8 +173,8 @@ impl FactoryRecord<'_> {
     pub fn playback_open(&self, path: &str) -> Result<Playback, Error> {
         let mut handle: azure_kinect_sys::k4arecord::k4a_playback_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
-        Error::from_k4a_result_t((self.api.k4arecord().k4a_playback_open)(path.as_ptr(), &mut handle))
-            .to_result_fn(|| Playback::from_handle(self, handle))
+        Error::from_k4a_result_t((self.api_record.k4arecord().k4a_playback_open)(path.as_ptr(), &mut handle))
+            .to_result_fn(|| Playback::from_handle(&self.api_record, handle))
     }
 
     /// Opens a new recording file for writing
@@ -184,13 +186,13 @@ impl FactoryRecord<'_> {
     ) -> Result<Record, Error> {
         let mut handle: azure_kinect_sys::k4arecord::k4a_record_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
-        Error::from_k4a_result_t((self.api.k4arecord().k4a_record_create)(
+        Error::from_k4a_result_t((self.api_record.k4arecord().k4a_record_create)(
             path.as_ptr(),
             device.handle as _,
             *device_configuration as _,
             &mut handle,
         ))
-            .to_result_fn(|| Record::from_handle(self, handle))
+            .to_result_fn(|| Record::from_handle(&self.api_record, handle))
     }
 }
 
