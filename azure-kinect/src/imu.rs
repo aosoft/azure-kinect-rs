@@ -7,14 +7,14 @@ pub struct Imu<'a> {
 
 impl Imu<'_> {
     pub(crate) fn new<'a>(device: &'a Device<'a>) -> Result<Imu<'a>, Error> {
-        Error::from_k4a_result_t((device.funcs.k4a_device_start_imu)(device.handle)).to_result(())?;
+        Error::from_k4a_result_t((device.api.funcs.k4a_device_start_imu)(device.handle)).to_result(())?;
         Ok(Imu { device })
     }
 
     /// Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
     pub fn get_imu_sample(&self, timeout_in_ms: i32) -> Result<k4a_imu_sample_t, Error> {
         let mut imu_sample = k4a_imu_sample_t::default();
-        Error::from_k4a_wait_result_t((self.device.funcs.k4a_device_get_imu_sample)(
+        Error::from_k4a_wait_result_t((self.device.api.funcs.k4a_device_get_imu_sample)(
             self.device.handle,
             &mut imu_sample,
             timeout_in_ms,
@@ -29,6 +29,6 @@ impl Imu<'_> {
 
 impl Drop for Imu<'_> {
     fn drop(&mut self) {
-        (self.device.funcs.k4a_device_stop_imu)(self.device.handle)
+        (self.device.api.funcs.k4a_device_stop_imu)(self.device.handle)
     }
 }

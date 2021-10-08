@@ -14,7 +14,7 @@ macro_rules! proc_address {
 
 pub struct Api {
     module: Module,
-    k4a: super::k4a::Funcs,
+    pub funcs: super::k4a::Funcs,
 }
 
 impl Api {
@@ -90,7 +90,7 @@ impl Api {
 
             Ok(Api {
                 module: module,
-                k4a: funcs,
+                funcs: funcs,
             })
         }
     }
@@ -109,14 +109,12 @@ impl Api {
     pub fn with_library_directory(lib_dir: &str) -> Result<Api, Error> {
         Self::with_module(Module::load_library(lib_dir, K4A_LIBNAME)?)
     }
-
-    pub fn k4a(&self) -> &super::k4a::Funcs { &self.k4a }
 }
 
 pub struct ApiRecord {
     module: Module,
-    k4a: Api,
-    k4arecord: super::k4arecord::Funcs,
+    pub k4a: Api,
+    pub funcs: super::k4arecord::Funcs,
 }
 
 impl ApiRecord {
@@ -168,7 +166,7 @@ impl ApiRecord {
             Ok(ApiRecord {
                 module: module,
                 k4a: Api::with_module(Module::get_module(K4A_LIBNAME)?)?,
-                k4arecord: funcs,
+                funcs: funcs,
             })
         }
     }
@@ -187,7 +185,4 @@ impl ApiRecord {
     pub fn with_library_directory(lib_dir: &str) -> Result<ApiRecord, Error> {
         Self::with_module(Module::load_library(lib_dir, K4ARECORD_LIBNAME)?)
     }
-
-    pub fn k4a(&self) -> &super::k4a::Funcs { &self.k4a.k4a }
-    pub fn k4arecord(&self) -> &super::k4arecord::Funcs { &self.k4arecord }
 }

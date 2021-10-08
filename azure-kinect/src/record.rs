@@ -6,14 +6,14 @@ use std::ffi::CString;
 use std::ptr;
 
 pub struct Record<'a> {
-    pub(crate) funcs: &'a azure_kinect_sys::k4arecord::Funcs,
+    pub(crate) api_record: &'a azure_kinect_sys::api::ApiRecord,
     pub(crate) handle: k4a_record_t,
 }
 
 impl Record<'_> {
-    pub(crate) fn from_handle<'a>(funcs: &'a azure_kinect_sys::k4arecord::Funcs, handle: k4a_record_t) -> Record<'a> {
+    pub(crate) fn from_handle<'a>(api_record: &'a azure_kinect_sys::api::ApiRecord, handle: k4a_record_t) -> Record<'a> {
         Record {
-            funcs: funcs,
+            api_record: api_record,
             handle: handle,
         }
     }

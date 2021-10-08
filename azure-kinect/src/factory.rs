@@ -12,14 +12,14 @@ pub type DebugMessageHandler = Box<dyn Fn(k4a_log_level_t, &str, raw::c_int, &st
 
 struct DebugMessageHandlerRegister<'a> {
     debug_message_handler: Option<DebugMessageHandler>,
-    funcs: &'a azure_kinect_sys::k4a::Funcs
+    api: &'a azure_kinect_sys::api::Api
 }
 
 impl DebugMessageHandlerRegister<'_> {
-    pub fn new(funcs: &azure_kinect_sys::k4a::Funcs) -> DebugMessageHandlerRegister {
+    pub fn new(api: &azure_kinect_sys::api::Api) -> DebugMessageHandlerRegister {
         DebugMessageHandlerRegister {
             debug_message_handler: None,
-            funcs,
+            api,
         }
     }
 
@@ -30,7 +30,7 @@ impl DebugMessageHandlerRegister<'_> {
         min_level: k4a_log_level_t,
     ) {
         self.debug_message_handler = debug_message_handler.into();
-        (self.funcs.k4a_set_debug_message_handler)(
+        (self.api.funcs.k4a_set_debug_message_handler)(
             Some(Self::debug_message_handler_func),
             &self.debug_message_handler as *const Option<DebugMessageHandler> as _,
             min_level as azure_kinect_sys::k4a::k4a_log_level_t,
@@ -40,7 +40,7 @@ impl DebugMessageHandlerRegister<'_> {
     /// Clears the callback function to receive debug messages from the Azure Kinect device.
     pub fn reset_debug_message_handler(mut self) {
         self.debug_message_handler = None;
-        (self.funcs.k4a_set_debug_message_handler)(
+        (self.api.funcs.k4a_set_debug_message_handler)(
             None,
             ptr::null_mut(),
             azure_kinect_sys::k4a::k4a_log_level_t_K4A_LOG_LEVEL_OFF,
@@ -80,7 +80,7 @@ impl Factory<'_> {
     pub fn new<'a>() -> Result<Factory<'a>, Error> {
         let api = azure_kinect_sys::api::Api::new()?;
         Ok(Factory {
-            debug_message_handler: DebugMessageHandlerRegister::new(api.k4a()),
+            debug_message_handler: DebugMessageHandlerRegister::new(&api),
             api,
         })
     }
@@ -88,7 +88,7 @@ impl Factory<'_> {
     pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
         let api = azure_kinect_sys::api::Api::with_library_directory(lib_dir)?;
         Ok(Factory {
-            debug_message_handler: DebugMessageHandlerRegister::new(api.k4a()),
+            debug_message_handler: DebugMessageHandlerRegister::new(&api),
             api,
         })
     }
@@ -108,14 +108,14 @@ impl Factory<'_> {
 
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {
-        (self.api.k4a().k4a_device_get_installed_count)()
+        (self.api.funcs.k4a_device_get_installed_count)()
     }
 
     /// Open a k4a device.
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
-        Error::from_k4a_result_t((self.api.k4a().k4a_device_open)(index, &mut handle))
-            .to_result_fn(|| Device::from_handle(&self.api.k4a(), handle))
+        Error::from_k4a_result_t((self.api.funcs.k4a_device_open)(index, &mut handle))
+            .to_result_fn(|| Device::from_handle(&self.api, handle))
     }
 }
 
@@ -130,16 +130,16 @@ impl FactoryRecord<'_> {
     pub fn new<'a>() -> Result<FactoryRecord<'a>, Error> {
         let api_record = azure_kinect_sys::api::ApiRecord::new()?;
         Ok(FactoryRecord {
-            debug_message_handler: DebugMessageHandlerRegister::new(api_record.k4a()),
-            api_record: api_record,
+            debug_message_handler: DebugMessageHandlerRegister::new(&api_record.k4a),
+            api_record,
         })
     }
 
     pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
-        let api = azure_kinect_sys::api::ApiRecord::with_library_directory(lib_dir)?;
+        let api_record = azure_kinect_sys::api::ApiRecord::with_library_directory(lib_dir)?;
         Ok(FactoryRecord {
-            debug_message_handler: DebugMessageHandlerRegister::new(api.k4a()),
-            api_record: api,
+            debug_message_handler: DebugMessageHandlerRegister::new(&api_record.k4a),
+            api_record,
         })
     }
 
@@ -157,22 +157,22 @@ impl FactoryRecord<'_> {
 
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {
-        (self.api_record.k4a().k4a_device_get_installed_count)()
+        (self.api_record.k4a.funcs.k4a_device_get_installed_count)()
     }
 
     /// Open a k4a device.
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
-        Error::from_k4a_result_t((self.api_record.k4a().k4a_device_open)(index, &mut handle))
-            .to_result_fn(|| Device::from_handle(&self.api_record.k4a(), handle))
+        Error::from_k4a_result_t((self.api_record.k4a.funcs.k4a_device_open)(index, &mut handle))
+            .to_result_fn(|| Device::from_handle(&self.api_record.k4a, handle))
     }
 
     /// Opens a K4A recording for playback.
     pub fn playback_open(&self, path: &str) -> Result<Playback, Error> {
         let mut handle: azure_kinect_sys::k4arecord::k4a_playback_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
-        Error::from_k4a_result_t((self.api_record.k4arecord().k4a_playback_open)(path.as_ptr(), &mut handle))
-            .to_result_fn(|| Playback::from_handle(&self.api_record.k4arecord(), handle))
+        Error::from_k4a_result_t((self.api_record.funcs.k4a_playback_open)(path.as_ptr(), &mut handle))
+            .to_result_fn(|| Playback::from_handle(&self.api_record, handle))
     }
 
     /// Opens a new recording file for writing
@@ -184,13 +184,13 @@ impl FactoryRecord<'_> {
     ) -> Result<Record, Error> {
         let mut handle: azure_kinect_sys::k4arecord::k4a_record_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
-        Error::from_k4a_result_t((self.api_record.k4arecord().k4a_record_create)(
+        Error::from_k4a_result_t((self.api_record.funcs.k4a_record_create)(
             path.as_ptr(),
             device.handle as _,
             *device_configuration,
             &mut handle,
         ))
-            .to_result_fn(|| Record::from_handle(&self.api_record.k4arecord(), handle))
+            .to_result_fn(|| Record::from_handle(&self.api_record, handle))
     }
 }
 
