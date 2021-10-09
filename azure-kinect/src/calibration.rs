@@ -20,16 +20,16 @@ impl Calibration<'_> {
     pub fn from_raw<'a>(
         factory: &'a Factory,
         raw_calibration: &Vec<u8>,
-        target_depth_mode: k4a_depth_mode_t,
-        target_color_resolution: k4a_color_resolution_t,
+        target_depth_mode: DepthMode,
+        target_color_resolution: ColorResolution,
     ) -> Result<Calibration<'a>, Error> {
         let mut calibration = k4a_calibration_t::default();
         Error::from_k4a_result_t(unsafe {
             (factory.api.funcs.k4a_calibration_get_from_raw)(
                 raw_calibration.as_ptr() as *mut i8,
                 raw_calibration.len(),
-                target_depth_mode,
-                target_color_resolution,
+                target_depth_mode.to_binding_type(),
+                target_color_resolution.to_binding_type(),
                 &mut calibration,
             )
         })

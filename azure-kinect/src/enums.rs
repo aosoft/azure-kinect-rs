@@ -1,7 +1,59 @@
-use crate::{Dimension, Range};
 use azure_kinect_sys::k4a::*;
+use crate::structs::*;
 
 #[repr(u32)]
+#[derive(Clone, Copy, Debug)]
+pub enum ColorResolution {
+    Off = k4a_color_resolution_t_K4A_COLOR_RESOLUTION_OFF,
+    _720p = k4a_color_resolution_t_K4A_COLOR_RESOLUTION_720P,
+    _1080p = k4a_color_resolution_t_K4A_COLOR_RESOLUTION_1080P,
+    _1440p = k4a_color_resolution_t_K4A_COLOR_RESOLUTION_1440P,
+    _1536p = k4a_color_resolution_t_K4A_COLOR_RESOLUTION_1536P,
+    _2160p = k4a_color_resolution_t_K4A_COLOR_RESOLUTION_2160P,
+    _3072p = k4a_color_resolution_t_K4A_COLOR_RESOLUTION_3072P,
+}
+
+impl ColorResolution {
+    pub(crate) fn to_binding_type(&self) -> k4a_color_resolution_t { *self as _ }
+
+    /// Gets the dimensions of the color images that the color camera will produce for a
+    /// given color resolution
+    pub fn get_dimension(&self) -> Dimension {
+        match self {
+            ColorResolution::_720p => Dimension {
+                width: 1280,
+                height: 720,
+            },
+            ColorResolution::_1080p => Dimension {
+                width: 1920,
+                height: 1080,
+            },
+            ColorResolution::_1440p => Dimension {
+                width: 2560,
+                height: 1440,
+            },
+            ColorResolution::_1536p => Dimension {
+                width: 2048,
+                height: 1536,
+            },
+            ColorResolution::_2160p => Dimension {
+                width: 3840,
+                height: 2160,
+            },
+            ColorResolution::_3072p => Dimension {
+                width: 4096,
+                height: 3072,
+            },
+            _ => Dimension {
+                width: 0,
+                height: 0,
+            },
+        }
+    }
+}
+
+#[repr(u32)]
+#[derive(Clone, Copy, Debug)]
 pub enum DepthMode {
     Off = k4a_depth_mode_t_K4A_DEPTH_MODE_OFF,
     NFov2x2Binned = k4a_depth_mode_t_K4A_DEPTH_MODE_NFOV_2X2BINNED,
@@ -12,6 +64,8 @@ pub enum DepthMode {
 }
 
 impl DepthMode {
+    pub(crate) fn to_binding_type(&self) -> k4a_depth_mode_t { *self as _ }
+
     /// Gets the dimensions of the depth images that the depth camera will produce for a
     /// given depth mode
     pub fn get_dimension(&self) -> Dimension {
