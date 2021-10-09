@@ -12,7 +12,7 @@ pub struct Transformation<'a> {
 
 impl Transformation<'_> {
     pub fn new<'a>(api: &'a azure_kinect_sys::api::Api, calibration: &'a Calibration) -> Transformation<'a> {
-        let handle = (api.funcs.k4a_transformation_create)(&calibration.calibration);
+        let handle = unsafe { (api.funcs.k4a_transformation_create)(&calibration.calibration) };
         Transformation {
             api: api,
             handle: handle,
@@ -44,13 +44,13 @@ impl Transformation<'_> {
         depth_image: &Image,
         transformed_depth_image: &mut Image,
     ) -> Result<(), Error> {
-        Error::from_k4a_result_t((self
+        Error::from_k4a_result_t(unsafe { (self
             .api.funcs
             .k4a_transformation_depth_image_to_color_camera)(
             self.handle,
             depth_image.handle,
             transformed_depth_image.handle,
-        ))
+        ) } )
         .to_result(())
     }
 
@@ -75,7 +75,7 @@ impl Transformation<'_> {
         interpolation_type: k4a_transformation_interpolation_type_t,
         invalid_custom_value: u32,
     ) -> Result<(), Error> {
-        Error::from_k4a_result_t((self
+        Error::from_k4a_result_t(unsafe { (self
             .api.funcs
             .k4a_transformation_depth_image_to_color_camera_custom)(
             self.handle,
@@ -85,7 +85,7 @@ impl Transformation<'_> {
             transformed_custom_image.handle,
             interpolation_type,
             invalid_custom_value,
-        ))
+        ) } )
         .to_result(())
     }
 
@@ -135,14 +135,14 @@ impl Transformation<'_> {
         color_image: &Image,
         transformed_color_image: &mut Image,
     ) -> Result<(), Error> {
-        Error::from_k4a_result_t((self
+        Error::from_k4a_result_t(unsafe { (self
             .api.funcs
             .k4a_transformation_color_image_to_depth_camera)(
             self.handle,
             depth_image.handle,
             color_image.handle,
             transformed_color_image.handle,
-        ))
+        ) } )
         .to_result(())
     }
 
@@ -174,12 +174,12 @@ impl Transformation<'_> {
         xyz_image: &mut Image,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(
-            (self.api.funcs.k4a_transformation_depth_image_to_point_cloud)(
+            unsafe { (self.api.funcs.k4a_transformation_depth_image_to_point_cloud)(
                 self.handle,
                 depth_image.handle,
                 camera,
                 xyz_image.handle,
-            ),
+            ) }
         )
         .to_result(())
     }
@@ -203,7 +203,7 @@ impl Transformation<'_> {
 
 impl Drop for Transformation<'_> {
     fn drop(&mut self) {
-        (self.api.funcs.k4a_transformation_destroy)(self.handle);
+        unsafe { (self.api.funcs.k4a_transformation_destroy)(self.handle); }
         self.handle = ptr::null_mut();
     }
 }
