@@ -202,7 +202,7 @@ mod tests {
         );
         assert!(manager.is_ok());
         let manager2 = manager.unwrap();
-        let c = (manager2.k4a_device_get_installed_count)();
+        let c = unsafe { (manager2.api.funcs.k4a_device_get_installed_count)() };
         println!("device count = {}", c);
         Ok(())
     }

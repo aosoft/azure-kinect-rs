@@ -91,10 +91,10 @@ mod tests {
             &|s, len| unsafe {
                 *len = t1.len() + 1;
                 if s == std::ptr::null_mut() {
-                    k4a_buffer_result_t::K4A_BUFFER_RESULT_TOO_SMALL
+                    k4a_buffer_result_t_K4A_BUFFER_RESULT_TOO_SMALL
                 } else {
                     std::ptr::copy_nonoverlapping(ct1.as_ptr(), s, t1.len() + 1);
-                    k4a_buffer_result_t::K4A_BUFFER_RESULT_SUCCEEDED
+                    k4a_buffer_result_t_K4A_BUFFER_RESULT_SUCCEEDED
                 }
             };
 
