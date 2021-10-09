@@ -21,23 +21,23 @@ impl PlaybackDataBlock<'_> {
 
     /// Get the time stamp in micro seconds for the given data_block
     pub fn get_device_timestamp_usec(&self) -> u64 {
-        (self.api_record.funcs.k4a_playback_data_block_get_device_timestamp_usec)(self.handle)
+        unsafe { (self.api_record.funcs.k4a_playback_data_block_get_device_timestamp_usec)(self.handle) }
     }
 
     /// Get the size of the data_block buffer.
     pub fn get_buffer_size(&self) -> usize {
-        (self.api_record.funcs.k4a_playback_data_block_get_buffer_size)(self.handle) as usize
+        unsafe { (self.api_record.funcs.k4a_playback_data_block_get_buffer_size)(self.handle) as usize }
     }
 
     /// Get the data_block buffer.
     pub fn get_buffer(&self) -> *const u8 {
-        (self.api_record.funcs.k4a_playback_data_block_get_buffer)(self.handle)
+        unsafe { (self.api_record.funcs.k4a_playback_data_block_get_buffer)(self.handle) }
     }
 }
 
 impl Drop for PlaybackDataBlock<'_> {
     fn drop(&mut self) {
-        (self.api_record.funcs.k4a_playback_data_block_release)(self.handle);
+        unsafe { (self.api_record.funcs.k4a_playback_data_block_release)(self.handle); }
         self.handle = ptr::null_mut();
     }
 }
