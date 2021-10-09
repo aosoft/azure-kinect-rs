@@ -1,8 +1,8 @@
 use azure_kinect::*;
+use azure_kinect_sys::k4a::*;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
-use azure_kinect_sys::k4a::*;
 
 fn main() {
     if let Err(e) = main2() {
@@ -20,7 +20,8 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
     let camera = device.start_cameras(&camera_config)?;
 
     #[cfg(feature = "depth-view")]
-    let image_dimension = unsafe { std::mem::transmute::<_, DepthMode>(camera_config.depth_mode) }.get_dimension();
+    let image_dimension =
+        unsafe { std::mem::transmute::<_, DepthMode>(camera_config.depth_mode) }.get_dimension();
     #[cfg(not(feature = "depth-view"))]
     let image_dimension = camera_config.color_resolution.get_dimension();
 
@@ -75,8 +76,15 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
                             let p2 = buffer.as_mut_ptr().add(y * pitch) as *mut u32;
                             for x in 0..width as isize {
                                 let value = *p.offset(x);
-                                *p2.offset(x) =
-                                    get_depth_color(value, unsafe { std::mem::transmute::<_, DepthMode>(camera_config.depth_mode) }.get_range())
+                                *p2.offset(x) = get_depth_color(
+                                    value,
+                                    unsafe {
+                                        std::mem::transmute::<_, DepthMode>(
+                                            camera_config.depth_mode,
+                                        )
+                                    }
+                                    .get_range(),
+                                )
                             }
                         }
                     }

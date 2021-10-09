@@ -1,5 +1,5 @@
-use azure_kinect_sys::k4a::*;
 use crate::{Dimension, Range};
+use azure_kinect_sys::k4a::*;
 
 #[repr(u32)]
 pub enum DepthMode {

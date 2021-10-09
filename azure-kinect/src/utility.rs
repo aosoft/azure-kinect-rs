@@ -67,7 +67,8 @@ pub(crate) fn get_k4a_binary_data(
                 if buffer > 1 {
                     let mut retbuf = Vec::<u8>::with_capacity(buffer);
                     retbuf.set_len(buffer);
-                    Error::from_k4a_buffer_result_t((f)(retbuf.as_mut_ptr(), &mut buffer)).to_result(retbuf)
+                    Error::from_k4a_buffer_result_t((f)(retbuf.as_mut_ptr(), &mut buffer))
+                        .to_result(retbuf)
                 } else {
                     Err(Error::from_k4a_buffer_result_t(r))
                 }
@@ -78,9 +79,9 @@ pub(crate) fn get_k4a_binary_data(
 }
 #[cfg(test)]
 mod tests {
-    use azure_kinect_sys::k4a::*;
-    use crate::*;
     use crate::utility::*;
+    use crate::*;
+    use azure_kinect_sys::k4a::*;
 
     #[test]
     fn test() {

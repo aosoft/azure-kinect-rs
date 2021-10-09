@@ -1,5 +1,5 @@
-use azure_kinect_sys::api::Api;
 use crate::*;
+use azure_kinect_sys::api::Api;
 use azure_kinect_sys::k4a::*;
 
 pub struct Calibration<'a> {
@@ -8,7 +8,10 @@ pub struct Calibration<'a> {
 }
 
 impl Calibration<'_> {
-    pub(crate) fn from_handle<'a>(api: &'a azure_kinect_sys::api::Api, calibration: k4a_calibration_t) -> Calibration<'a> {
+    pub(crate) fn from_handle<'a>(
+        api: &'a azure_kinect_sys::api::Api,
+        calibration: k4a_calibration_t,
+    ) -> Calibration<'a> {
         Calibration {
             api: api,
             calibration: calibration,
@@ -31,7 +34,7 @@ impl Calibration<'_> {
                 &mut calibration,
             )
         })
-            .to_result_fn(|| Calibration::from_handle(&factory.api, calibration))
+        .to_result_fn(|| Calibration::from_handle(&factory.api, calibration))
     }
 
     /// Transform a 3d point of a source coordinate system into a 3d point of the target coordinate system.
@@ -51,7 +54,7 @@ impl Calibration<'_> {
                 &mut target_point3d,
             )
         })
-            .to_result(target_point3d)
+        .to_result(target_point3d)
     }
 
     /// Transform a 2d pixel coordinate with an associated depth value of the source camera into a 3d point of the target coordinate system.
@@ -76,7 +79,7 @@ impl Calibration<'_> {
                 &mut valid,
             )
         })
-            .to_result((target_point3d, valid != 0))
+        .to_result((target_point3d, valid != 0))
     }
 
     /// Transform a 3d point of a source coordinate system into a 2d pixel coordinate of the target camera.
@@ -99,7 +102,7 @@ impl Calibration<'_> {
                 &mut valid,
             )
         })
-            .to_result((target_point2d, valid != 0))
+        .to_result((target_point2d, valid != 0))
     }
 
     /// Transform a 2d pixel coordinate with an associated depth value of the source camera into a 2d pixel coordinate of the target camera
@@ -124,7 +127,7 @@ impl Calibration<'_> {
                 &mut valid,
             )
         })
-            .to_result((target_point2d, valid != 0))
+        .to_result((target_point2d, valid != 0))
     }
 
     /// Transform a 2D pixel coordinate from color camera into a 2D pixel coordinate of the depth camera. This function
@@ -146,6 +149,6 @@ impl Calibration<'_> {
                 &mut valid,
             )
         })
-            .to_result((target_point2d, valid != 0))
+        .to_result((target_point2d, valid != 0))
     }
 }

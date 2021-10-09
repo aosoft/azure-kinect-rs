@@ -1,6 +1,6 @@
+use crate::Error;
 use std::ffi::c_void;
 use std::ptr;
-use crate::Error;
 
 #[link(name = "kernel32")]
 extern "stdcall" {
@@ -23,7 +23,9 @@ pub(crate) struct Module {
 impl Drop for Module {
     fn drop(&mut self) {
         if self.require_free_library && self.handle != ptr::null() {
-            unsafe { FreeLibrary(self.handle); }
+            unsafe {
+                FreeLibrary(self.handle);
+            }
             self.handle = ptr::null();
         }
     }
@@ -31,7 +33,10 @@ impl Drop for Module {
 
 impl Module {
     pub fn new(handle: *const c_void, require_free_library: bool) -> Module {
-        Module { handle, require_free_library }
+        Module {
+            handle,
+            require_free_library,
+        }
     }
 
     pub fn load_library(lib_dir: &str, dll_file_name: &str) -> Result<Module, Error> {
@@ -60,10 +65,13 @@ impl Module {
 
     pub fn get_module(module_name: &str) -> Result<Module, Error> {
         unsafe {
-            let p = GetModuleHandleW(module_name.encode_utf16()
-                .chain(Some(0))
-                .collect::<Vec<u16>>()
-                .as_ptr());
+            let p = GetModuleHandleW(
+                module_name
+                    .encode_utf16()
+                    .chain(Some(0))
+                    .collect::<Vec<u16>>()
+                    .as_ptr(),
+            );
             if p != ptr::null() {
                 Ok(Module::new(p, false))
             } else {
@@ -73,7 +81,8 @@ impl Module {
     }
 
     pub fn get_proc_address(&self, lpProcName: *const u8) -> Result<*const c_void, Error> {
-        unsafe { let p = GetProcAddress(self.handle, lpProcName);
+        unsafe {
+            let p = GetProcAddress(self.handle, lpProcName);
             if p != ptr::null() {
                 Ok(p)
             } else {

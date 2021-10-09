@@ -1,7 +1,7 @@
 use crate::*;
+use azure_kinect_sys::api::Api;
 use azure_kinect_sys::k4a::*;
 use std::ptr;
-use azure_kinect_sys::api::Api;
 
 pub struct Image<'a> {
     api: &'a azure_kinect_sys::api::Api,
@@ -9,7 +9,10 @@ pub struct Image<'a> {
 }
 
 impl Image<'_> {
-    pub(crate) fn from_handle<'a>(api: &'a azure_kinect_sys::api::Api, handle: k4a_image_t) -> Image<'a> {
+    pub(crate) fn from_handle<'a>(
+        api: &'a azure_kinect_sys::api::Api,
+        handle: k4a_image_t,
+    ) -> Image<'a> {
         Image {
             api: api,
             handle: handle,
@@ -25,13 +28,15 @@ impl Image<'_> {
         stride_bytes: i32,
     ) -> Result<Image<'a>, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
-        Error::from_k4a_result_t(unsafe { (api.funcs.k4a_image_create)(
-            format,
-            width_pixels,
-            height_pixels,
-            stride_bytes,
-            &mut handle,
-        ) } )
+        Error::from_k4a_result_t(unsafe {
+            (api.funcs.k4a_image_create)(
+                format,
+                width_pixels,
+                height_pixels,
+                stride_bytes,
+                &mut handle,
+            )
+        })
         .to_result_fn(|| Image::from_handle(api, handle))
     }
 
@@ -48,17 +53,19 @@ impl Image<'_> {
         buffer_release_cb_context: *mut (),
     ) -> Result<Image<'a>, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
-        Error::from_k4a_result_t(unsafe { (api.funcs.k4a_image_create_from_buffer)(
-            format,
-            width_pixels,
-            height_pixels,
-            stride_bytes,
-            buffer,
-            buffer_size,
-            buffer_release_cb,
-            buffer_release_cb_context as _,
-            &mut handle,
-        ) } )
+        Error::from_k4a_result_t(unsafe {
+            (api.funcs.k4a_image_create_from_buffer)(
+                format,
+                width_pixels,
+                height_pixels,
+                stride_bytes,
+                buffer,
+                buffer_size,
+                buffer_release_cb,
+                buffer_release_cb_context as _,
+                &mut handle,
+            )
+        })
         .to_result_fn(|| Image::from_handle(api, handle))
     }
 
@@ -150,14 +157,18 @@ impl Image<'_> {
 
 impl Drop for Image<'_> {
     fn drop(&mut self) {
-        unsafe { (self.api.funcs.k4a_image_release)(self.handle); }
+        unsafe {
+            (self.api.funcs.k4a_image_release)(self.handle);
+        }
         self.handle = ptr::null_mut();
     }
 }
 
 impl Clone for Image<'_> {
     fn clone(&self) -> Self {
-        unsafe { (self.api.funcs.k4a_image_reference)(self.handle); }
+        unsafe {
+            (self.api.funcs.k4a_image_reference)(self.handle);
+        }
         Image::from_handle(&self.api, self.handle)
     }
 }

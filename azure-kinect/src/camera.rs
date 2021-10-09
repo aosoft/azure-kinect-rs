@@ -11,10 +11,9 @@ impl Camera<'_> {
         device: &'a Device<'a>,
         configuration: &k4a_device_configuration_t,
     ) -> Result<Camera<'a>, Error> {
-        Error::from_k4a_result_t(unsafe { (device.api.funcs.k4a_device_start_cameras)(
-            device.handle,
-            configuration,
-        ) } )
+        Error::from_k4a_result_t(unsafe {
+            (device.api.funcs.k4a_device_start_cameras)(device.handle, configuration)
+        })
         .to_result(())?;
         Ok(Camera::<'a> { device })
     }
@@ -22,11 +21,13 @@ impl Camera<'_> {
     /// Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
     pub fn get_capture(&self, timeout_in_ms: i32) -> Result<Capture, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
-        Error::from_k4a_wait_result_t(unsafe { (self.device.api.funcs.k4a_device_get_capture)(
-            self.device.handle,
-            &mut handle,
-            timeout_in_ms,
-        ) } )
+        Error::from_k4a_wait_result_t(unsafe {
+            (self.device.api.funcs.k4a_device_get_capture)(
+                self.device.handle,
+                &mut handle,
+                timeout_in_ms,
+            )
+        })
         .to_result_fn(|| Capture::from_handle(&self.device.api, handle))
     }
 
@@ -43,6 +44,8 @@ impl Camera<'_> {
 
 impl Drop for Camera<'_> {
     fn drop(&mut self) {
-        unsafe { (self.device.api.funcs.k4a_device_stop_cameras)(self.device.handle); }
+        unsafe {
+            (self.device.api.funcs.k4a_device_stop_cameras)(self.device.handle);
+        }
     }
 }

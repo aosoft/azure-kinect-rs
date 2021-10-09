@@ -1,8 +1,8 @@
 use crate::param::Parameter;
-use azure_kinect::*;
-use std::time::{Duration, Instant};
 use azure_kinect::fps::Fps;
+use azure_kinect::*;
 use azure_kinect_sys::k4a::*;
+use std::time::{Duration, Instant};
 
 #[derive(Debug)]
 pub enum Error<'a> {
@@ -90,10 +90,10 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     );
     println!("; A: {}", version_info.audio);
 
-    let camera_fps = unsafe { std::mem::transmute::<_, Fps>(param.device_config.camera_fps) }.get_u32();
+    let camera_fps =
+        unsafe { std::mem::transmute::<_, Fps>(param.device_config.camera_fps) }.get_u32();
     if camera_fps <= 0
-        || (param.device_config.color_resolution
-            == k4a_color_resolution_t_K4A_COLOR_RESOLUTION_OFF
+        || (param.device_config.color_resolution == k4a_color_resolution_t_K4A_COLOR_RESOLUTION_OFF
             && param.device_config.depth_mode == k4a_depth_mode_t_K4A_DEPTH_MODE_OFF)
     {
         return Err(Box::new(Error::ErrorStr(
@@ -146,19 +146,18 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
 
     println!("Device started");
 
-    let recording = match factory.record_create(
-        param.recording_filename.as_str(),
-        &device,
-        unsafe { std::mem::transmute(&param.device_config) },
-    ) {
-        Ok(recording) => recording,
-        Err(_) => {
-            return Err(Box::new(Error::Error(format!(
-                "Unable to create recording file: {}",
-                param.recording_filename
-            ))))
-        }
-    };
+    let recording =
+        match factory.record_create(param.recording_filename.as_str(), &device, unsafe {
+            std::mem::transmute(&param.device_config)
+        }) {
+            Ok(recording) => recording,
+            Err(_) => {
+                return Err(Box::new(Error::Error(format!(
+                    "Unable to create recording file: {}",
+                    param.recording_filename
+                ))))
+            }
+        };
 
     if imu.is_some() {
         recording.add_imu_track()?;

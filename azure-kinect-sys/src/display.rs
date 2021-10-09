@@ -1,6 +1,6 @@
+use crate::k4a::*;
 use crate::*;
 use std::fmt::{Display, Formatter, Result};
-use crate::k4a::*;
 
 impl Display for k4a_imu_sample_t {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {

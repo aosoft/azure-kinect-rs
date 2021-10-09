@@ -1,8 +1,8 @@
 use crate::recorder::Error;
 use azure_kinect::*;
+use azure_kinect_sys::k4a::*;
 use clap::{App, Arg, ArgMatches};
 use std::time::Duration;
-use azure_kinect_sys::k4a::*;
 
 pub struct Parameter {
     pub list_device: bool,
@@ -16,8 +16,7 @@ pub struct Parameter {
 }
 
 impl Parameter {
-    pub fn new<'a>() -> Result<Parameter, Error<'a>>
-    {
+    pub fn new<'a>() -> Result<Parameter, Error<'a>> {
         let p = Parameter::from(create_app().get_matches());
 
         if let Ok(r) = p.as_ref() {
