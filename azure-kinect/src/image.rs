@@ -18,26 +18,26 @@ impl Image<'_> {
 
     /// Create a blank image
     pub fn with_format<'a>(
-        factory: &'a Factory,
+        api: &'a azure_kinect_sys::api::Api,
         format: k4a_image_format_t,
         width_pixels: i32,
         height_pixels: i32,
         stride_bytes: i32,
     ) -> Result<Image<'a>, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
-        Error::from_k4a_result_t((factory.api.funcs.k4a_image_create)(
+        Error::from_k4a_result_t((api.funcs.k4a_image_create)(
             format,
             width_pixels,
             height_pixels,
             stride_bytes,
             &mut handle,
         ))
-        .to_result_fn(|| Image::from_handle(&factory.api, handle))
+        .to_result_fn(|| Image::from_handle(api, handle))
     }
 
     /// Create an image from a pre-allocated buffer
     pub fn with_buffer<'a>(
-        factory: &'a Factory,
+        api: &'a azure_kinect_sys::api::Api,
         format: k4a_image_format_t,
         width_pixels: i32,
         height_pixels: i32,
@@ -48,7 +48,7 @@ impl Image<'_> {
         buffer_release_cb_context: *mut (),
     ) -> Result<Image<'a>, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
-        Error::from_k4a_result_t((factory.api.funcs.k4a_image_create_from_buffer)(
+        Error::from_k4a_result_t((api.funcs.k4a_image_create_from_buffer)(
             format,
             width_pixels,
             height_pixels,
@@ -59,7 +59,7 @@ impl Image<'_> {
             buffer_release_cb_context as _,
             &mut handle,
         ))
-        .to_result_fn(|| Image::from_handle(&factory.api, handle))
+        .to_result_fn(|| Image::from_handle(api, handle))
     }
 
     /// Get the image buffer
