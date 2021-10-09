@@ -11,7 +11,7 @@ macro_rules! proc_address {
 }
 
 pub struct Api {
-    module: Module,
+    #[allow(dead_code)] module: Module,     //  Module manages a dynamic link library
     pub funcs: super::k4a::Funcs,
 }
 
@@ -149,7 +149,7 @@ impl Api {
 }
 
 pub struct ApiRecord {
-    module: Module,
+    #[allow(dead_code)] module: Module,     //  Module manages a dynamic link library
     pub k4a: Api,
     pub funcs: super::k4arecord::Funcs,
 }

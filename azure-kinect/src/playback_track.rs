@@ -1,7 +1,6 @@
 use crate::playback::Playback;
 use crate::utility::*;
 use crate::*;
-use azure_kinect_sys::k4a::*;
 use azure_kinect_sys::k4arecord::k4a_record_video_settings_t;
 
 pub struct PlaybackTrack<'a> {

@@ -15,13 +15,13 @@ pub struct Playback<'a> {
 }
 
 impl Playback<'_> {
-    pub(crate) fn from_handle<'a>(
-        api_record: &'a azure_kinect_sys::api::ApiRecord,
+    pub(crate) fn from_handle(
+        api_record: &azure_kinect_sys::api::ApiRecord,
         handle: azure_kinect_sys::k4arecord::k4a_playback_t,
-    ) -> Playback<'a> {
+    ) -> Playback {
         Playback {
-            api_record: api_record,
-            handle: handle,
+            api_record,
+            handle,
         }
     }
 
@@ -133,7 +133,7 @@ impl Playback<'_> {
 
     /// Set the image format that color captures will be converted to. By default the conversion format will be the
     /// same as the image format stored in the recording file, and no conversion will occur.
-    pub fn set_color_conversion(&self, format: k4a_image_format_t) -> Result<(), Error> {
+    pub fn set_color_conversion(&mut self, format: k4a_image_format_t) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
             (self.api_record.funcs.k4a_playback_set_color_conversion)(self.handle, format)
         })

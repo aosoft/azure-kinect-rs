@@ -1,5 +1,4 @@
 use crate::k4a::*;
-use crate::*;
 use std::fmt::{Display, Formatter, Result};
 
 impl Display for k4a_imu_sample_t {

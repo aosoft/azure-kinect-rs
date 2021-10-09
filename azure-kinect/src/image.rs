@@ -1,5 +1,4 @@
 use crate::*;
-use azure_kinect_sys::api::Api;
 use azure_kinect_sys::k4a::*;
 use std::ptr;
 
@@ -9,24 +8,24 @@ pub struct Image<'a> {
 }
 
 impl Image<'_> {
-    pub(crate) fn from_handle<'a>(
-        api: &'a azure_kinect_sys::api::Api,
+    pub(crate) fn from_handle(
+        api: &azure_kinect_sys::api::Api,
         handle: k4a_image_t,
-    ) -> Image<'a> {
+    ) -> Image {
         Image {
-            api: api,
-            handle: handle,
+            api,
+            handle,
         }
     }
 
     /// Create a blank image
-    pub fn with_format<'a>(
-        api: &'a azure_kinect_sys::api::Api,
+    pub fn with_format(
+        api: &azure_kinect_sys::api::Api,
         format: k4a_image_format_t,
         width_pixels: i32,
         height_pixels: i32,
         stride_bytes: i32,
-    ) -> Result<Image<'a>, Error> {
+    ) -> Result<Image, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
         Error::from_k4a_result_t(unsafe {
             (api.funcs.k4a_image_create)(
@@ -41,8 +40,8 @@ impl Image<'_> {
     }
 
     /// Create an image from a pre-allocated buffer
-    pub fn with_buffer<'a>(
-        api: &'a azure_kinect_sys::api::Api,
+    pub fn with_buffer(
+        api: &azure_kinect_sys::api::Api,
         format: k4a_image_format_t,
         width_pixels: i32,
         height_pixels: i32,
@@ -51,7 +50,7 @@ impl Image<'_> {
         buffer_size: usize,
         buffer_release_cb: k4a_memory_destroy_cb_t,
         buffer_release_cb_context: *mut (),
-    ) -> Result<Image<'a>, Error> {
+    ) -> Result<Image, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
         Error::from_k4a_result_t(unsafe {
             (api.funcs.k4a_image_create_from_buffer)(
@@ -135,7 +134,7 @@ impl Image<'_> {
     }
 
     /// Set the image's system timestamp in nanoseconds
-    pub fn set_system_timestamp_nsec(&self, timestamp: u64) {
+    pub fn set_system_timestamp_nsec(&mut self, timestamp: u64) {
         unsafe { (self.api.funcs.k4a_image_set_system_timestamp_nsec)(self.handle, timestamp) }
     }
 

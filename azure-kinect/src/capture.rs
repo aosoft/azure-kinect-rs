@@ -1,5 +1,4 @@
 use crate::*;
-use azure_kinect_sys::api::Api;
 use azure_kinect_sys::k4a::*;
 use std::ptr;
 
@@ -9,19 +8,19 @@ pub struct Capture<'a> {
 }
 
 impl Capture<'_> {
-    pub fn new<'a>(factory: &'a Factory) -> Result<Capture<'a>, Error> {
+    pub fn new(factory: &Factory) -> Result<Capture, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
         Error::from_k4a_result_t(unsafe { (factory.api.funcs.k4a_capture_create)(&mut handle) })
             .to_result_fn(|| Capture::from_handle(&factory.api, handle))
     }
 
-    pub(crate) fn from_handle<'a>(
-        api: &'a azure_kinect_sys::api::Api,
+    pub(crate) fn from_handle(
+        api: &azure_kinect_sys::api::Api,
         handle: k4a_capture_t,
-    ) -> Capture<'a> {
+    ) -> Capture {
         Capture {
-            api: api,
-            handle: handle,
+            api,
+            handle,
         }
     }
 

@@ -1,6 +1,5 @@
 use crate::utility::*;
 use crate::*;
-use azure_kinect_sys::api::Api;
 use azure_kinect_sys::k4a::*;
 use std::ptr;
 
@@ -20,13 +19,13 @@ pub struct ColorControlCapabilities {
 }
 
 impl Device<'_> {
-    pub(crate) fn from_handle<'a>(
-        api: &'a azure_kinect_sys::api::Api,
+    pub(crate) fn from_handle(
+        api: &azure_kinect_sys::api::Api,
         handle: k4a_device_t,
-    ) -> Device<'a> {
+    ) -> Device {
         Device {
-            api: api,
-            handle: handle,
+            api,
+            handle,
         }
     }
 
@@ -66,7 +65,7 @@ impl Device<'_> {
 
     /// Set the K4A color sensor control value
     pub fn set_color_control(
-        &self,
+        &mut self,
         command: k4a_color_control_command_t,
         mode: k4a_color_control_mode_t,
         value: i32,

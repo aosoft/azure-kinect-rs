@@ -1,9 +1,8 @@
-use crate::error::ToResult;
 use crate::playback::Playback;
 use crate::record::Record;
 use crate::*;
 use azure_kinect_sys::k4a::k4a_log_level_t;
-use std::ffi::{c_void, CString};
+use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
 
@@ -38,7 +37,7 @@ impl DebugMessageHandlerRegister {
     }
 
     /// Clears the callback function to receive debug messages from the Azure Kinect device.
-    pub fn reset_debug_message_handler(mut self, api: &azure_kinect_sys::api::Api) {
+    pub fn reset_debug_message_handler(&mut self, api: &azure_kinect_sys::api::Api) {
         self.debug_message_handler = None;
         unsafe {
             (api.funcs.k4a_set_debug_message_handler)(

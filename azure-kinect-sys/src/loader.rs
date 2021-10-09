@@ -80,9 +80,9 @@ impl Module {
         }
     }
 
-    pub fn get_proc_address(&self, lpProcName: *const u8) -> Result<*const c_void, Error> {
+    pub fn get_proc_address(&self, proc_name: *const u8) -> Result<*const c_void, Error> {
         unsafe {
-            let p = GetProcAddress(self.handle, lpProcName);
+            let p = GetProcAddress(self.handle, proc_name);
             if p != ptr::null() {
                 Ok(p)
             } else {

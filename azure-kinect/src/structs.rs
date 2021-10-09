@@ -1,5 +1,3 @@
-use crate::*;
-
 #[derive(Copy, Clone, Debug)]
 pub struct Dimension {
     pub width: i32,

@@ -1,5 +1,4 @@
 use crate::*;
-use azure_kinect_sys::api::Api;
 use azure_kinect_sys::k4a::*;
 
 pub struct Calibration<'a> {
@@ -8,13 +7,13 @@ pub struct Calibration<'a> {
 }
 
 impl Calibration<'_> {
-    pub(crate) fn from_handle<'a>(
-        api: &'a azure_kinect_sys::api::Api,
+    pub(crate) fn from_handle(
+        api: &azure_kinect_sys::api::Api,
         calibration: k4a_calibration_t,
-    ) -> Calibration<'a> {
+    ) -> Calibration {
         Calibration {
-            api: api,
-            calibration: calibration,
+            api,
+            calibration,
         }
     }
 

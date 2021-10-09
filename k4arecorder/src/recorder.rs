@@ -63,7 +63,7 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
         return Err(Box::new(Error::ErrorStr("Device not found.")));
     }
 
-    let device = match factory.device_open(param.device_index) {
+    let mut device = match factory.device_open(param.device_index) {
         Ok(device) => device,
         Err(_) => {
             return Err(Box::new(Error::ErrorStr(

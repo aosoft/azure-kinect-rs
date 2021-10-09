@@ -1,5 +1,3 @@
-use crate::*;
-use azure_kinect_sys::k4a::*;
 use azure_kinect_sys::k4arecord::k4a_playback_data_block_t;
 use std::ptr;
 

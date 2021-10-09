@@ -17,8 +17,8 @@ impl Transformation<'_> {
     ) -> Transformation<'a> {
         let handle = unsafe { (api.funcs.k4a_transformation_create)(&calibration.calibration) };
         Transformation {
-            api: api,
-            handle: handle,
+            api,
+            handle,
             color_resolution: Dimension {
                 width: calibration
                     .calibration
