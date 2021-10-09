@@ -10,27 +10,24 @@ use azure_kinect_sys::k4a::k4a_log_level_t;
 
 pub type DebugMessageHandler = Box<dyn Fn(k4a_log_level_t, &str, raw::c_int, &str)>;
 
-struct DebugMessageHandlerRegister<'a> {
+struct DebugMessageHandlerRegister {
     debug_message_handler: Option<DebugMessageHandler>,
-    api: &'a azure_kinect_sys::api::Api
 }
 
-impl DebugMessageHandlerRegister<'_> {
-    pub fn new(api: &azure_kinect_sys::api::Api) -> DebugMessageHandlerRegister {
-        DebugMessageHandlerRegister {
-            debug_message_handler: None,
-            api,
-        }
+impl DebugMessageHandlerRegister {
+    pub fn new() -> DebugMessageHandlerRegister {
+        DebugMessageHandlerRegister { debug_message_handler: None }
     }
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
     pub fn set_debug_message_handler(
         &mut self,
+        api: &azure_kinect_sys::api::Api,
         debug_message_handler: DebugMessageHandler,
         min_level: k4a_log_level_t,
     ) {
         self.debug_message_handler = debug_message_handler.into();
-        (self.api.funcs.k4a_set_debug_message_handler)(
+        (api.funcs.k4a_set_debug_message_handler)(
             Some(Self::debug_message_handler_func),
             &self.debug_message_handler as *const Option<DebugMessageHandler> as _,
             min_level as azure_kinect_sys::k4a::k4a_log_level_t,
@@ -38,9 +35,9 @@ impl DebugMessageHandlerRegister<'_> {
     }
 
     /// Clears the callback function to receive debug messages from the Azure Kinect device.
-    pub fn reset_debug_message_handler(mut self) {
+    pub fn reset_debug_message_handler(mut self, api: &azure_kinect_sys::api::Api) {
         self.debug_message_handler = None;
-        (self.api.funcs.k4a_set_debug_message_handler)(
+        (api.funcs.k4a_set_debug_message_handler)(
             None,
             ptr::null_mut(),
             azure_kinect_sys::k4a::k4a_log_level_t_K4A_LOG_LEVEL_OFF,
@@ -71,16 +68,16 @@ impl DebugMessageHandlerRegister<'_> {
 }
 
 
-pub struct Factory<'a> {
+pub struct Factory {
     pub(crate) api: azure_kinect_sys::api::Api,
-    debug_message_handler: DebugMessageHandlerRegister<'a>,
+    debug_message_handler: DebugMessageHandlerRegister,
 }
 
-impl Factory<'_> {
-    pub fn new<'a>() -> Result<Factory<'a>, Error> {
+impl Factory {
+    pub fn new() -> Result<Factory, Error> {
         let api = azure_kinect_sys::api::Api::new()?;
         Ok(Factory {
-            debug_message_handler: DebugMessageHandlerRegister::new(&api),
+            debug_message_handler: DebugMessageHandlerRegister::new(),
             api,
         })
     }
@@ -88,7 +85,7 @@ impl Factory<'_> {
     pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
         let api = azure_kinect_sys::api::Api::with_library_directory(lib_dir)?;
         Ok(Factory {
-            debug_message_handler: DebugMessageHandlerRegister::new(&api),
+            debug_message_handler: DebugMessageHandlerRegister::new(),
             api,
         })
     }
@@ -98,11 +95,11 @@ impl Factory<'_> {
         debug_message_handler: DebugMessageHandler,
         min_level: k4a_log_level_t,
     ) {
-        self.debug_message_handler.set_debug_message_handler(debug_message_handler, min_level)
+        self.debug_message_handler.set_debug_message_handler(&self.api, debug_message_handler, min_level)
     }
 
     pub fn reset_debug_message_handler(mut self) {
-        self.debug_message_handler.reset_debug_message_handler();
+        self.debug_message_handler.reset_debug_message_handler(&self.api);
     }
 
 
@@ -120,17 +117,16 @@ impl Factory<'_> {
 }
 
 
-
-pub struct FactoryRecord<'a> {
+pub struct FactoryRecord {
     pub(crate) api_record: azure_kinect_sys::api::ApiRecord,
-    debug_message_handler: DebugMessageHandlerRegister<'a>,
+    debug_message_handler: DebugMessageHandlerRegister,
 }
 
-impl FactoryRecord<'_> {
-    pub fn new<'a>() -> Result<FactoryRecord<'a>, Error> {
+impl FactoryRecord {
+    pub fn new() -> Result<FactoryRecord, Error> {
         let api_record = azure_kinect_sys::api::ApiRecord::new()?;
         Ok(FactoryRecord {
-            debug_message_handler: DebugMessageHandlerRegister::new(&api_record.k4a),
+            debug_message_handler: DebugMessageHandlerRegister::new(),
             api_record,
         })
     }
@@ -138,7 +134,7 @@ impl FactoryRecord<'_> {
     pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
         let api_record = azure_kinect_sys::api::ApiRecord::with_library_directory(lib_dir)?;
         Ok(FactoryRecord {
-            debug_message_handler: DebugMessageHandlerRegister::new(&api_record.k4a),
+            debug_message_handler: DebugMessageHandlerRegister::new(),
             api_record,
         })
     }
@@ -148,11 +144,11 @@ impl FactoryRecord<'_> {
         debug_message_handler: DebugMessageHandler,
         min_level: k4a_log_level_t,
     ) {
-        self.debug_message_handler.set_debug_message_handler(debug_message_handler, min_level)
+        self.debug_message_handler.set_debug_message_handler(&self.api_record.k4a, debug_message_handler, min_level)
     }
 
     pub fn reset_debug_message_handler(mut self) {
-        self.debug_message_handler.reset_debug_message_handler();
+        self.debug_message_handler.reset_debug_message_handler(&self.api_record.k4a);
     }
 
     /// Gets the number of connected devices

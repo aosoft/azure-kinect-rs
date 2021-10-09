@@ -9,7 +9,7 @@ pub struct Capture<'a> {
 }
 
 impl Capture<'_> {
-    pub fn new<'a>(factory: &'a Factory<'a>) -> Result<Capture<'a>, Error> {
+    pub fn new<'a>(factory: &'a Factory) -> Result<Capture<'a>, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
         Error::from_k4a_result_t((factory.api.funcs.k4a_capture_create)(&mut handle))
             .to_result_fn(|| Capture::from_handle(&factory.api, handle))
