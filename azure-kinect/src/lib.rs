@@ -17,7 +17,6 @@ pub mod capture;
 pub mod color_resolution;
 pub mod depth_mode;
 pub mod device;
-pub mod display;
 pub mod fps;
 pub mod error;
 pub mod factory;

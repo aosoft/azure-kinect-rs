@@ -1,6 +1,8 @@
 use crate::param::Parameter;
 use azure_kinect::*;
 use std::time::{Duration, Instant};
+use azure_kinect::fps::Fps;
+use azure_kinect_sys::k4a::*;
 
 #[derive(Debug)]
 pub enum Error<'a> {
@@ -75,7 +77,7 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     let version_info = device.get_version()?;
     print!(
         "Device version: {}",
-        if version_info.firmware_build == k4a_firmware_build_t::K4A_FIRMWARE_BUILD_RELEASE {
+        if version_info.firmware_build == k4a_firmware_build_t_K4A_FIRMWARE_BUILD_RELEASE {
             "Rel"
         } else {
             "Dbg"
@@ -88,11 +90,11 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     );
     println!("; A: {}", version_info.audio);
 
-    let camera_fps = param.device_config.camera_fps.get_u32();
+    let camera_fps = unsafe { std::mem::transmute::<_, Fps>(param.device_config.camera_fps) }.get_u32();
     if camera_fps <= 0
         || (param.device_config.color_resolution
-            == k4a_color_resolution_t::K4A_COLOR_RESOLUTION_OFF
-            && param.device_config.depth_mode == k4a_depth_mode_t::K4A_DEPTH_MODE_OFF)
+            == k4a_color_resolution_t_K4A_COLOR_RESOLUTION_OFF
+            && param.device_config.depth_mode == k4a_depth_mode_t_K4A_DEPTH_MODE_OFF)
     {
         return Err(Box::new(Error::ErrorStr(
             "Either the color or depth modes must be enabled to record.",
@@ -101,16 +103,16 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
 
     if let Some(absolute_exposure_value) = param.absolute_exposure_value {
         if let Err(_) = device.set_color_control(
-            k4a_color_control_command_t::K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-            k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
+            k4a_color_control_command_t_K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+            k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_MANUAL,
             absolute_exposure_value,
         ) {
             eprintln!("Runtime error: k4a_device_set_color_control() for manual exposure failed ");
         }
     } else {
         if let Err(_) = device.set_color_control(
-            k4a_color_control_command_t::K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-            k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO,
+            k4a_color_control_command_t_K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+            k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_AUTO,
             0,
         ) {
             eprintln!("Runtime error: k4a_device_set_color_control() for auto exposure failed ");
@@ -119,16 +121,16 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
 
     if let Some(gain) = param.gain {
         if let Err(_) = device.set_color_control(
-            k4a_color_control_command_t::K4A_COLOR_CONTROL_GAIN,
-            k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_MANUAL,
+            k4a_color_control_command_t_K4A_COLOR_CONTROL_GAIN,
+            k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_MANUAL,
             gain,
         ) {
             eprintln!("Runtime error: k4a_device_set_color_control() for manual gain failed ");
         }
     } else {
         if let Err(_) = device.set_color_control(
-            k4a_color_control_command_t::K4A_COLOR_CONTROL_GAIN,
-            k4a_color_control_mode_t::K4A_COLOR_CONTROL_MODE_AUTO,
+            k4a_color_control_command_t_K4A_COLOR_CONTROL_GAIN,
+            k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_AUTO,
             0,
         ) {
             eprintln!("Runtime error: k4a_device_set_color_control() for auto gain failed ");
@@ -147,7 +149,7 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     let recording = match factory.record_create(
         param.recording_filename.as_str(),
         &device,
-        &param.device_config,
+        unsafe { std::mem::transmute(&param.device_config) },
     ) {
         Ok(recording) => recording,
         Err(_) => {
@@ -165,7 +167,7 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
 
     // Wait for the first capture before starting recording.
     let timeout_sec_for_first_capture = if param.device_config.wired_sync_mode
-        == k4a_wired_sync_mode_t::K4A_WIRED_SYNC_MODE_SUBORDINATE
+        == k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_SUBORDINATE
     {
         println!("[subordinate mode] Waiting for signal from master");
         360u64
