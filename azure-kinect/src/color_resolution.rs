@@ -17,27 +17,27 @@ impl ColorResolution {
     /// given color resolution
     pub fn get_dimension(&self) -> Dimension {
         match self {
-            _720p => Dimension {
+            ColorResolution::_720p => Dimension {
                 width: 1280,
                 height: 720,
             },
-            _1080p => Dimension {
+            ColorResolution::_1080p => Dimension {
                 width: 1920,
                 height: 1080,
             },
-            _1440p => Dimension {
+            ColorResolution::_1440p => Dimension {
                 width: 2560,
                 height: 1440,
             },
-            _1536p => Dimension {
+            ColorResolution::_1536p => Dimension {
                 width: 2048,
                 height: 1536,
             },
-            _2160p => Dimension {
+            ColorResolution::_2160p => Dimension {
                 width: 3840,
                 height: 2160,
             },
-            _3072p => Dimension {
+            ColorResolution::_3072p => Dimension {
                 width: 4096,
                 height: 3072,
             },

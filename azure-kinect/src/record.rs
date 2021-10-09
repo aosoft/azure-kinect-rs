@@ -126,9 +126,7 @@ impl Record<'_> {
     /// Writes an imu sample to file
     pub fn write_imu_sample(&self, imu_sample: k4a_imu_sample_t) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self.api_record.funcs.k4a_record_write_imu_sample)(self.handle, unsafe {
-                std::mem::transmute(imu_sample)
-            })
+            (self.api_record.funcs.k4a_record_write_imu_sample)(self.handle,  std::mem::transmute(imu_sample))
         })
         .to_result(())
     }

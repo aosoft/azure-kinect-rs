@@ -16,23 +16,23 @@ impl DepthMode {
     /// given depth mode
     pub fn get_dimension(&self) -> Dimension {
         match self {
-            NFov2x2Binned => Dimension {
+            DepthMode::NFov2x2Binned => Dimension {
                 width: 320,
                 height: 288,
             },
-            NFovUnbinned => Dimension {
+            DepthMode::NFovUnbinned => Dimension {
                 width: 640,
                 height: 576,
             },
-            WFov2x2Binned => Dimension {
+            DepthMode::WFov2x2Binned => Dimension {
                 width: 512,
                 height: 512,
             },
-            WFovUnbinned => Dimension {
+            DepthMode::WFovUnbinned => Dimension {
                 width: 1024,
                 height: 1024,
             },
-            PassiveIr => Dimension {
+            DepthMode::PassiveIr => Dimension {
                 width: 1024,
                 height: 1024,
             },
@@ -47,19 +47,19 @@ impl DepthMode {
     /// when using a given depth mode, in millimeters
     pub fn get_range(&self) -> Range<u16> {
         match self {
-            NFov2x2Binned => Range::<u16> {
+            DepthMode::NFov2x2Binned => Range::<u16> {
                 min: 500,
                 max: 5800,
             },
-            NFovUnbinned => Range::<u16> {
+            DepthMode::NFovUnbinned => Range::<u16> {
                 min: 500,
                 max: 4000,
             },
-            WFov2x2Binned => Range::<u16> {
+            DepthMode::WFov2x2Binned => Range::<u16> {
                 min: 250,
                 max: 3000,
             },
-            WFovUnbinned => Range::<u16> {
+            DepthMode::WFovUnbinned => Range::<u16> {
                 min: 250,
                 max: 2500,
             },
@@ -71,11 +71,11 @@ impl DepthMode {
     /// from the IR camera when using a given depth mode
     pub fn get_ir_level(&self) -> Range<u16> {
         match self {
-            PassiveIr => Range::<u16> {
+            DepthMode::PassiveIr => Range::<u16> {
                 min: 250,
                 max: 3000,
             },
-            Off => Range::<u16> { min: 0, max: 0 },
+            DepthMode::Off => Range::<u16> { min: 0, max: 0 },
             _ => Range::<u16> { min: 0, max: 1000 },
         }
     }

@@ -10,9 +10,9 @@ pub enum Fps {
 impl Fps {
     pub fn get_u32(&self) -> u32 {
         match self {
-            _5fps => 5,
-            _15fps => 15,
-            _30fps => 30,
+            Fps::_5fps => 5,
+            Fps::_15fps => 15,
+            Fps::_30fps => 30,
         }
     }
 }

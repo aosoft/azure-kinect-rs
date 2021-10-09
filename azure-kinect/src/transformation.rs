@@ -1,3 +1,5 @@
+#![allow(non_upper_case_globals)]
+
 use crate::*;
 use azure_kinect_sys::k4a::*;
 use std::ptr;

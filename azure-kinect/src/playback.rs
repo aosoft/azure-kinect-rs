@@ -96,9 +96,7 @@ impl Playback<'_> {
     pub fn get_next_imu_sample(&self) -> Result<k4a_imu_sample_t, Error> {
         let mut imu_sample = k4a_imu_sample_t::default();
         Error::from_k4a_stream_result_t(unsafe {
-            (self.api_record.funcs.k4a_playback_get_next_imu_sample)(self.handle, unsafe {
-                std::mem::transmute(&mut imu_sample)
-            })
+            (self.api_record.funcs.k4a_playback_get_next_imu_sample)(self.handle,  std::mem::transmute(&mut imu_sample))
         })
         .to_result(imu_sample)
     }
@@ -107,9 +105,7 @@ impl Playback<'_> {
     pub fn get_previous_imu_sample(&self) -> Result<k4a_imu_sample_t, Error> {
         let mut imu_sample = k4a_imu_sample_t::default();
         Error::from_k4a_stream_result_t(unsafe {
-            (self.api_record.funcs.k4a_playback_get_previous_imu_sample)(self.handle, unsafe {
-                std::mem::transmute(&mut imu_sample)
-            })
+            (self.api_record.funcs.k4a_playback_get_previous_imu_sample)(self.handle, std::mem::transmute(&mut imu_sample))
         })
         .to_result(imu_sample)
     }

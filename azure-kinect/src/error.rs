@@ -1,3 +1,5 @@
+#![allow(non_upper_case_globals)]
+
 use azure_kinect_sys::k4a::*;
 use azure_kinect_sys::k4arecord::k4a_stream_result_t;
 
@@ -14,35 +16,35 @@ pub enum Error {
 impl Error {
     pub(crate) fn from_k4a_result_t(s: k4a_result_t) -> Error {
         match s {
-            K4A_RESULT_SUCCEEDED => Error::Succeeded,
-            K4A_RESULT_FAILED => Error::Failed,
+            k4a_result_t_K4A_RESULT_SUCCEEDED => Error::Succeeded,
+            k4a_result_t_K4A_RESULT_FAILED => Error::Failed,
             _ => Error::Failed,
         }
     }
 
     pub(crate) fn from_k4a_buffer_result_t(s: k4a_buffer_result_t) -> Error {
         match s {
-            K4A_BUFFER_RESULT_SUCCEEDED => Error::Succeeded,
-            K4A_BUFFER_RESULT_FAILED => Error::Failed,
-            K4A_BUFFER_RESULT_TOO_SMALL => Error::TooSmall,
+            k4a_buffer_result_t_K4A_BUFFER_RESULT_SUCCEEDED => Error::Succeeded,
+            k4a_buffer_result_t_K4A_BUFFER_RESULT_FAILED => Error::Failed,
+            k4a_buffer_result_t_K4A_BUFFER_RESULT_TOO_SMALL => Error::TooSmall,
             _ => Error::Failed,
         }
     }
 
     pub(crate) fn from_k4a_wait_result_t(s: k4a_wait_result_t) -> Error {
         match s {
-            K4A_WAIT_RESULT_SUCCEEDED => Error::Succeeded,
-            K4A_WAIT_RESULT_FAILED => Error::Failed,
-            K4A_WAIT_RESULT_TIMEOUT => Error::Timeout,
+            k4a_wait_result_t_K4A_WAIT_RESULT_SUCCEEDED => Error::Succeeded,
+            k4a_wait_result_t_K4A_WAIT_RESULT_FAILED => Error::Failed,
+            k4a_wait_result_t_K4A_WAIT_RESULT_TIMEOUT => Error::Timeout,
             _ => Error::Failed,
         }
     }
 
     pub(crate) fn from_k4a_stream_result_t(s: k4a_stream_result_t) -> Error {
         match s {
-            K4A_STREAM_RESULT_SUCCEEDED => Error::Succeeded,
-            K4A_STREAM_RESULT_FAILED => Error::Failed,
-            K4A_STREAM_RESULT_EOF => Error::Eof,
+            azure_kinect_sys::k4arecord::k4a_stream_result_t_K4A_STREAM_RESULT_SUCCEEDED => Error::Succeeded,
+            azure_kinect_sys::k4arecord::k4a_stream_result_t_K4A_STREAM_RESULT_FAILED => Error::Failed,
+            azure_kinect_sys::k4arecord::k4a_stream_result_t_K4A_STREAM_RESULT_EOF => Error::Eof,
             _ => Error::Failed,
         }
     }
