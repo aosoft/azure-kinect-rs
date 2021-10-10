@@ -1,43 +1,42 @@
 use crate::playback::Playback;
 use crate::record::Record;
 use crate::*;
-use azure_kinect_sys::k4a::k4a_log_level_t;
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
 
-pub type DebugMessageHandler = Box<dyn Fn(k4a_log_level_t, &str, raw::c_int, &str)>;
+pub type DebugMessageHandler = Box<dyn Fn(LogLevel, &str, raw::c_int, &str)>;
 
 struct DebugMessageHandlerRegister {
     debug_message_handler: Option<DebugMessageHandler>,
 }
 
 impl DebugMessageHandlerRegister {
-    pub fn new() -> DebugMessageHandlerRegister {
+    pub(crate) fn new() -> DebugMessageHandlerRegister {
         DebugMessageHandlerRegister {
             debug_message_handler: None,
         }
     }
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
-    pub fn set_debug_message_handler(
+    pub(crate) fn set_debug_message_handler(
         &mut self,
         api: &azure_kinect_sys::api::Api,
         debug_message_handler: DebugMessageHandler,
-        min_level: k4a_log_level_t,
+        min_level: LogLevel,
     ) {
         self.debug_message_handler = debug_message_handler.into();
         unsafe {
             (api.funcs.k4a_set_debug_message_handler)(
                 Some(Self::debug_message_handler_func),
                 &self.debug_message_handler as *const Option<DebugMessageHandler> as _,
-                min_level as azure_kinect_sys::k4a::k4a_log_level_t,
+                min_level.into(),
             );
         }
     }
 
     /// Clears the callback function to receive debug messages from the Azure Kinect device.
-    pub fn reset_debug_message_handler(&mut self, api: &azure_kinect_sys::api::Api) {
+    pub(crate) fn reset_debug_message_handler(&mut self, api: &azure_kinect_sys::api::Api) {
         self.debug_message_handler = None;
         unsafe {
             (api.funcs.k4a_set_debug_message_handler)(
@@ -59,7 +58,7 @@ impl DebugMessageHandlerRegister {
             let h = context as *const Option<DebugMessageHandler>;
             if h != ptr::null() && (*h).is_some() {
                 (*h).as_ref().unwrap()(
-                    level,
+                    LogLevel::from_primitive(level),
                     std::ffi::CStr::from_ptr(file).to_str().unwrap_or_default(),
                     line,
                     std::ffi::CStr::from_ptr(message)
@@ -96,7 +95,7 @@ impl Factory {
     pub fn set_debug_message_handler(
         &mut self,
         debug_message_handler: DebugMessageHandler,
-        min_level: k4a_log_level_t,
+        min_level: LogLevel,
     ) {
         self.debug_message_handler.set_debug_message_handler(
             &self.api,
@@ -148,7 +147,7 @@ impl FactoryRecord {
     pub fn set_debug_message_handler(
         &mut self,
         debug_message_handler: DebugMessageHandler,
-        min_level: k4a_log_level_t,
+        min_level: LogLevel,
     ) {
         self.debug_message_handler.set_debug_message_handler(
             &self.api_record.k4a,
@@ -191,7 +190,7 @@ impl FactoryRecord {
         &self,
         path: &str,
         device: &Device,
-        device_configuration: &azure_kinect_sys::k4arecord::k4a_device_configuration_t,
+        device_configuration: &DeviceConfiguration,
     ) -> Result<Record, Error> {
         let mut handle: azure_kinect_sys::k4arecord::k4a_record_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
@@ -199,7 +198,7 @@ impl FactoryRecord {
             (self.api_record.funcs.k4a_record_create)(
                 path.as_ptr(),
                 device.handle as _,
-                *device_configuration,
+                *device_configuration.for_k4arecord(),
                 &mut handle,
             )
         })

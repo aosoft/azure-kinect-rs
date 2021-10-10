@@ -3,6 +3,12 @@ use crate::structs::*;
 
 macro_rules! impl_conv_primitive_to_enum {
     ($enum_type:ident, $primitive_type:ident) => {
+        impl From<$enum_type> for $primitive_type {
+            fn from(s: $enum_type) -> Self {
+                s as _
+            }
+        }
+
         impl $enum_type {
             #[allow(dead_code)]
             pub(crate) fn from_primitive(s: $primitive_type) -> Self {
@@ -30,12 +36,6 @@ pub enum LogLevel {
     Off = k4a_log_level_t_K4A_LOG_LEVEL_OFF,
 }
 
-impl From<LogLevel> for k4a_log_level_t {
-    fn from(s: LogLevel) -> Self {
-        s as _
-    }
-}
-
 impl_conv_primitive_to_enum!(LogLevel, k4a_log_level_t);
 
 
@@ -48,12 +48,6 @@ pub enum DepthMode {
     WFov2x2Binned = k4a_depth_mode_t_K4A_DEPTH_MODE_WFOV_2X2BINNED,
     WFovUnbinned = k4a_depth_mode_t_K4A_DEPTH_MODE_WFOV_UNBINNED,
     PassiveIr = k4a_depth_mode_t_K4A_DEPTH_MODE_PASSIVE_IR,
-}
-
-impl From<DepthMode> for k4a_depth_mode_t {
-    fn from(s: DepthMode) -> Self {
-        s as _
-    }
 }
 
 impl_conv_primitive_to_enum!(DepthMode, k4a_depth_mode_t);
@@ -141,12 +135,6 @@ pub enum ColorResolution {
     _3072p = k4a_color_resolution_t_K4A_COLOR_RESOLUTION_3072P,
 }
 
-impl From<ColorResolution> for k4a_color_resolution_t {
-    fn from(s: ColorResolution) -> Self {
-        s as _
-    }
-}
-
 impl_conv_primitive_to_enum!(ColorResolution, k4a_color_resolution_t);
 
 impl ColorResolution {
@@ -210,12 +198,6 @@ pub enum ImageFormat {
     Custom = k4a_image_format_t_K4A_IMAGE_FORMAT_CUSTOM,
 }
 
-impl From<ImageFormat> for k4a_image_format_t {
-    fn from(s: ImageFormat) -> Self {
-        s as _
-    }
-}
-
 impl_conv_primitive_to_enum!(ImageFormat, k4a_image_format_t);
 
 
@@ -229,12 +211,6 @@ pub enum TransformationInterpolationType {
     Linear = k4a_transformation_interpolation_type_t_K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,
 }
 
-impl From<TransformationInterpolationType> for k4a_transformation_interpolation_type_t {
-    fn from(s: TransformationInterpolationType) -> Self {
-        s as _
-    }
-}
-
 impl_conv_primitive_to_enum!(TransformationInterpolationType, k4a_transformation_interpolation_type_t);
 
 #[repr(u32)]
@@ -243,12 +219,6 @@ pub enum Fps {
     _5fps = k4a_fps_t_K4A_FRAMES_PER_SECOND_5,
     _15fps = k4a_fps_t_K4A_FRAMES_PER_SECOND_15,
     _30fps = k4a_fps_t_K4A_FRAMES_PER_SECOND_30,
-}
-
-impl From<Fps> for k4a_fps_t {
-    fn from(s: Fps) -> Self {
-        s as _
-    }
 }
 
 impl_conv_primitive_to_enum!(Fps, k4a_fps_t);
@@ -289,12 +259,6 @@ pub enum ColorControlCommand {
     PowerlineFrequency = k4a_color_control_command_t_K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
 }
 
-impl From<ColorControlCommand> for k4a_color_control_command_t {
-    fn from(s: ColorControlCommand) -> Self {
-        s as _
-    }
-}
-
 impl_conv_primitive_to_enum!(ColorControlCommand, k4a_color_control_command_t);
 
 
@@ -306,12 +270,6 @@ pub enum ColorControlMode {
     Auto = k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_AUTO,
     #[doc = "< set the associated k4a_color_control_command_t to manual"]
     Manual = k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_MANUAL,
-}
-
-impl From<ColorControlMode> for k4a_color_control_mode_t {
-    fn from(s: ColorControlMode) -> Self {
-        s as _
-    }
 }
 
 impl_conv_primitive_to_enum!(ColorControlMode, k4a_color_control_mode_t);
@@ -327,12 +285,6 @@ pub enum WiredSyncMode {
     Master = k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_MASTER,
     #[doc = "< The 'Sync In' jack is used for synchronization and 'Sync Out' is driven for the next device in the chain."]
     Subordinate = k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_SUBORDINATE,
-}
-
-impl From<WiredSyncMode> for k4a_wired_sync_mode_t {
-    fn from(s: WiredSyncMode) -> Self {
-        s as _
-    }
 }
 
 impl_conv_primitive_to_enum!(WiredSyncMode, k4a_wired_sync_mode_t);
@@ -354,12 +306,6 @@ pub enum CalibrationType {
     Accel = k4a_calibration_type_t_K4A_CALIBRATION_TYPE_ACCEL,
 }
 
-impl From<CalibrationType> for k4a_calibration_type_t {
-    fn from(s: CalibrationType) -> Self {
-        s as _
-    }
-}
-
 impl_conv_primitive_to_enum!(CalibrationType, k4a_calibration_type_t);
 
 
@@ -379,12 +325,6 @@ pub enum CalibrationModelType {
     BrownConrady = k4a_calibration_model_type_t_K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY,
 }
 
-impl From<CalibrationModelType> for k4a_calibration_model_type_t {
-    fn from(s: CalibrationModelType) -> Self {
-        s as _
-    }
-}
-
 impl_conv_primitive_to_enum!(CalibrationModelType, k4a_calibration_model_type_t);
 
 
@@ -396,12 +336,6 @@ pub enum FirmwareBuildType {
     Release = k4a_firmware_build_t_K4A_FIRMWARE_BUILD_RELEASE,
     #[doc = "< Pre-production firmware."]
     Debug = k4a_firmware_build_t_K4A_FIRMWARE_BUILD_DEBUG,
-}
-
-impl From<FirmwareBuildType> for k4a_firmware_build_t {
-    fn from(s: FirmwareBuildType) -> Self {
-        s as _
-    }
 }
 
 impl_conv_primitive_to_enum!(FirmwareBuildType, k4a_firmware_build_t);
@@ -418,12 +352,6 @@ pub enum FirmwareSignatureType {
     Test = k4a_firmware_signature_t_K4A_FIRMWARE_SIGNATURE_TEST,
     #[doc = "< Unsigned firmware."]
     Unsigned = k4a_firmware_signature_t_K4A_FIRMWARE_SIGNATURE_UNSIGNED,
-}
-
-impl From<FirmwareSignatureType> for k4a_firmware_signature_t {
-    fn from(s: FirmwareSignatureType) -> Self {
-        s as _
-    }
 }
 
 impl_conv_primitive_to_enum!(FirmwareSignatureType, k4a_firmware_signature_t);

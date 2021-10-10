@@ -2,7 +2,7 @@ pub use calibration::Calibration;
 pub use camera::Camera;
 pub use capture::Capture;
 pub use enums::*;
-pub use device::Device;
+pub use device::{Device, DeviceConfiguration, DeviceConfigurationBuilder};
 pub use error::Error;
 pub use factory::{DebugMessageHandler, Factory, FactoryRecord};
 pub use image::Image;
