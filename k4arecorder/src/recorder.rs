@@ -89,11 +89,10 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     );
     println!("; A: {}", version_info.audio);
 
-    let camera_fps =
-        unsafe { std::mem::transmute::<_, Fps>(param.device_config.camera_fps) }.get_u32();
+    let camera_fps = param.device_config.camera_fps().get_u32();
     if camera_fps <= 0
-        || (param.device_config.color_resolution == k4a_color_resolution_t_K4A_COLOR_RESOLUTION_OFF
-            && param.device_config.depth_mode == k4a_depth_mode_t_K4A_DEPTH_MODE_OFF)
+        || (param.device_config.color_resolution() == ColorResolution::Off
+            && param.device_config.depth_mode() == DepthMode::Off)
     {
         return Err(Box::new(Error::ErrorStr(
             "Either the color or depth modes must be enabled to record.",
@@ -164,8 +163,8 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     recording.write_header()?;
 
     // Wait for the first capture before starting recording.
-    let timeout_sec_for_first_capture = if param.device_config.wired_sync_mode
-        == k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_SUBORDINATE
+    let timeout_sec_for_first_capture = if param.device_config.wired_sync_mode()
+        == WiredSyncMode::Subordinate
     {
         println!("[subordinate mode] Waiting for signal from master");
         360u64

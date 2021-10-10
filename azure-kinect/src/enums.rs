@@ -13,7 +13,7 @@ macro_rules! impl_conv_primitive_to_enum {
 }
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Verbosity levels of debug messaging"]
 pub enum LogLevel {
     #[doc = "< Most severe level of debug messaging."]
@@ -40,7 +40,7 @@ impl_conv_primitive_to_enum!(LogLevel, k4a_log_level_t);
 
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum DepthMode {
     Off = k4a_depth_mode_t_K4A_DEPTH_MODE_OFF,
     NFov2x2Binned = k4a_depth_mode_t_K4A_DEPTH_MODE_NFOV_2X2BINNED,
@@ -130,7 +130,7 @@ impl DepthMode {
 
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum ColorResolution {
     Off = k4a_color_resolution_t_K4A_COLOR_RESOLUTION_OFF,
     _720p = k4a_color_resolution_t_K4A_COLOR_RESOLUTION_720P,
@@ -187,7 +187,7 @@ impl ColorResolution {
 }
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Image format type."]
 pub enum ImageFormat {
     #[doc = " Color image type MJPG."]
@@ -220,7 +220,7 @@ impl_conv_primitive_to_enum!(ImageFormat, k4a_image_format_t);
 
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Transformation interpolation type."]
 pub enum TransformationInterpolationType {
     #[doc = "< Nearest neighbor interpolation"]
@@ -238,7 +238,7 @@ impl From<TransformationInterpolationType> for k4a_transformation_interpolation_
 impl_conv_primitive_to_enum!(TransformationInterpolationType, k4a_transformation_interpolation_type_t);
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Fps {
     _5fps = k4a_fps_t_K4A_FRAMES_PER_SECOND_5,
     _15fps = k4a_fps_t_K4A_FRAMES_PER_SECOND_15,
@@ -264,7 +264,7 @@ impl Fps {
 }
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Color sensor control commands"]
 pub enum ColorControlCommand {
     #[doc = " Exposure time setting."]
@@ -299,7 +299,7 @@ impl_conv_primitive_to_enum!(ColorControlCommand, k4a_color_control_command_t);
 
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Calibration types."]
 pub enum ColorControlMode {
     #[doc = "< set the associated k4a_color_control_command_t to auto"]
@@ -318,15 +318,15 @@ impl_conv_primitive_to_enum!(ColorControlMode, k4a_color_control_mode_t);
 
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Synchronization mode when connecting two or more devices together."]
 pub enum WiredSyncMode {
     #[doc = "< Neither 'Sync In' or 'Sync Out' connections are used."]
     Standalone = k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_STANDALONE,
-    #[doc = "< The 'Sync Out' jack is enabled and synchronization data it driven out the"]
+    #[doc = "< The 'Sync Out' jack is enabled and synchronization data it driven out the connected wire."]
     Master = k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_MASTER,
-    #[doc = "< The 'Sync In' jack is used for synchronization and 'Sync Out' is driven for the"]
-    Subroutine = k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_SUBORDINATE,
+    #[doc = "< The 'Sync In' jack is used for synchronization and 'Sync Out' is driven for the next device in the chain."]
+    Subordinate = k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_SUBORDINATE,
 }
 
 impl From<WiredSyncMode> for k4a_wired_sync_mode_t {
@@ -339,7 +339,7 @@ impl_conv_primitive_to_enum!(WiredSyncMode, k4a_wired_sync_mode_t);
 
 
 #[repr(i32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Calibration types."]
 pub enum CalibrationType {
     #[doc = "< Calibration type is unknown"]
@@ -364,7 +364,7 @@ impl_conv_primitive_to_enum!(CalibrationType, k4a_calibration_type_t);
 
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Calibration model type."]
 pub enum CalibrationModelType {
     #[doc = "< Calibration model is unknown"]
@@ -389,7 +389,7 @@ impl_conv_primitive_to_enum!(CalibrationModelType, k4a_calibration_model_type_t)
 
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Firmware build type."]
 pub enum FirmwareBuildType {
     #[doc = "< Production firmware."]
@@ -409,7 +409,7 @@ impl_conv_primitive_to_enum!(FirmwareBuildType, k4a_firmware_build_t);
 
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Firmware signature type."]
 pub enum FirmwareSignatureType {
     #[doc = "< Microsoft signed firmware."]

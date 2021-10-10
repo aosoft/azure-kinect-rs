@@ -9,10 +9,10 @@ pub struct Camera<'a> {
 impl Camera<'_> {
     pub(crate) fn new<'a>(
         device: &'a Device<'a>,
-        configuration: &k4a_device_configuration_t,
+        configuration: &DeviceConfiguration,
     ) -> Result<Camera<'a>, Error> {
         Error::from_k4a_result_t(unsafe {
-            (device.api.funcs.k4a_device_start_cameras)(device.handle, configuration)
+            (device.api.funcs.k4a_device_start_cameras)(device.handle, &configuration.value)
         })
         .to_result(())?;
         Ok(Camera::<'a> { device })
