@@ -13,15 +13,13 @@ fn main() {
 fn main2() -> Result<(), Box<dyn std::error::Error>> {
     let factory = Factory::new()?;
     let device = factory.device_open(0)?;
-    let camera_config = k4a_device_configuration_t {
-        depth_mode: k4a_depth_mode_t_K4A_DEPTH_MODE_NFOV_2X2BINNED,
-        ..k4a_device_configuration_t::default()
-    };
+    let camera_config = DeviceConfiguration::builder()
+        .depth_mode(DepthMode::NFov2x2Binned)
+        .build();
     let camera = device.start_cameras(&camera_config)?;
 
     #[cfg(feature = "depth-view")]
-    let image_dimension =
-        unsafe { std::mem::transmute::<_, DepthMode>(camera_config.depth_mode) }.get_dimension();
+    let image_dimension = camera_config.depth_mode().get_dimension();
     #[cfg(not(feature = "depth-view"))]
     let image_dimension = camera_config.color_resolution.get_dimension();
 
@@ -76,13 +74,7 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
                             let p2 = buffer.as_mut_ptr().add(y * pitch) as *mut u32;
                             for x in 0..width as isize {
                                 let value = *p.offset(x);
-                                *p2.offset(x) = get_depth_color(
-                                    value,
-                                    std::mem::transmute::<_, DepthMode>(
-                                        camera_config.depth_mode,
-                                    )
-                                    .get_range(),
-                                )
+                                *p2.offset(x) = get_depth_color(value, camera_config.depth_mode().get_range())
                             }
                         }
                     }
