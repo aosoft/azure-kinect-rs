@@ -3,6 +3,7 @@
 use crate::*;
 use azure_kinect_sys::k4a::*;
 use std::ptr;
+use crate::enums::CalibrationType;
 
 #[allow(dead_code)]
 pub struct Transformation<'a> {
@@ -184,14 +185,14 @@ impl Transformation<'_> {
     pub fn depth_image_to_point_cloud_exist_image(
         &self,
         depth_image: &Image,
-        camera: k4a_calibration_type_t,
+        camera: CalibrationType,
         xyz_image: &mut Image,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
             (self.api.funcs.k4a_transformation_depth_image_to_point_cloud)(
                 self.handle,
                 depth_image.handle,
-                camera,
+                camera.into(),
                 xyz_image.handle,
             )
         })
@@ -201,7 +202,7 @@ impl Transformation<'_> {
     pub fn depth_image_to_point_cloud(
         &self,
         depth_image: &Image,
-        camera: k4a_calibration_type_t,
+        camera: CalibrationType,
     ) -> Result<Image, Error> {
         let mut xyz_image = Image::with_format(
             self.api,

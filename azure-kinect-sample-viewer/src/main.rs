@@ -78,11 +78,9 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
                                 let value = *p.offset(x);
                                 *p2.offset(x) = get_depth_color(
                                     value,
-                                    unsafe {
-                                        std::mem::transmute::<_, DepthMode>(
-                                            camera_config.depth_mode,
-                                        )
-                                    }
+                                    std::mem::transmute::<_, DepthMode>(
+                                        camera_config.depth_mode,
+                                    )
                                     .get_range(),
                                 )
                             }

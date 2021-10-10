@@ -9,6 +9,7 @@ pub use image::Image;
 pub use imu::Imu;
 pub use structs::{Dimension, Range};
 pub use transformation::Transformation;
+pub use vectors::{Float2, Float3};
 
 pub mod calibration;
 pub mod camera;
@@ -27,3 +28,4 @@ pub mod record;
 pub mod structs;
 pub mod transformation;
 pub mod utility;
+pub mod vectors;
