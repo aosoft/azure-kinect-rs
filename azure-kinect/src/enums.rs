@@ -217,6 +217,7 @@ impl From<TransformationInterpolationType> for k4a_transformation_interpolation_
 }
 
 #[repr(u32)]
+#[derive(Clone, Copy, Debug)]
 pub enum Fps {
     _5fps = k4a_fps_t_K4A_FRAMES_PER_SECOND_5,
     _15fps = k4a_fps_t_K4A_FRAMES_PER_SECOND_15,
@@ -236,6 +237,74 @@ impl Fps {
             Fps::_15fps => 15,
             Fps::_30fps => 30,
         }
+    }
+}
+
+#[repr(u32)]
+#[derive(Clone, Copy, Debug)]
+#[doc = " Color sensor control commands"]
+pub enum ColorControlCommand {
+    #[doc = " Exposure time setting."]
+    ExposureTimeAbsolute = k4a_color_control_command_t_K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+    #[doc = " Exposure or Framerate priority setting."]
+    AutoExposurePriority = k4a_color_control_command_t_K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY,
+    #[doc = " Brightness setting."]
+    Brightness = k4a_color_control_command_t_K4A_COLOR_CONTROL_BRIGHTNESS,
+    #[doc = " Contrast setting."]
+    Contrast = k4a_color_control_command_t_K4A_COLOR_CONTROL_CONTRAST,
+    #[doc = " Saturation setting."]
+    Saturation = k4a_color_control_command_t_K4A_COLOR_CONTROL_SATURATION,
+    #[doc = " Sharpness setting."]
+    Sharpness = k4a_color_control_command_t_K4A_COLOR_CONTROL_SHARPNESS,
+    #[doc = " White balance setting."]
+    WhiteBalance = k4a_color_control_command_t_K4A_COLOR_CONTROL_WHITEBALANCE,
+    #[doc = " Backlight compensation setting."]
+    BacklightCompensation = k4a_color_control_command_t_K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION,
+    #[doc = " Gain setting."]
+    Gain = k4a_color_control_command_t_K4A_COLOR_CONTROL_GAIN,
+    #[doc = " Powerline frequency setting."]
+    PowerlineFrequency = k4a_color_control_command_t_K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
+}
+
+impl From<ColorControlCommand> for k4a_color_control_command_t {
+    fn from(s: ColorControlCommand) -> Self {
+        s as _
+    }
+}
+
+
+#[repr(u32)]
+#[derive(Clone, Copy, Debug)]
+#[doc = " Calibration types."]
+pub enum ColorControlMode {
+    #[doc = "< set the associated k4a_color_control_command_t to auto"]
+    Auto = k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_AUTO,
+    #[doc = "< set the associated k4a_color_control_command_t to manual"]
+    Manual = k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_MANUAL,
+}
+
+impl From<ColorControlMode> for k4a_color_control_mode_t {
+    fn from(s: ColorControlMode) -> Self {
+        s as _
+    }
+}
+
+
+#[repr(u32)]
+#[derive(Clone, Copy, Debug)]
+#[doc = " Synchronization mode when connecting two or more devices together."]
+pub enum WiredSyncMode {
+    #[doc = "< Neither 'Sync In' or 'Sync Out' connections are used."]
+    Standalone = k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_STANDALONE,
+    #[doc = "< The 'Sync Out' jack is enabled and synchronization data it driven out the"]
+    Master = k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_MASTER,
+    #[doc = "< The 'Sync In' jack is used for synchronization and 'Sync Out' is driven for the"]
+    Subroutine = k4a_wired_sync_mode_t_K4A_WIRED_SYNC_MODE_SUBORDINATE,
+}
+
+impl From<WiredSyncMode> for k4a_wired_sync_mode_t {
+    fn from(s: WiredSyncMode) -> Self {
+        s as _
     }
 }
 
@@ -261,3 +330,64 @@ impl From<CalibrationType> for k4a_calibration_type_t {
         s as _
     }
 }
+
+
+#[repr(u32)]
+#[derive(Clone, Copy, Debug)]
+#[doc = " Calibration model type."]
+pub enum CalibrationModelType {
+    #[doc = "< Calibration model is unknown"]
+    Unknown = k4a_calibration_model_type_t_K4A_CALIBRATION_LENS_DISTORTION_MODEL_UNKNOWN,
+    #[doc = "< Deprecated (not supported). Calibration model is Theta (arctan)."]
+    Theta = k4a_calibration_model_type_t_K4A_CALIBRATION_LENS_DISTORTION_MODEL_THETA,
+    #[doc = "< Deprecated (not supported). Calibration model is Polynomial 3K."]
+    Polynomial3K = k4a_calibration_model_type_t_K4A_CALIBRATION_LENS_DISTORTION_MODEL_POLYNOMIAL_3K,
+    #[doc = "< Deprecated (only supported early internal devices). Calibration model is Rational 6KT."]
+    Rational6KT = k4a_calibration_model_type_t_K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT,
+    #[doc = "< Calibration model is Brown Conrady (compatible with OpenCV)"]
+    BrownConrady = k4a_calibration_model_type_t_K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY,
+}
+
+impl From<CalibrationModelType> for k4a_calibration_model_type_t {
+    fn from(s: CalibrationType) -> Self {
+        s as _
+    }
+}
+
+
+#[repr(u32)]
+#[derive(Clone, Copy, Debug)]
+#[doc = " Firmware build type."]
+pub enum FirmwareBuildType {
+    #[doc = "< Production firmware."]
+    Release = k4a_firmware_build_t_K4A_FIRMWARE_BUILD_RELEASE,
+    #[doc = "< Pre-production firmware."]
+    Debug = k4a_firmware_build_t_K4A_FIRMWARE_BUILD_DEBUG,
+}
+
+impl From<FirmwareBuildType> for k4a_firmware_build_t {
+    fn from(s: FirmwareBuildType) -> Self {
+        s as _
+    }
+}
+
+
+
+#[repr(u32)]
+#[derive(Clone, Copy, Debug)]
+#[doc = " Firmware signature type."]
+pub enum FirmwareSignatureType {
+    #[doc = "< Microsoft signed firmware."]
+    Microsoft = k4a_firmware_signature_t_K4A_FIRMWARE_SIGNATURE_MSFT,
+    #[doc = "< Test signed firmware."]
+    Test = k4a_firmware_signature_t_K4A_FIRMWARE_SIGNATURE_TEST,
+    #[doc = "< Unsigned firmware."]
+    Unsigned = k4a_firmware_signature_t_K4A_FIRMWARE_SIGNATURE_UNSIGNED,
+}
+
+impl From<FirmwareSignatureType> for k4a_firmware_signature_t {
+    fn from(s: FirmwareSignatureType) -> Self {
+        s as _
+    }
+}
+
