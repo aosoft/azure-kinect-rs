@@ -199,6 +199,47 @@ impl From<ImageFormat> for k4a_image_format_t {
     }
 }
 
+
+#[repr(u32)]
+#[derive(Clone, Copy, Debug)]
+#[doc = " Transformation interpolation type."]
+pub enum TransformationInterpolationType {
+    #[doc = "< Nearest neighbor interpolation"]
+    Nearest = k4a_transformation_interpolation_type_t_K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST,
+    #[doc = "< Linear interpolation"]
+    Linear = k4a_transformation_interpolation_type_t_K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,
+}
+
+impl From<TransformationInterpolationType> for k4a_transformation_interpolation_type_t {
+    fn from(s: TransformationInterpolationType) -> Self {
+        s as _
+    }
+}
+
+#[repr(u32)]
+pub enum Fps {
+    _5fps = k4a_fps_t_K4A_FRAMES_PER_SECOND_5,
+    _15fps = k4a_fps_t_K4A_FRAMES_PER_SECOND_15,
+    _30fps = k4a_fps_t_K4A_FRAMES_PER_SECOND_30,
+}
+
+impl From<Fps> for k4a_fps_t {
+    fn from(s: Fps) -> Self {
+        s as _
+    }
+}
+
+impl Fps {
+    pub fn get_u32(&self) -> u32 {
+        match self {
+            Fps::_5fps => 5,
+            Fps::_15fps => 15,
+            Fps::_30fps => 30,
+        }
+    }
+}
+
+
 #[repr(i32)]
 #[derive(Clone, Copy, Debug)]
 #[doc = " Calibration types."]

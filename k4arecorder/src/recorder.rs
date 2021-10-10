@@ -1,5 +1,4 @@
 use crate::param::Parameter;
-use azure_kinect::fps::Fps;
 use azure_kinect::*;
 use azure_kinect_sys::k4a::*;
 use std::time::{Duration, Instant};
