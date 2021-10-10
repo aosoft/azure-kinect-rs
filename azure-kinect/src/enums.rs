@@ -1,6 +1,17 @@
 use azure_kinect_sys::k4a::*;
 use crate::structs::*;
 
+macro_rules! impl_conv_primitive_to_enum {
+    ($enum_type:ident, $primitive_type:ident) => {
+        impl $enum_type {
+            #[allow(dead_code)]
+            pub(crate) fn from_primitive(s: $primitive_type) -> Self {
+                unsafe { std::mem::transmute(s) }
+            }
+        }
+    };
+}
+
 #[repr(u32)]
 #[derive(Clone, Copy, Debug)]
 #[doc = " Verbosity levels of debug messaging"]
@@ -25,6 +36,8 @@ impl From<LogLevel> for k4a_log_level_t {
     }
 }
 
+impl_conv_primitive_to_enum!(LogLevel, k4a_log_level_t);
+
 
 #[repr(u32)]
 #[derive(Clone, Copy, Debug)]
@@ -42,6 +55,8 @@ impl From<DepthMode> for k4a_depth_mode_t {
         s as _
     }
 }
+
+impl_conv_primitive_to_enum!(DepthMode, k4a_depth_mode_t);
 
 impl DepthMode {
     /// Gets the dimensions of the depth images that the depth camera will produce for a
@@ -132,6 +147,8 @@ impl From<ColorResolution> for k4a_color_resolution_t {
     }
 }
 
+impl_conv_primitive_to_enum!(ColorResolution, k4a_color_resolution_t);
+
 impl ColorResolution {
     /// Gets the dimensions of the color images that the color camera will produce for a
     /// given color resolution
@@ -199,6 +216,8 @@ impl From<ImageFormat> for k4a_image_format_t {
     }
 }
 
+impl_conv_primitive_to_enum!(ImageFormat, k4a_image_format_t);
+
 
 #[repr(u32)]
 #[derive(Clone, Copy, Debug)]
@@ -216,6 +235,8 @@ impl From<TransformationInterpolationType> for k4a_transformation_interpolation_
     }
 }
 
+impl_conv_primitive_to_enum!(TransformationInterpolationType, k4a_transformation_interpolation_type_t);
+
 #[repr(u32)]
 #[derive(Clone, Copy, Debug)]
 pub enum Fps {
@@ -229,6 +250,8 @@ impl From<Fps> for k4a_fps_t {
         s as _
     }
 }
+
+impl_conv_primitive_to_enum!(Fps, k4a_fps_t);
 
 impl Fps {
     pub fn get_u32(&self) -> u32 {
@@ -272,6 +295,8 @@ impl From<ColorControlCommand> for k4a_color_control_command_t {
     }
 }
 
+impl_conv_primitive_to_enum!(ColorControlCommand, k4a_color_control_command_t);
+
 
 #[repr(u32)]
 #[derive(Clone, Copy, Debug)]
@@ -288,6 +313,8 @@ impl From<ColorControlMode> for k4a_color_control_mode_t {
         s as _
     }
 }
+
+impl_conv_primitive_to_enum!(ColorControlMode, k4a_color_control_mode_t);
 
 
 #[repr(u32)]
@@ -307,6 +334,8 @@ impl From<WiredSyncMode> for k4a_wired_sync_mode_t {
         s as _
     }
 }
+
+impl_conv_primitive_to_enum!(WiredSyncMode, k4a_wired_sync_mode_t);
 
 
 #[repr(i32)]
@@ -331,6 +360,8 @@ impl From<CalibrationType> for k4a_calibration_type_t {
     }
 }
 
+impl_conv_primitive_to_enum!(CalibrationType, k4a_calibration_type_t);
+
 
 #[repr(u32)]
 #[derive(Clone, Copy, Debug)]
@@ -349,10 +380,12 @@ pub enum CalibrationModelType {
 }
 
 impl From<CalibrationModelType> for k4a_calibration_model_type_t {
-    fn from(s: CalibrationType) -> Self {
+    fn from(s: CalibrationModelType) -> Self {
         s as _
     }
 }
+
+impl_conv_primitive_to_enum!(CalibrationModelType, k4a_calibration_model_type_t);
 
 
 #[repr(u32)]
@@ -370,6 +403,8 @@ impl From<FirmwareBuildType> for k4a_firmware_build_t {
         s as _
     }
 }
+
+impl_conv_primitive_to_enum!(FirmwareBuildType, k4a_firmware_build_t);
 
 
 
@@ -390,4 +425,6 @@ impl From<FirmwareSignatureType> for k4a_firmware_signature_t {
         s as _
     }
 }
+
+impl_conv_primitive_to_enum!(FirmwareSignatureType, k4a_firmware_signature_t);
 
