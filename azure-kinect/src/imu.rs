@@ -6,6 +6,10 @@ pub struct ImuSample {
 }
 
 impl ImuSample {
+    pub(crate) fn from_native(value: k4a_imu_sample_t) -> ImuSample {
+        ImuSample { value }
+    }
+
     #[doc = "< Temperature reading of this sample (Celsius)."]
     pub fn temperature(&self) -> f32 { self.value.temperature }
     #[doc = "< Accelerometer sample in meters per second squared."]
@@ -39,7 +43,7 @@ impl Imu<'_> {
                 timeout_in_ms,
             )
         })
-        .to_result(ImuSample { value: imu_sample })
+        .to_result(ImuSample::from_native(imu_sample))
     }
 
     pub fn get_imu_sample_wait_infinite(&self) -> Result<ImuSample, Error> {

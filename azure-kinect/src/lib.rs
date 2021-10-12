@@ -6,7 +6,7 @@ pub use device::{Device, DeviceConfiguration, DeviceConfigurationBuilder};
 pub use error::Error;
 pub use factory::{DebugMessageHandler, Factory, FactoryRecord};
 pub use image::Image;
-pub use imu::Imu;
+pub use imu::{Imu, ImuSample};
 pub use structs::*;
 pub use transformation::Transformation;
 pub use vectors::*;

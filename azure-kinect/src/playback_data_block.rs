@@ -2,8 +2,8 @@ use azure_kinect_sys::k4arecord::k4a_playback_data_block_t;
 use std::ptr;
 
 pub struct PlaybackDataBlock<'a> {
-    pub(crate) api_record: &'a azure_kinect_sys::api::ApiRecord,
-    pub(crate) handle: k4a_playback_data_block_t,
+    api_record: &'a azure_kinect_sys::api::ApiRecord,
+    handle: k4a_playback_data_block_t,
 }
 
 impl PlaybackDataBlock<'_> {

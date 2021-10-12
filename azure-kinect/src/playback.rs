@@ -8,6 +8,7 @@ use azure_kinect_sys::k4arecord::{
     k4a_record_configuration_t,
 };
 use std::ptr;
+use crate::imu::ImuSample;
 
 pub struct Playback<'a> {
     pub(crate) factory: &'a FactoryRecord,
@@ -93,21 +94,21 @@ impl Playback<'_> {
     }
 
     /// Get the next IMU sample in the recording.
-    pub fn get_next_imu_sample(&self) -> Result<k4a_imu_sample_t, Error> {
+    pub fn get_next_imu_sample(&self) -> Result<ImuSample, Error> {
         let mut imu_sample = k4a_imu_sample_t::default();
         Error::from_k4a_stream_result_t(unsafe {
             (self.factory.api_record.funcs.k4a_playback_get_next_imu_sample)(self.handle,  std::mem::transmute(&mut imu_sample))
         })
-        .to_result(imu_sample)
+        .to_result( ImuSample::from_native(imu_sample))
     }
 
     /// Get the previous IMU sample in the recording.
-    pub fn get_previous_imu_sample(&self) -> Result<k4a_imu_sample_t, Error> {
+    pub fn get_previous_imu_sample(&self) -> Result<ImuSample, Error> {
         let mut imu_sample = k4a_imu_sample_t::default();
         Error::from_k4a_stream_result_t(unsafe {
             (self.factory.api_record.funcs.k4a_playback_get_previous_imu_sample)(self.handle, std::mem::transmute(&mut imu_sample))
         })
-        .to_result(imu_sample)
+        .to_result( ImuSample::from_native(imu_sample))
     }
 
     /// Seeks to a specific time point in the recording
