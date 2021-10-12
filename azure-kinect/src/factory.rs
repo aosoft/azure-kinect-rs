@@ -15,22 +15,18 @@ pub struct Factory {
 
 impl Factory {
     pub fn new() -> Result<Factory, Error> {
-        let api = azure_kinect_sys::api::Api::new()?;
-        Ok(with_api(api))
+        Ok(Factory {
+            api: azure_kinect_sys::api::Api::new()?,
+            debug_message_handler: None
+        })
     }
 
     pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
-        let api = azure_kinect_sys::api::Api::with_library_directory(lib_dir)?;
-        Ok(with_api(api))
+        Ok(Factory {
+            api: azure_kinect_sys::api::Api::with_library_directory(lib_dir)?,
+            debug_message_handler: None
+        })
     }
-
-    pub(crate) fn with_api(api: azure_kinect_sys::api::Api) -> Factory {
-        Factory {
-            debug_message_handler: None,
-            api,
-        }
-    }
-
 
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {
@@ -43,8 +39,6 @@ impl Factory {
         Error::from_k4a_result_t(unsafe { (self.api.funcs.k4a_device_open)(index, &mut handle) })
             .to_result_fn(|| Device::from_handle(&self.api, handle))
     }
-
-
 
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
@@ -106,18 +100,16 @@ pub struct FactoryRecord {
 
 impl FactoryRecord {
     pub fn new() -> Result<FactoryRecord, Error> {
-        let api_record = azure_kinect_sys::api::ApiRecord::new()?;
         Ok(FactoryRecord {
-            core: Factory::with_api(api_record.k4a),
-            api_record,
+            core: Factory::new()?,
+            api_record: azure_kinect_sys::api::ApiRecord::new()?,
         })
     }
 
     pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
-        let api_record = azure_kinect_sys::api::ApiRecord::with_library_directory(lib_dir)?;
         Ok(FactoryRecord {
-            core: Factory::with_api(api_record.k4a),
-            api_record,
+            core: Factory::with_library_directory(lib_dir)?,
+            api_record: azure_kinect_sys::api::ApiRecord::with_library_directory(lib_dir)?,
         })
     }
 
@@ -129,7 +121,7 @@ impl FactoryRecord {
         Error::from_k4a_result_t(unsafe {
             (self.api_record.funcs.k4a_playback_open)(path.as_ptr(), &mut handle)
         })
-        .to_result_fn(|| Playback::from_handle(&self.api_record, handle))
+        .to_result_fn(|| Playback::from_handle(&self, handle))
     }
 
     /// Opens a new recording file for writing

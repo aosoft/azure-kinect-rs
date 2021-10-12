@@ -150,7 +150,6 @@ impl Api {
 
 pub struct ApiRecord {
     #[allow(dead_code)] module_k4arecord: Module,     //  Module manages a dynamic link library
-    pub k4a: Api,
     pub funcs: super::k4arecord::Funcs,
 }
 
@@ -265,7 +264,6 @@ impl ApiRecord {
 
             Ok(ApiRecord {
                 module_k4arecord,
-                k4a: Api::with_module(Module::get_module(K4A_LIBNAME)?)?,
                 funcs,
             })
         }
