@@ -1,6 +1,23 @@
 use crate::*;
 use azure_kinect_sys::k4a::*;
 
+pub struct ImuSample {
+    pub(crate) value: k4a_imu_sample_t,
+}
+
+impl ImuSample {
+    #[doc = "< Temperature reading of this sample (Celsius)."]
+    pub fn temperature(&self) -> f32 { self.value.temperature }
+    #[doc = "< Accelerometer sample in meters per second squared."]
+    pub fn acc_sample(&self) -> Float3 { Float3::from_native(self.value.acc_sample) }
+    #[doc = "< Timestamp of the accelerometer in microseconds."]
+    pub fn acc_timestamp_usec(&self) -> u64 { self.value.acc_timestamp_usec }
+    #[doc = "< Gyro sample in radians per second."]
+    pub fn gyro_sample(&self) -> Float3 { Float3::from_native(self.value.gyro_sample) }
+    #[doc = "< Timestamp of the gyroscope in microseconds"]
+    pub fn gyro_timestamp_usec(&self) -> u64 { self.value.gyro_timestamp_usec }
+}
+
 pub struct Imu<'a> {
     device: &'a Device<'a>,
 }
@@ -13,7 +30,7 @@ impl Imu<'_> {
     }
 
     /// Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
-    pub fn get_imu_sample(&self, timeout_in_ms: i32) -> Result<k4a_imu_sample_t, Error> {
+    pub fn get_imu_sample(&self, timeout_in_ms: i32) -> Result<ImuSample, Error> {
         let mut imu_sample = k4a_imu_sample_t::default();
         Error::from_k4a_wait_result_t(unsafe {
             (self.device.api.funcs.k4a_device_get_imu_sample)(
@@ -22,11 +39,11 @@ impl Imu<'_> {
                 timeout_in_ms,
             )
         })
-        .to_result(imu_sample)
+        .to_result(ImuSample { value: imu_sample })
     }
 
-    pub fn get_imu_sample_wait_infinite(&self) -> Result<k4a_imu_sample_t, Error> {
-        self.get_imu_sample(K4A_WAIT_INFINITE)
+    pub fn get_imu_sample_wait_infinite(&self) -> Result<ImuSample, Error> {
+        self.get_imu_sample(azure_kinect_sys::k4a::K4A_WAIT_INFINITE)
     }
 }
 

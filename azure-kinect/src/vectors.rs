@@ -13,6 +13,10 @@ impl Float2 {
         }
     }
 
+    pub(crate) fn from_native(value: k4a_float2_t) -> Float2 {
+        Float2 { value }
+    }
+
     #[doc = "< X component of a vector"]
     pub fn x(&self) -> f32 { unsafe { self.value.xy.x } }
     #[doc = "< Y component of a vector"]
@@ -31,6 +35,10 @@ impl Float3 {
         Float3 {
             value: k4a_float3_t { xyz: k4a_float3_t__xyz { x, y, z } }
         }
+    }
+
+    pub(crate) fn from_native(value: k4a_float3_t) -> Float3 {
+        Float3 { value }
     }
 
     #[doc = "< X component of a vector"]
