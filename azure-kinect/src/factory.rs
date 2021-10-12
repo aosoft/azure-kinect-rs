@@ -7,16 +7,45 @@ use std::ptr;
 
 pub type DebugMessageHandler = Box<dyn Fn(LogLevel, &str, raw::c_int, &str)>;
 
-struct DebugMessageHandlerRegister {
+
+pub struct Factory {
+    pub(crate) api: azure_kinect_sys::api::Api,
     debug_message_handler: Option<DebugMessageHandler>,
 }
 
-impl DebugMessageHandlerRegister {
-    pub(crate) fn new() -> DebugMessageHandlerRegister {
-        DebugMessageHandlerRegister {
+impl Factory {
+    pub fn new() -> Result<Factory, Error> {
+        let api = azure_kinect_sys::api::Api::new()?;
+        Ok(with_api(api))
+    }
+
+    pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
+        let api = azure_kinect_sys::api::Api::with_library_directory(lib_dir)?;
+        Ok(with_api(api))
+    }
+
+    pub(crate) fn with_api(api: azure_kinect_sys::api::Api) -> Factory {
+        Factory {
             debug_message_handler: None,
+            api,
         }
     }
+
+
+    /// Gets the number of connected devices
+    pub fn device_get_installed_count(&self) -> u32 {
+        unsafe { (self.api.funcs.k4a_device_get_installed_count)() }
+    }
+
+    /// Open a k4a device.
+    pub fn device_open(&self, index: u32) -> Result<Device, Error> {
+        let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
+        Error::from_k4a_result_t(unsafe { (self.api.funcs.k4a_device_open)(index, &mut handle) })
+            .to_result_fn(|| Device::from_handle(&self.api, handle))
+    }
+
+
+
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
     pub(crate) fn set_debug_message_handler(
@@ -70,68 +99,16 @@ impl DebugMessageHandlerRegister {
     }
 }
 
-pub struct Factory {
-    pub(crate) api: azure_kinect_sys::api::Api,
-    debug_message_handler: DebugMessageHandlerRegister,
-}
-
-impl Factory {
-    pub fn new() -> Result<Factory, Error> {
-        let api = azure_kinect_sys::api::Api::new()?;
-        Ok(Factory {
-            debug_message_handler: DebugMessageHandlerRegister::new(),
-            api,
-        })
-    }
-
-    pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
-        let api = azure_kinect_sys::api::Api::with_library_directory(lib_dir)?;
-        Ok(Factory {
-            debug_message_handler: DebugMessageHandlerRegister::new(),
-            api,
-        })
-    }
-
-    pub fn set_debug_message_handler(
-        &mut self,
-        debug_message_handler: DebugMessageHandler,
-        min_level: LogLevel,
-    ) {
-        self.debug_message_handler.set_debug_message_handler(
-            &self.api,
-            debug_message_handler,
-            min_level,
-        )
-    }
-
-    pub fn reset_debug_message_handler(mut self) {
-        self.debug_message_handler
-            .reset_debug_message_handler(&self.api);
-    }
-
-    /// Gets the number of connected devices
-    pub fn device_get_installed_count(&self) -> u32 {
-        unsafe { (self.api.funcs.k4a_device_get_installed_count)() }
-    }
-
-    /// Open a k4a device.
-    pub fn device_open(&self, index: u32) -> Result<Device, Error> {
-        let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
-        Error::from_k4a_result_t(unsafe { (self.api.funcs.k4a_device_open)(index, &mut handle) })
-            .to_result_fn(|| Device::from_handle(&self.api, handle))
-    }
-}
-
 pub struct FactoryRecord {
+    pub core: Factory,
     pub(crate) api_record: azure_kinect_sys::api::ApiRecord,
-    debug_message_handler: DebugMessageHandlerRegister,
 }
 
 impl FactoryRecord {
     pub fn new() -> Result<FactoryRecord, Error> {
         let api_record = azure_kinect_sys::api::ApiRecord::new()?;
         Ok(FactoryRecord {
-            debug_message_handler: DebugMessageHandlerRegister::new(),
+            core: Factory::with_api(api_record.k4a),
             api_record,
         })
     }
@@ -139,41 +116,11 @@ impl FactoryRecord {
     pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
         let api_record = azure_kinect_sys::api::ApiRecord::with_library_directory(lib_dir)?;
         Ok(FactoryRecord {
-            debug_message_handler: DebugMessageHandlerRegister::new(),
+            core: Factory::with_api(api_record.k4a),
             api_record,
         })
     }
 
-    pub fn set_debug_message_handler(
-        &mut self,
-        debug_message_handler: DebugMessageHandler,
-        min_level: LogLevel,
-    ) {
-        self.debug_message_handler.set_debug_message_handler(
-            &self.api_record.k4a,
-            debug_message_handler,
-            min_level,
-        )
-    }
-
-    pub fn reset_debug_message_handler(mut self) {
-        self.debug_message_handler
-            .reset_debug_message_handler(&self.api_record.k4a);
-    }
-
-    /// Gets the number of connected devices
-    pub fn device_get_installed_count(&self) -> u32 {
-        unsafe { (self.api_record.k4a.funcs.k4a_device_get_installed_count)() }
-    }
-
-    /// Open a k4a device.
-    pub fn device_open(&self, index: u32) -> Result<Device, Error> {
-        let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
-        Error::from_k4a_result_t(unsafe {
-            (self.api_record.k4a.funcs.k4a_device_open)(index, &mut handle)
-        })
-        .to_result_fn(|| Device::from_handle(&self.api_record.k4a, handle))
-    }
 
     /// Opens a K4A recording for playback.
     pub fn playback_open(&self, path: &str) -> Result<Playback, Error> {
