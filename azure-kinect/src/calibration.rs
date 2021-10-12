@@ -18,23 +18,14 @@ impl Calibration<'_> {
         }
     }
 
+    #[deprecated(since = "0.2", note = "Factory::calibration_get_from_raw")]
     pub fn from_raw<'a>(
         factory: &'a Factory,
         raw_calibration: &Vec<u8>,
         target_depth_mode: DepthMode,
         target_color_resolution: ColorResolution,
     ) -> Result<Calibration<'a>, Error> {
-        let mut calibration = k4a_calibration_t::default();
-        Error::from_k4a_result_t(unsafe {
-            (factory.api.funcs.k4a_calibration_get_from_raw)(
-                raw_calibration.as_ptr() as *mut i8,
-                raw_calibration.len(),
-                target_depth_mode.into(),
-                target_color_resolution.into(),
-                &mut calibration,
-            )
-        })
-        .to_result_fn(|| Calibration::from_handle(&factory.api, calibration))
+        factory.calibration_get_from_raw(raw_calibration, target_depth_mode, target_color_resolution)
     }
 
     /// Transform a 3d point of a source coordinate system into a 3d point of the target coordinate system.

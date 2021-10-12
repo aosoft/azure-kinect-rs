@@ -4,6 +4,7 @@ use crate::*;
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
+use azure_kinect_sys::k4a::{k4a_calibration_t, k4a_capture_t};
 
 pub type DebugMessageHandler = Box<dyn Fn(LogLevel, &str, raw::c_int, &str)>;
 
@@ -40,6 +41,28 @@ impl Factory {
             .to_result_fn(|| Device::from_handle(&self.api, handle))
     }
 
+    /// Get the camera calibration for a device from a raw calibration blob.
+    pub fn calibration_get_from_raw(&self, raw_calibration: &Vec<u8>,
+                                    target_depth_mode: DepthMode,
+                                    target_color_resolution: ColorResolution,
+    ) -> Result<Calibration, Error> {
+        let mut calibration = k4a_calibration_t::default();
+        Error::from_k4a_result_t(unsafe {
+            (self.api.funcs.k4a_calibration_get_from_raw)(
+                raw_calibration.as_ptr() as *mut i8,
+                raw_calibration.len(),
+                target_depth_mode.into(),
+                target_color_resolution.into(),
+                &mut calibration,
+            )
+        }).to_result_fn(|| Calibration::from_handle(&self.api, calibration))
+    }
+
+    pub fn capture_create(&self) -> Result<Capture, Error> {
+        let mut handle: k4a_capture_t = ptr::null_mut();
+        Error::from_k4a_result_t(unsafe { (self.api.funcs.k4a_capture_create)(&mut handle) })
+            .to_result_fn(|| Capture::from_handle(&self.api, handle))
+    }
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
     pub(crate) fn set_debug_message_handler(
