@@ -19,30 +19,22 @@ impl Image<'_> {
     }
 
     /// Create a blank image
+    #[deprecated(since = "0.2", note = "Factory::image_create")]
     pub fn with_format(
-        api: &azure_kinect_sys::api::Api,
-        format: k4a_image_format_t,
+        factory: &Factory,
+        format: ImageFormat,
         width_pixels: i32,
         height_pixels: i32,
         stride_bytes: i32,
     ) -> Result<Image, Error> {
-        let mut handle: k4a_image_t = ptr::null_mut();
-        Error::from_k4a_result_t(unsafe {
-            (api.funcs.k4a_image_create)(
-                format,
-                width_pixels,
-                height_pixels,
-                stride_bytes,
-                &mut handle,
-            )
-        })
-        .to_result_fn(|| Image::from_handle(api, handle))
+        factory.image_create(format, width_pixels, height_pixels, stride_bytes)
     }
 
     /// Create an image from a pre-allocated buffer
+    #[deprecated(since = "0.2", note = "Factory::image_create_from_buffer")]
     pub fn with_buffer(
-        api: &azure_kinect_sys::api::Api,
-        format: k4a_image_format_t,
+        factory: &Factory,
+        format: ImageFormat,
         width_pixels: i32,
         height_pixels: i32,
         stride_bytes: i32,
@@ -51,21 +43,9 @@ impl Image<'_> {
         buffer_release_cb: k4a_memory_destroy_cb_t,
         buffer_release_cb_context: *mut (),
     ) -> Result<Image, Error> {
-        let mut handle: k4a_image_t = ptr::null_mut();
-        Error::from_k4a_result_t(unsafe {
-            (api.funcs.k4a_image_create_from_buffer)(
-                format,
-                width_pixels,
-                height_pixels,
-                stride_bytes,
-                buffer,
-                buffer_size,
-                buffer_release_cb,
-                buffer_release_cb_context as _,
-                &mut handle,
-            )
-        })
-        .to_result_fn(|| Image::from_handle(api, handle))
+        factory.image_create_from_buffer(
+            format, width_pixels, height_pixels, stride_bytes, buffer, buffer_size,
+            buffer_release_cb, buffer_release_cb_context)
     }
 
     /// Get the image buffer

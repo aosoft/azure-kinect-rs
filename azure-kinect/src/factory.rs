@@ -4,7 +4,7 @@ use crate::*;
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
-use azure_kinect_sys::k4a::{k4a_calibration_t, k4a_capture_t};
+use azure_kinect_sys::k4a::{k4a_calibration_t, k4a_capture_t, k4a_image_t, k4a_memory_destroy_cb_t};
 
 pub type DebugMessageHandler = Box<dyn Fn(LogLevel, &str, raw::c_int, &str)>;
 
@@ -63,6 +63,58 @@ impl Factory {
         Error::from_k4a_result_t(unsafe { (self.api.funcs.k4a_capture_create)(&mut handle) })
             .to_result_fn(|| Capture::from_handle(&self.api, handle))
     }
+
+    /// Create a blank image
+    pub fn image_create(
+        &self,
+        format: ImageFormat,
+        width_pixels: i32,
+        height_pixels: i32,
+        stride_bytes: i32,
+    ) -> Result<Image, Error> {
+        let mut handle: k4a_image_t = ptr::null_mut();
+        Error::from_k4a_result_t(unsafe {
+            (self.api.funcs.k4a_image_create)(
+                format.into(),
+                width_pixels,
+                height_pixels,
+                stride_bytes,
+                &mut handle,
+            )
+        })
+            .to_result_fn(|| Image::from_handle(&self.api, handle))
+    }
+
+    /// Create an image from a pre-allocated buffer
+    pub fn image_create_from_buffer(
+        &self,
+        format: ImageFormat,
+        width_pixels: i32,
+        height_pixels: i32,
+        stride_bytes: i32,
+        buffer: *mut u8,
+        buffer_size: usize,
+        buffer_release_cb: k4a_memory_destroy_cb_t,
+        buffer_release_cb_context: *mut (),
+    ) -> Result<Image, Error> {
+        let mut handle: k4a_image_t = ptr::null_mut();
+        Error::from_k4a_result_t(unsafe {
+            (self.api.funcs.k4a_image_create_from_buffer)(
+                format.into(),
+                width_pixels,
+                height_pixels,
+                stride_bytes,
+                buffer,
+                buffer_size,
+                buffer_release_cb,
+                buffer_release_cb_context as _,
+                &mut handle,
+            )
+        })
+            .to_result_fn(|| Image::from_handle(&self.api, handle))
+    }
+
+
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
     pub(crate) fn set_debug_message_handler(
