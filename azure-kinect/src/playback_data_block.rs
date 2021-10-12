@@ -17,20 +17,14 @@ impl PlaybackDataBlock<'_> {
     /// Get the time stamp in micro seconds for the given data_block
     pub fn get_device_timestamp_usec(&self) -> u64 {
         unsafe {
-            (self
-                .api_record
-                .funcs
-                .k4a_playback_data_block_get_device_timestamp_usec)(self.handle)
+            (self.api_record.funcs.k4a_playback_data_block_get_device_timestamp_usec)(self.handle)
         }
     }
 
     /// Get the size of the data_block buffer.
     pub fn get_buffer_size(&self) -> usize {
         unsafe {
-            (self
-                .api_record
-                .funcs
-                .k4a_playback_data_block_get_buffer_size)(self.handle) as usize
+            (self.api_record.funcs.k4a_playback_data_block_get_buffer_size)(self.handle) as usize
         }
     }
 

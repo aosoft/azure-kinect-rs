@@ -10,10 +10,7 @@ pub struct PlaybackTrack<'a> {
 
 impl PlaybackTrack<'_> {
     pub(crate) fn new<'a>(playback: &'a Playback, name: std::ffi::CString) -> PlaybackTrack<'a> {
-        PlaybackTrack {
-            playback: playback,
-            name: name,
-        }
+        PlaybackTrack { playback, name, }
     }
 
     pub fn get_name(&self) -> &str {

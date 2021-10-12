@@ -10,6 +10,40 @@ use azure_kinect_sys::k4arecord::{
 use std::ptr;
 use crate::imu::ImuSample;
 
+pub struct RecordConfiguration {
+    pub(crate) value: k4a_record_configuration_t
+}
+
+impl RecordConfiguration {
+    #[doc = " Image format used to record the color camera."]
+    pub fn color_format(&self) -> ImageFormat { ImageFormat::from_primitive(self.value.color_format) }
+    #[doc = " Image resolution used to record the color camera."]
+    pub fn color_resolution(&self) -> ColorResolution { ColorResolution::from_primitive(self.value.color_resolution) }
+    #[doc = " Mode used to record the depth camera."]
+    pub fn depth_mode(&self) -> DepthMode { DepthMode::from_primitive(self.value.depth_mode) }
+    #[doc = " Frame rate used to record the color and depth camera."]
+    pub fn camera_fps(&self) -> Fps { Fps::from_primitive(self.value.camera_fps) }
+    #[doc = " True if the recording contains Color camera frames."]
+    pub fn color_track_enabled(&self) -> bool { self.value.color_track_enabled }
+    #[doc = " True if the recording contains Depth camera frames."]
+    pub fn depth_track_enabled(&self) -> bool { self.value.depth_track_enabled }
+    #[doc = " True if the recording contains IR camera frames."]
+    pub fn ir_track_enabled(&self) -> bool { self.value.ir_track_enabled }
+    #[doc = " True if the recording contains IMU sample data."]
+    pub fn imu_track_enabled(&self) -> bool { self.value.imu_track_enabled }
+    #[doc = " The delay between color and depth images in the recording."]
+    #[doc = " A negative delay means depth images are first { self.value. } and a positive delay means color images are first."]
+    pub fn depth_delay_off_color_usec(&self) -> i32 { self.value.depth_delay_off_color_usec }
+    #[doc = " External synchronization mode"]
+    pub fn wired_sync_mode(&self) -> k4a_wired_sync_mode_t { self.value.wired_sync_mode }
+    #[doc = " The delay between this recording and the externally synced master camera."]
+    #[doc = " This value is 0 unless \\p wired_sync_mode is set to ::K4A_WIRED_SYNC_MODE_SUBORDINATE"]
+    pub fn subordinate_delay_off_master_usec(&self) -> u32 { self.value.subordinate_delay_off_master_usec }
+    #[doc = " The timestamp offset of the start of the recording. All recorded timestamps are offset by this value such that"]
+    #[doc = " the recording starts at timestamp 0. This value can be used to synchronize timestamps between 2 recording files."]
+    pub fn start_timestamp_offset_usec(&self) -> u32 { self.value.start_timestamp_offset_usec }
+}
+
 pub struct Playback<'a> {
     pub(crate) factory: &'a FactoryRecord,
     pub(crate) handle: k4a_playback_t,
@@ -50,7 +84,7 @@ impl Playback<'_> {
     }
 
     /// Gets the configuration of the recording
-    pub fn get_record_configuration(&self) -> Result<k4a_record_configuration_t, Error> {
+    pub fn get_record_configuration(&self) -> Result<RecordConfiguration, Error> {
         let mut configuration = k4a_record_configuration_t::default();
         Error::from_k4a_result_t(unsafe {
             (self.factory.api_record.funcs.k4a_playback_get_record_configuration)(
@@ -58,7 +92,7 @@ impl Playback<'_> {
                 &mut configuration,
             )
         })
-        .to_result(configuration)
+        .to_result(RecordConfiguration { value: configuration })
     }
 
     /// Get the next capture in the recording.
