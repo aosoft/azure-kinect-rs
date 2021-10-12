@@ -114,6 +114,14 @@ impl Factory {
             .to_result_fn(|| Image::from_handle(&self.api, handle))
     }
 
+    /// Get handle to transformation handle.
+    pub fn transformation_create<'a>(
+        &'a self,
+        calibration: &'a Calibration,
+    ) -> Transformation<'a> {
+        let handle = unsafe { (self.api.funcs.k4a_transformation_create)(&calibration.calibration) };
+        Transformation::from_handle(&self, handle, calibration)
+    }
 
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.

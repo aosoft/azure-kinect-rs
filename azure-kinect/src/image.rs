@@ -64,8 +64,8 @@ impl Image<'_> {
     }
 
     /// Get the image format of the image
-    pub fn get_format(&self) -> k4a_image_format_t {
-        unsafe { (self.api.funcs.k4a_image_get_format)(self.handle) }
+    pub fn get_format(&self) -> ImageFormat {
+        ImageFormat::from_primitive(unsafe { (self.api.funcs.k4a_image_get_format)(self.handle) })
     }
 
     /// Get the image width in pixels

@@ -7,20 +7,27 @@ use crate::enums::CalibrationType;
 
 #[allow(dead_code)]
 pub struct Transformation<'a> {
-    api: &'a azure_kinect_sys::api::Api,
+    factory: &'a Factory,
     handle: k4a_transformation_t,
     color_resolution: Dimension,
     depth_resolution: Dimension,
 }
 
 impl Transformation<'_> {
+    #[deprecated(since = "0.2", note = "Factory::transformation_create")]
     pub fn new<'a>(
-        api: &'a azure_kinect_sys::api::Api,
+        factory: &'a Factory,
         calibration: &'a Calibration,
     ) -> Transformation<'a> {
-        let handle = unsafe { (api.funcs.k4a_transformation_create)(&calibration.calibration) };
+        factory.transformation_create(calibration)
+    }
+
+    pub(crate) fn from_handle<'a>(
+        factory: &'a Factory,
+        handle: k4a_transformation_t,
+        calibration: &'a Calibration) -> Transformation<'a> {
         Transformation {
-            api,
+            factory,
             handle,
             color_resolution: Dimension {
                 width: calibration
@@ -45,16 +52,14 @@ impl Transformation<'_> {
         }
     }
 
+
     pub fn depth_image_to_color_camera_exist_image(
         &self,
         depth_image: &Image,
         transformed_depth_image: &mut Image,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self
-                .api
-                .funcs
-                .k4a_transformation_depth_image_to_color_camera)(
+            (self.factory.api.funcs.k4a_transformation_depth_image_to_color_camera)(
                 self.handle,
                 depth_image.handle,
                 transformed_depth_image.handle,
@@ -64,9 +69,8 @@ impl Transformation<'_> {
     }
 
     pub fn depth_image_to_color_camera(&self, depth_image: &Image) -> Result<Image, Error> {
-        let mut transformed_depth_image = Image::with_format(
-            self.api,
-            k4a_image_format_t_K4A_IMAGE_FORMAT_DEPTH16,
+        let mut transformed_depth_image = self.factory.image_create(
+            ImageFormat::Depth16,
             self.color_resolution.width,
             self.color_resolution.height,
             self.color_resolution.width * (std::mem::size_of::<u16>() as i32),
@@ -85,10 +89,7 @@ impl Transformation<'_> {
         invalid_custom_value: u32,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self
-                .api
-                .funcs
-                .k4a_transformation_depth_image_to_color_camera_custom)(
+            (self.factory.api.funcs.k4a_transformation_depth_image_to_color_camera_custom)(
                 self.handle,
                 depth_image.handle,
                 custom_image.handle,
@@ -109,21 +110,19 @@ impl Transformation<'_> {
         invalid_custom_value: u32,
     ) -> Result<(Image, Image), Error> {
         let bytes_per_pixel: usize = match custom_image.get_format() {
-            k4a_image_format_t_K4A_IMAGE_FORMAT_CUSTOM8 => std::mem::size_of::<i8>(),
-            k4a_image_format_t_K4A_IMAGE_FORMAT_CUSTOM16 => std::mem::size_of::<i16>(),
+            ImageFormat::Custom8 => std::mem::size_of::<i8>(),
+            ImageFormat::Custom16 => std::mem::size_of::<i16>(),
             _ => return Err(Error::Failed),
         };
 
-        let mut transformed_depth_image = Image::with_format(
-            self.api,
-            k4a_image_format_t_K4A_IMAGE_FORMAT_DEPTH16,
+        let mut transformed_depth_image = self.factory.image_create(
+            ImageFormat::Depth16,
             self.color_resolution.width,
             self.color_resolution.height,
             self.color_resolution.width * (std::mem::size_of::<u16>() as i32),
         )?;
 
-        let mut transformed_custom_image = Image::with_format(
-            self.api,
+        let mut transformed_custom_image = self.factory.image_create(
             custom_image.get_format(),
             self.color_resolution.width,
             self.color_resolution.height,
@@ -148,10 +147,7 @@ impl Transformation<'_> {
         transformed_color_image: &mut Image,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self
-                .api
-                .funcs
-                .k4a_transformation_color_image_to_depth_camera)(
+            (self.factory.api.funcs.k4a_transformation_color_image_to_depth_camera)(
                 self.handle,
                 depth_image.handle,
                 color_image.handle,
@@ -166,9 +162,8 @@ impl Transformation<'_> {
         depth_image: &Image,
         color_image: &Image,
     ) -> Result<Image, Error> {
-        let mut transformed_color_image = Image::with_format(
-            self.api,
-            k4a_image_format_t_K4A_IMAGE_FORMAT_COLOR_BGRA32,
+        let mut transformed_color_image = self.factory.image_create(
+            ImageFormat::BGRA32,
             self.color_resolution.width,
             self.color_resolution.height,
             self.color_resolution.width * (std::mem::size_of::<u8>() as i32) * 4,
@@ -189,7 +184,7 @@ impl Transformation<'_> {
         xyz_image: &mut Image,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self.api.funcs.k4a_transformation_depth_image_to_point_cloud)(
+            (self.factory.api.funcs.k4a_transformation_depth_image_to_point_cloud)(
                 self.handle,
                 depth_image.handle,
                 camera.into(),
@@ -204,9 +199,8 @@ impl Transformation<'_> {
         depth_image: &Image,
         camera: CalibrationType,
     ) -> Result<Image, Error> {
-        let mut xyz_image = Image::with_format(
-            self.api,
-            k4a_image_format_t_K4A_IMAGE_FORMAT_CUSTOM,
+        let mut xyz_image = self.factory.image_create(
+            ImageFormat::Custom,
             self.color_resolution.width,
             self.color_resolution.height,
             self.color_resolution.width * (std::mem::size_of::<u16>() as i32) * 3,
@@ -219,7 +213,7 @@ impl Transformation<'_> {
 impl Drop for Transformation<'_> {
     fn drop(&mut self) {
         unsafe {
-            (self.api.funcs.k4a_transformation_destroy)(self.handle);
+            (self.factory.api.funcs.k4a_transformation_destroy)(self.handle);
         }
         self.handle = ptr::null_mut();
     }
