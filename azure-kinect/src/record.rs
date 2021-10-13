@@ -7,6 +7,46 @@ use azure_kinect_sys::k4arecord::{
 use std::ffi::CString;
 use std::ptr;
 
+pub struct RecordVideoSetting {
+    pub(crate) value: k4a_record_video_settings_t,
+}
+
+impl RecordVideoSetting {
+    pub fn new(width: u64, height: u64, frame_rate: u64) -> RecordVideoSetting {
+        RecordVideoSetting {
+            value: k4a_record_video_settings_t {
+                width,
+                height,
+                frame_rate
+            }
+        }
+    }
+
+    #[doc = "< Frame width of the video"]
+    pub fn width(&self) -> u64 { self.value.width }
+    #[doc = "< Frame height of the video"]
+    pub fn height(&self) -> u64 { self.value.height }
+    #[doc = "< Frame rate (frames-per-second) of the video"]
+    pub fn frame_rate(&self) -> u64 { self.value.frame_rate }
+}
+
+pub struct RecordSubtitleSetting {
+    pub(crate) value: k4a_record_subtitle_settings_t,
+}
+
+impl RecordSubtitleSetting {
+    pub fn new(high_freq_data: bool) -> RecordSubtitleSetting {
+        RecordSubtitleSetting {
+            value: k4a_record_subtitle_settings_t {
+                high_freq_data
+            }
+        }
+    }
+
+    pub fn high_freq_data(&self) -> bool { self.value.high_freq_data }
+}
+
+
 pub struct Record<'a> {
     pub(crate) api_record: &'a azure_kinect_sys::api::ApiRecord,
     pub(crate) handle: k4a_record_t,
@@ -67,7 +107,7 @@ impl Record<'_> {
         track_name: &str,
         codec_id: &str,
         codec_context: &[u8],
-        track_settings: &k4a_record_video_settings_t,
+        track_settings: &RecordVideoSetting,
     ) -> Result<(), Error> {
         let track_name = CString::new(track_name).unwrap_or_default();
         let codec_id = CString::new(codec_id).unwrap_or_default();
@@ -78,7 +118,7 @@ impl Record<'_> {
                 codec_id.as_ptr(),
                 codec_context.as_ptr(),
                 codec_context.len(),
-                track_settings,
+                &track_settings.value,
             )
         })
         .to_result(())
@@ -90,7 +130,7 @@ impl Record<'_> {
         track_name: &str,
         codec_id: &str,
         codec_context: &[u8],
-        track_settings: &k4a_record_subtitle_settings_t,
+        track_settings: &RecordSubtitleSetting,
     ) -> Result<(), Error> {
         let track_name = CString::new(track_name).unwrap_or_default();
         let codec_id = CString::new(codec_id).unwrap_or_default();
@@ -101,7 +141,7 @@ impl Record<'_> {
                 codec_id.as_ptr(),
                 codec_context.as_ptr(),
                 codec_context.len(),
-                track_settings,
+                &track_settings.value,
             )
         })
         .to_result(())
@@ -124,9 +164,9 @@ impl Record<'_> {
     }
 
     /// Writes an imu sample to file
-    pub fn write_imu_sample(&self, imu_sample: k4a_imu_sample_t) -> Result<(), Error> {
+    pub fn write_imu_sample(&self, imu_sample: &ImuSample) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self.api_record.funcs.k4a_record_write_imu_sample)(self.handle,  std::mem::transmute(imu_sample))
+            (self.api_record.funcs.k4a_record_write_imu_sample)(self.handle,  std::mem::transmute::<k4a_imu_sample_t, _>(imu_sample.value))
         })
         .to_result(())
     }
