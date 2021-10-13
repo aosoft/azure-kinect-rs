@@ -11,7 +11,8 @@ macro_rules! proc_address {
 }
 
 pub struct Api {
-    #[allow(dead_code)] module_k4a: Module,     //  Module manages a dynamic link library
+    #[allow(dead_code)]
+    module_k4a: Module, //  Module manages a dynamic link library
     pub funcs: super::k4a::Funcs,
 }
 
@@ -23,7 +24,10 @@ impl Api {
                     module_k4a,
                     k4a_device_get_installed_count
                 ),
-                k4a_set_debug_message_handler: proc_address!(module_k4a, k4a_set_debug_message_handler),
+                k4a_set_debug_message_handler: proc_address!(
+                    module_k4a,
+                    k4a_set_debug_message_handler
+                ),
                 k4a_set_allocator: proc_address!(module_k4a, k4a_set_allocator),
                 k4a_device_open: proc_address!(module_k4a, k4a_device_open),
                 k4a_device_close: proc_address!(module_k4a, k4a_device_close),
@@ -38,17 +42,29 @@ impl Api {
                 k4a_capture_set_color_image: proc_address!(module_k4a, k4a_capture_set_color_image),
                 k4a_capture_set_depth_image: proc_address!(module_k4a, k4a_capture_set_depth_image),
                 k4a_capture_set_ir_image: proc_address!(module_k4a, k4a_capture_set_ir_image),
-                k4a_capture_set_temperature_c: proc_address!(module_k4a, k4a_capture_set_temperature_c),
-                k4a_capture_get_temperature_c: proc_address!(module_k4a, k4a_capture_get_temperature_c),
+                k4a_capture_set_temperature_c: proc_address!(
+                    module_k4a,
+                    k4a_capture_set_temperature_c
+                ),
+                k4a_capture_get_temperature_c: proc_address!(
+                    module_k4a,
+                    k4a_capture_get_temperature_c
+                ),
                 k4a_image_create: proc_address!(module_k4a, k4a_image_create),
-                k4a_image_create_from_buffer: proc_address!(module_k4a, k4a_image_create_from_buffer),
+                k4a_image_create_from_buffer: proc_address!(
+                    module_k4a,
+                    k4a_image_create_from_buffer
+                ),
                 k4a_image_get_buffer: proc_address!(module_k4a, k4a_image_get_buffer),
                 k4a_image_get_size: proc_address!(module_k4a, k4a_image_get_size),
                 k4a_image_get_format: proc_address!(module_k4a, k4a_image_get_format),
                 k4a_image_get_width_pixels: proc_address!(module_k4a, k4a_image_get_width_pixels),
                 k4a_image_get_height_pixels: proc_address!(module_k4a, k4a_image_get_height_pixels),
                 k4a_image_get_stride_bytes: proc_address!(module_k4a, k4a_image_get_stride_bytes),
-                k4a_image_get_timestamp_usec: proc_address!(module_k4a, k4a_image_get_timestamp_usec),
+                k4a_image_get_timestamp_usec: proc_address!(
+                    module_k4a,
+                    k4a_image_get_timestamp_usec
+                ),
                 k4a_image_get_device_timestamp_usec: proc_address!(
                     module_k4a,
                     k4a_image_get_device_timestamp_usec
@@ -64,7 +80,10 @@ impl Api {
                     module_k4a,
                     k4a_image_set_device_timestamp_usec
                 ),
-                k4a_image_set_timestamp_usec: proc_address!(module_k4a, k4a_image_set_timestamp_usec),
+                k4a_image_set_timestamp_usec: proc_address!(
+                    module_k4a,
+                    k4a_image_set_timestamp_usec
+                ),
                 k4a_image_set_system_timestamp_nsec: proc_address!(
                     module_k4a,
                     k4a_image_set_system_timestamp_nsec
@@ -88,15 +107,24 @@ impl Api {
                     module_k4a,
                     k4a_device_get_color_control_capabilities
                 ),
-                k4a_device_get_color_control: proc_address!(module_k4a, k4a_device_get_color_control),
-                k4a_device_set_color_control: proc_address!(module_k4a, k4a_device_set_color_control),
+                k4a_device_get_color_control: proc_address!(
+                    module_k4a,
+                    k4a_device_get_color_control
+                ),
+                k4a_device_set_color_control: proc_address!(
+                    module_k4a,
+                    k4a_device_set_color_control
+                ),
                 k4a_device_get_raw_calibration: proc_address!(
                     module_k4a,
                     k4a_device_get_raw_calibration
                 ),
                 k4a_device_get_calibration: proc_address!(module_k4a, k4a_device_get_calibration),
                 k4a_device_get_sync_jack: proc_address!(module_k4a, k4a_device_get_sync_jack),
-                k4a_calibration_get_from_raw: proc_address!(module_k4a, k4a_calibration_get_from_raw),
+                k4a_calibration_get_from_raw: proc_address!(
+                    module_k4a,
+                    k4a_calibration_get_from_raw
+                ),
                 k4a_calibration_3d_to_3d: proc_address!(module_k4a, k4a_calibration_3d_to_3d),
                 k4a_calibration_2d_to_3d: proc_address!(module_k4a, k4a_calibration_2d_to_3d),
                 k4a_calibration_3d_to_2d: proc_address!(module_k4a, k4a_calibration_3d_to_2d),
@@ -125,10 +153,7 @@ impl Api {
                 ),
             };
 
-            Ok(Api {
-                module_k4a,
-                funcs,
-            })
+            Ok(Api { module_k4a, funcs })
         }
     }
 
@@ -153,7 +178,8 @@ impl Api {
 }
 
 pub struct ApiRecord {
-    #[allow(dead_code)] pub(crate) module_k4arecord: Module,     //  Module manages a dynamic link library
+    #[allow(dead_code)]
+    pub(crate) module_k4arecord: Module, //  Module manages a dynamic link library
     pub funcs: super::k4arecord::Funcs,
 }
 
@@ -164,7 +190,10 @@ impl ApiRecord {
                 k4a_record_create: proc_address!(module_k4arecord, k4a_record_create),
                 k4a_record_add_tag: proc_address!(module_k4arecord, k4a_record_add_tag),
                 k4a_record_add_imu_track: proc_address!(module_k4arecord, k4a_record_add_imu_track),
-                k4a_record_add_attachment: proc_address!(module_k4arecord, k4a_record_add_attachment),
+                k4a_record_add_attachment: proc_address!(
+                    module_k4arecord,
+                    k4a_record_add_attachment
+                ),
                 k4a_record_add_custom_video_track: proc_address!(
                     module_k4arecord,
                     k4a_record_add_custom_video_track
@@ -175,7 +204,10 @@ impl ApiRecord {
                 ),
                 k4a_record_write_header: proc_address!(module_k4arecord, k4a_record_write_header),
                 k4a_record_write_capture: proc_address!(module_k4arecord, k4a_record_write_capture),
-                k4a_record_write_imu_sample: proc_address!(module_k4arecord, k4a_record_write_imu_sample),
+                k4a_record_write_imu_sample: proc_address!(
+                    module_k4arecord,
+                    k4a_record_write_imu_sample
+                ),
                 k4a_record_write_custom_track_data: proc_address!(
                     module_k4arecord,
                     k4a_record_write_custom_track_data
@@ -187,7 +219,10 @@ impl ApiRecord {
                     module_k4arecord,
                     k4a_playback_get_raw_calibration
                 ),
-                k4a_playback_get_calibration: proc_address!(module_k4arecord, k4a_playback_get_calibration),
+                k4a_playback_get_calibration: proc_address!(
+                    module_k4arecord,
+                    k4a_playback_get_calibration
+                ),
                 k4a_playback_get_record_configuration: proc_address!(
                     module_k4arecord,
                     k4a_playback_get_record_configuration
@@ -196,9 +231,18 @@ impl ApiRecord {
                     module_k4arecord,
                     k4a_playback_check_track_exists
                 ),
-                k4a_playback_get_track_count: proc_address!(module_k4arecord, k4a_playback_get_track_count),
-                k4a_playback_get_track_name: proc_address!(module_k4arecord, k4a_playback_get_track_name),
-                k4a_playback_track_is_builtin: proc_address!(module_k4arecord, k4a_playback_track_is_builtin),
+                k4a_playback_get_track_count: proc_address!(
+                    module_k4arecord,
+                    k4a_playback_get_track_count
+                ),
+                k4a_playback_get_track_name: proc_address!(
+                    module_k4arecord,
+                    k4a_playback_get_track_name
+                ),
+                k4a_playback_track_is_builtin: proc_address!(
+                    module_k4arecord,
+                    k4a_playback_track_is_builtin
+                ),
                 k4a_playback_track_get_video_settings: proc_address!(
                     module_k4arecord,
                     k4a_playback_track_get_video_settings
@@ -216,8 +260,14 @@ impl ApiRecord {
                     module_k4arecord,
                     k4a_playback_set_color_conversion
                 ),
-                k4a_playback_get_attachment: proc_address!(module_k4arecord, k4a_playback_get_attachment),
-                k4a_playback_get_next_capture: proc_address!(module_k4arecord, k4a_playback_get_next_capture),
+                k4a_playback_get_attachment: proc_address!(
+                    module_k4arecord,
+                    k4a_playback_get_attachment
+                ),
+                k4a_playback_get_next_capture: proc_address!(
+                    module_k4arecord,
+                    k4a_playback_get_next_capture
+                ),
                 k4a_playback_get_previous_capture: proc_address!(
                     module_k4arecord,
                     k4a_playback_get_previous_capture
@@ -254,7 +304,10 @@ impl ApiRecord {
                     module_k4arecord,
                     k4a_playback_data_block_release
                 ),
-                k4a_playback_seek_timestamp: proc_address!(module_k4arecord, k4a_playback_seek_timestamp),
+                k4a_playback_seek_timestamp: proc_address!(
+                    module_k4arecord,
+                    k4a_playback_seek_timestamp
+                ),
                 k4a_playback_get_recording_length_usec: proc_address!(
                     module_k4arecord,
                     k4a_playback_get_recording_length_usec

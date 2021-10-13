@@ -17,17 +17,23 @@ impl RecordVideoSetting {
             value: k4a_record_video_settings_t {
                 width,
                 height,
-                frame_rate
-            }
+                frame_rate,
+            },
         }
     }
 
     #[doc = "< Frame width of the video"]
-    pub fn width(&self) -> u64 { self.value.width }
+    pub fn width(&self) -> u64 {
+        self.value.width
+    }
     #[doc = "< Frame height of the video"]
-    pub fn height(&self) -> u64 { self.value.height }
+    pub fn height(&self) -> u64 {
+        self.value.height
+    }
     #[doc = "< Frame rate (frames-per-second) of the video"]
-    pub fn frame_rate(&self) -> u64 { self.value.frame_rate }
+    pub fn frame_rate(&self) -> u64 {
+        self.value.frame_rate
+    }
 }
 
 pub struct RecordSubtitleSetting {
@@ -37,15 +43,14 @@ pub struct RecordSubtitleSetting {
 impl RecordSubtitleSetting {
     pub fn new(high_freq_data: bool) -> RecordSubtitleSetting {
         RecordSubtitleSetting {
-            value: k4a_record_subtitle_settings_t {
-                high_freq_data
-            }
+            value: k4a_record_subtitle_settings_t { high_freq_data },
         }
     }
 
-    pub fn high_freq_data(&self) -> bool { self.value.high_freq_data }
+    pub fn high_freq_data(&self) -> bool {
+        self.value.high_freq_data
+    }
 }
-
 
 pub struct Record<'a> {
     pub(crate) api_record: &'a azure_kinect_sys::api::ApiRecord,
@@ -57,10 +62,7 @@ impl Record<'_> {
         api_record: &azure_kinect_sys::api::ApiRecord,
         handle: k4a_record_t,
     ) -> Record {
-        Record {
-            api_record,
-            handle,
-        }
+        Record { api_record, handle }
     }
 
     /// Flushes all pending recording data to disk
@@ -166,7 +168,10 @@ impl Record<'_> {
     /// Writes an imu sample to file
     pub fn write_imu_sample(&self, imu_sample: &ImuSample) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self.api_record.funcs.k4a_record_write_imu_sample)(self.handle,  std::mem::transmute::<k4a_imu_sample_t, _>(imu_sample.value))
+            (self.api_record.funcs.k4a_record_write_imu_sample)(
+                self.handle,
+                std::mem::transmute::<k4a_imu_sample_t, _>(imu_sample.value),
+            )
         })
         .to_result(())
     }

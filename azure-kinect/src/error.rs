@@ -42,8 +42,12 @@ impl Error {
 
     pub(crate) fn from_k4a_stream_result_t(s: k4a_stream_result_t) -> Error {
         match s {
-            azure_kinect_sys::k4arecord::k4a_stream_result_t_K4A_STREAM_RESULT_SUCCEEDED => Error::Succeeded,
-            azure_kinect_sys::k4arecord::k4a_stream_result_t_K4A_STREAM_RESULT_FAILED => Error::Failed,
+            azure_kinect_sys::k4arecord::k4a_stream_result_t_K4A_STREAM_RESULT_SUCCEEDED => {
+                Error::Succeeded
+            }
+            azure_kinect_sys::k4arecord::k4a_stream_result_t_K4A_STREAM_RESULT_FAILED => {
+                Error::Failed
+            }
             azure_kinect_sys::k4arecord::k4a_stream_result_t_K4A_STREAM_RESULT_EOF => Error::Eof,
             _ => Error::Failed,
         }

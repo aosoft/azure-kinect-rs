@@ -1,7 +1,7 @@
 use crate::recorder::Error;
+use azure_kinect::*;
 use clap::{App, Arg, ArgMatches};
 use std::time::Duration;
-use azure_kinect::*;
 
 pub struct Parameter {
     pub list_device: bool,
@@ -20,7 +20,9 @@ impl Parameter {
 
         if let Ok(r) = p.as_ref() {
             if !r.list_device && r.recording_filename.len() == 0 {
-                create_app().print_help().or_else(|_| { Err(Error::ErrorStr("err")) })?;
+                create_app()
+                    .print_help()
+                    .or_else(|_| Err(Error::ErrorStr("err")))?;
                 std::process::exit(1);
             }
         }
@@ -43,22 +45,22 @@ impl Parameter {
                 .depth_mode(to_depth_mode(args.value_of("depth-mode").unwrap())?)
                 .camera_fps(to_frame_rate(args.value_of("rate").unwrap())?)
                 .synchronized_images_only(false)
-                .depth_delay_off_color_usec(args
-                    .value_of("depth-delay")
-                    .unwrap_or("0")
-                    .parse()
-                    .unwrap_or(0))
+                .depth_delay_off_color_usec(
+                    args.value_of("depth-delay")
+                        .unwrap_or("0")
+                        .parse()
+                        .unwrap_or(0),
+                )
                 .wired_sync_mode(to_external_sync(args.value_of("external-sync").unwrap())?)
-                .subordinate_delay_off_master_usec(args
-                    .value_of("sync-delay")
-                    .unwrap_or("0")
-                    .parse()
-                    .unwrap_or(0))
+                .subordinate_delay_off_master_usec(
+                    args.value_of("sync-delay")
+                        .unwrap_or("0")
+                        .parse()
+                        .unwrap_or(0),
+                )
                 .disable_streaming_indicator(false)
                 .build(),
-            record_imu: to_imu_mode(args
-                .value_of("imu")
-                .unwrap_or("ON"))?,
+            record_imu: to_imu_mode(args.value_of("imu").unwrap_or("ON"))?,
             absolute_exposure_value: correct_param_range(
                 args.value_of("exposure-control"),
                 2,
@@ -69,8 +71,7 @@ impl Parameter {
 
         if param.device_config.camera_fps() == Fps::_30fps
             && (param.device_config.depth_mode() == DepthMode::WFovUnbinned
-            || param.device_config.color_resolution()
-            == ColorResolution::_3072p)
+                || param.device_config.color_resolution() == ColorResolution::_3072p)
         {
             return Err(Error::ErrorStr(
                 "Error: 30 Frames per second is not supported by this camera mode.",
@@ -78,8 +79,7 @@ impl Parameter {
         }
 
         if param.device_config.subordinate_delay_off_master_usec() > 0
-            && param.device_config.wired_sync_mode()
-            != WiredSyncMode::Subordinate
+            && param.device_config.wired_sync_mode() != WiredSyncMode::Subordinate
         {
             return Err(Error::ErrorStr(
                 "--sync-delay is only valid if --external-sync is set to Subordinate.",
@@ -169,46 +169,17 @@ fn correct_param_range<T: Ord + core::str::FromStr + Copy + Clone>(
     correct_param(value, |value| std::cmp::max(min, std::cmp::min(max, value)))
 }
 
-fn to_format_and_resolution<'a>(
-    value: &str,
-) -> Result<(ImageFormat, ColorResolution), Error<'a>> {
+fn to_format_and_resolution<'a>(value: &str) -> Result<(ImageFormat, ColorResolution), Error<'a>> {
     match value.to_ascii_lowercase().as_str() {
-        "3072p" => Ok((
-            ImageFormat::MJPG,
-            ColorResolution::_3072p,
-        )),
-        "2160p" => Ok((
-            ImageFormat::MJPG,
-            ColorResolution::_2160p,
-        )),
-        "1536p" => Ok((
-            ImageFormat::MJPG,
-            ColorResolution::_1536p,
-        )),
-        "1440p" => Ok((
-            ImageFormat::MJPG,
-            ColorResolution::_1440p,
-        )),
-        "1080p" => Ok((
-            ImageFormat::MJPG,
-            ColorResolution::_1080p,
-        )),
-        "720p" => Ok((
-            ImageFormat::MJPG,
-            ColorResolution::_720p,
-        )),
-        "720p_nv12" => Ok((
-            ImageFormat::NV12,
-            ColorResolution::_720p,
-        )),
-        "720p_yuy2" => Ok((
-            ImageFormat::YUY2,
-            ColorResolution::_720p,
-        )),
-        "off" => Ok((
-            ImageFormat::MJPG,
-            ColorResolution::Off,
-        )),
+        "3072p" => Ok((ImageFormat::MJPG, ColorResolution::_3072p)),
+        "2160p" => Ok((ImageFormat::MJPG, ColorResolution::_2160p)),
+        "1536p" => Ok((ImageFormat::MJPG, ColorResolution::_1536p)),
+        "1440p" => Ok((ImageFormat::MJPG, ColorResolution::_1440p)),
+        "1080p" => Ok((ImageFormat::MJPG, ColorResolution::_1080p)),
+        "720p" => Ok((ImageFormat::MJPG, ColorResolution::_720p)),
+        "720p_nv12" => Ok((ImageFormat::NV12, ColorResolution::_720p)),
+        "720p_yuy2" => Ok((ImageFormat::YUY2, ColorResolution::_720p)),
+        "off" => Ok((ImageFormat::MJPG, ColorResolution::Off)),
         _ => Err(Error::Error(format!(
             "Unknown color mode specified: {}",
             value
@@ -269,50 +240,62 @@ fn to_external_sync<'a>(value: &str) -> Result<WiredSyncMode, Error<'a>> {
 
 #[test]
 fn conv_param_test() {
-    assert_eq!(to_format_and_resolution("3072p").unwrap(), (
-        ImageFormat::MJPG,
-        ColorResolution::_3072p
-    ));
-    assert_eq!(to_format_and_resolution("2160p").unwrap(), (
-        ImageFormat::MJPG,
-        ColorResolution::_2160p
-    ));
-    assert_eq!(to_format_and_resolution("1536p").unwrap(), (
-        ImageFormat::MJPG,
-        ColorResolution::_1536p
-    ));
-    assert_eq!(to_format_and_resolution("1440p").unwrap(), (
-        ImageFormat::MJPG,
-        ColorResolution::_1440p
-    ));
-    assert_eq!(to_format_and_resolution("1080p").unwrap(), (
-        ImageFormat::MJPG,
-        ColorResolution::_1080p
-    ));
-    assert_eq!(to_format_and_resolution("720p").unwrap(), (
-        ImageFormat::MJPG,
-        ColorResolution::_720p
-    ));
+    assert_eq!(
+        to_format_and_resolution("3072p").unwrap(),
+        (ImageFormat::MJPG, ColorResolution::_3072p)
+    );
+    assert_eq!(
+        to_format_and_resolution("2160p").unwrap(),
+        (ImageFormat::MJPG, ColorResolution::_2160p)
+    );
+    assert_eq!(
+        to_format_and_resolution("1536p").unwrap(),
+        (ImageFormat::MJPG, ColorResolution::_1536p)
+    );
+    assert_eq!(
+        to_format_and_resolution("1440p").unwrap(),
+        (ImageFormat::MJPG, ColorResolution::_1440p)
+    );
+    assert_eq!(
+        to_format_and_resolution("1080p").unwrap(),
+        (ImageFormat::MJPG, ColorResolution::_1080p)
+    );
+    assert_eq!(
+        to_format_and_resolution("720p").unwrap(),
+        (ImageFormat::MJPG, ColorResolution::_720p)
+    );
     assert!(to_format_and_resolution("720p_nv12").is_ok());
     assert!(to_format_and_resolution("720p_yuy2").is_ok());
-    assert_eq!(to_format_and_resolution("720p_NV12").unwrap(), (
-        ImageFormat::NV12,
-        ColorResolution::_720p
-    ));
-    assert_eq!(to_format_and_resolution("720p_YUY2").unwrap(), (
-        ImageFormat::YUY2,
-        ColorResolution::_720p
-    ));
-    assert_eq!(to_format_and_resolution("OFF").unwrap(), (
-        ImageFormat::MJPG,
-        ColorResolution::_Off
-    ));
+    assert_eq!(
+        to_format_and_resolution("720p_NV12").unwrap(),
+        (ImageFormat::NV12, ColorResolution::_720p)
+    );
+    assert_eq!(
+        to_format_and_resolution("720p_YUY2").unwrap(),
+        (ImageFormat::YUY2, ColorResolution::_720p)
+    );
+    assert_eq!(
+        to_format_and_resolution("OFF").unwrap(),
+        (ImageFormat::MJPG, ColorResolution::_Off)
+    );
     assert!(to_format_and_resolution("asdqv").is_err());
 
-    assert_eq!(to_depth_mode("NFOV_2X2BINNED").unwrap(), DepthMode::NFov2x2Binned);
-    assert_eq!(to_depth_mode("NFOV_UNBINNED").unwrap(), DepthMode::NFovUnbinned);
-    assert_eq!(to_depth_mode("WFOV_2X2BINNED").unwrap(), DepthMode::WFov2x2Binned);
-    assert_eq!(to_depth_mode("WFOV_UNBINNED").unwrap(), DepthMode::WFovUnbinned);
+    assert_eq!(
+        to_depth_mode("NFOV_2X2BINNED").unwrap(),
+        DepthMode::NFov2x2Binned
+    );
+    assert_eq!(
+        to_depth_mode("NFOV_UNBINNED").unwrap(),
+        DepthMode::NFovUnbinned
+    );
+    assert_eq!(
+        to_depth_mode("WFOV_2X2BINNED").unwrap(),
+        DepthMode::WFov2x2Binned
+    );
+    assert_eq!(
+        to_depth_mode("WFOV_UNBINNED").unwrap(),
+        DepthMode::WFovUnbinned
+    );
     assert_eq!(to_depth_mode("PASSIVE_IR").unwrap(), DepthMode::PassiveIr);
     assert_eq!(to_depth_mode("OFF").unwrap(), DepthMode::Off);
     assert!(to_depth_mode("off").is_ok());
@@ -329,8 +312,14 @@ fn conv_param_test() {
     assert!(to_imu_mode("poasdas").is_err());
 
     assert_eq!(to_external_sync("master").unwrap(), WiredSyncMode::Master);
-    assert_eq!(to_external_sync("Subordinate").unwrap(), WiredSyncMode::Subordinate);
+    assert_eq!(
+        to_external_sync("Subordinate").unwrap(),
+        WiredSyncMode::Subordinate
+    );
     assert_eq!(to_external_sync("SUB").unwrap(), WiredSyncMode::Subordinate);
-    assert_eq!(to_external_sync("STANDALONE").unwrap(), WiredSyncMode::Standalone);
+    assert_eq!(
+        to_external_sync("STANDALONE").unwrap(),
+        WiredSyncMode::Standalone
+    );
     assert!(to_external_sync("as098kasd").is_err());
 }

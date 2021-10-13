@@ -1,5 +1,5 @@
-use azure_kinect_sys::k4a::*;
 use crate::structs::*;
+use azure_kinect_sys::k4a::*;
 
 macro_rules! impl_conv_primitive_to_enum {
     ($enum_type:ident, $primitive_type:ident) => {
@@ -37,7 +37,6 @@ pub enum LogLevel {
 }
 
 impl_conv_primitive_to_enum!(LogLevel, k4a_log_level_t);
-
 
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -122,7 +121,6 @@ impl DepthMode {
     }
 }
 
-
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum ColorResolution {
@@ -200,7 +198,6 @@ pub enum ImageFormat {
 
 impl_conv_primitive_to_enum!(ImageFormat, k4a_image_format_t);
 
-
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Transformation interpolation type."]
@@ -211,7 +208,10 @@ pub enum TransformationInterpolationType {
     Linear = k4a_transformation_interpolation_type_t_K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,
 }
 
-impl_conv_primitive_to_enum!(TransformationInterpolationType, k4a_transformation_interpolation_type_t);
+impl_conv_primitive_to_enum!(
+    TransformationInterpolationType,
+    k4a_transformation_interpolation_type_t
+);
 
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -261,7 +261,6 @@ pub enum ColorControlCommand {
 
 impl_conv_primitive_to_enum!(ColorControlCommand, k4a_color_control_command_t);
 
-
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Calibration types."]
@@ -273,7 +272,6 @@ pub enum ColorControlMode {
 }
 
 impl_conv_primitive_to_enum!(ColorControlMode, k4a_color_control_mode_t);
-
 
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -288,7 +286,6 @@ pub enum WiredSyncMode {
 }
 
 impl_conv_primitive_to_enum!(WiredSyncMode, k4a_wired_sync_mode_t);
-
 
 #[repr(i32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -308,7 +305,6 @@ pub enum CalibrationType {
 
 impl_conv_primitive_to_enum!(CalibrationType, k4a_calibration_type_t);
 
-
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Calibration model type."]
@@ -327,7 +323,6 @@ pub enum CalibrationModelType {
 
 impl_conv_primitive_to_enum!(CalibrationModelType, k4a_calibration_model_type_t);
 
-
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 #[doc = " Firmware build type."]
@@ -339,8 +334,6 @@ pub enum FirmwareBuildType {
 }
 
 impl_conv_primitive_to_enum!(FirmwareBuildType, k4a_firmware_build_t);
-
-
 
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -355,4 +348,3 @@ pub enum FirmwareSignatureType {
 }
 
 impl_conv_primitive_to_enum!(FirmwareSignatureType, k4a_firmware_signature_t);
-

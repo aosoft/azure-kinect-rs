@@ -19,21 +19,12 @@ pub struct ColorControlCapabilities {
 }
 
 impl Device<'_> {
-    pub(crate) fn from_handle(
-        api: &azure_kinect_sys::api::Api,
-        handle: k4a_device_t,
-    ) -> Device {
-        Device {
-            api,
-            handle,
-        }
+    pub(crate) fn from_handle(api: &azure_kinect_sys::api::Api, handle: k4a_device_t) -> Device {
+        Device { api, handle }
     }
 
     /// Starts the K4A device's cameras
-    pub fn start_cameras(
-        &self,
-        configuration: &DeviceConfiguration,
-    ) -> Result<Camera, Error> {
+    pub fn start_cameras(&self, configuration: &DeviceConfiguration) -> Result<Camera, Error> {
         Camera::new(&self, configuration)
     }
 
@@ -71,7 +62,12 @@ impl Device<'_> {
         value: i32,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self.api.funcs.k4a_device_set_color_control)(self.handle, command.into(), mode.into(), value)
+            (self.api.funcs.k4a_device_set_color_control)(
+                self.handle,
+                command.into(),
+                mode.into(),
+                value,
+            )
         })
         .to_result(())
     }
@@ -155,7 +151,7 @@ impl Device<'_> {
         Error::from_k4a_result_t(unsafe {
             (self.api.funcs.k4a_device_get_version)(self.handle, &mut version)
         })
-        .to_result(HardwareVersion{ value: version })
+        .to_result(HardwareVersion { value: version })
     }
 }
 
@@ -168,7 +164,6 @@ impl Drop for Device<'_> {
     }
 }
 
-
 #[derive(Copy, Clone, Default)]
 pub struct DeviceConfiguration {
     pub(crate) value: k4a_device_configuration_t,
@@ -179,34 +174,54 @@ impl DeviceConfiguration {
         unsafe { std::mem::transmute(&self.value) }
     }
 
-    pub fn builder() -> DeviceConfigurationBuilder { DeviceConfigurationBuilder::default() }
+    pub fn builder() -> DeviceConfigurationBuilder {
+        DeviceConfigurationBuilder::default()
+    }
 
     #[doc = " Image format to capture with the color camera."]
-    pub fn color_format(&self) -> ImageFormat { ImageFormat::from_primitive(self.value.color_format) }
+    pub fn color_format(&self) -> ImageFormat {
+        ImageFormat::from_primitive(self.value.color_format)
+    }
 
     #[doc = " Image resolution to capture with the color camera."]
-    pub fn color_resolution(&self) -> ColorResolution { ColorResolution::from_primitive(self.value.color_resolution) }
+    pub fn color_resolution(&self) -> ColorResolution {
+        ColorResolution::from_primitive(self.value.color_resolution)
+    }
 
     #[doc = " Capture mode for the depth camera."]
-    pub fn depth_mode(&self) -> DepthMode { DepthMode::from_primitive(self.value.depth_mode) }
+    pub fn depth_mode(&self) -> DepthMode {
+        DepthMode::from_primitive(self.value.depth_mode)
+    }
 
     #[doc = " Desired frame rate for the color and depth camera."]
-    pub fn camera_fps(&self) -> Fps { Fps::from_primitive(self.value.camera_fps.into()) }
+    pub fn camera_fps(&self) -> Fps {
+        Fps::from_primitive(self.value.camera_fps.into())
+    }
 
     #[doc = " Only produce k4a_capture_t objects if they contain synchronized color and depth images."]
-    pub fn synchronized_images_only(&self) -> bool { self.value.synchronized_images_only }
+    pub fn synchronized_images_only(&self) -> bool {
+        self.value.synchronized_images_only
+    }
 
     #[doc = " Desired delay between the capture of the color image and the capture of the depth image."]
-    pub fn depth_delay_off_color_usec(&self) -> i32 { self.value.depth_delay_off_color_usec }
+    pub fn depth_delay_off_color_usec(&self) -> i32 {
+        self.value.depth_delay_off_color_usec
+    }
 
     #[doc = " The external synchronization mode."]
-    pub fn wired_sync_mode(&self) -> WiredSyncMode { WiredSyncMode::from_primitive(self.value.wired_sync_mode.into()) }
+    pub fn wired_sync_mode(&self) -> WiredSyncMode {
+        WiredSyncMode::from_primitive(self.value.wired_sync_mode.into())
+    }
 
     #[doc = " The external synchronization timing."]
-    pub fn subordinate_delay_off_master_usec(&self) -> u32 { self.value.subordinate_delay_off_master_usec }
+    pub fn subordinate_delay_off_master_usec(&self) -> u32 {
+        self.value.subordinate_delay_off_master_usec
+    }
 
     #[doc = " Streaming indicator automatically turns on when the color or depth camera's are in use."]
-    pub fn disable_streaming_indicator(&self) -> bool { self.value.disable_streaming_indicator }
+    pub fn disable_streaming_indicator(&self) -> bool {
+        self.value.disable_streaming_indicator
+    }
 }
 
 #[derive(Default)]

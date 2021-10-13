@@ -1,9 +1,9 @@
 #![allow(non_upper_case_globals)]
 
+use crate::enums::CalibrationType;
 use crate::*;
 use azure_kinect_sys::k4a::*;
 use std::ptr;
-use crate::enums::CalibrationType;
 
 #[allow(dead_code)]
 pub struct Transformation<'a> {
@@ -15,17 +15,15 @@ pub struct Transformation<'a> {
 
 impl Transformation<'_> {
     #[deprecated(since = "0.2", note = "Factory::transformation_create")]
-    pub fn new<'a>(
-        factory: &'a Factory,
-        calibration: &'a Calibration,
-    ) -> Transformation<'a> {
+    pub fn new<'a>(factory: &'a Factory, calibration: &'a Calibration) -> Transformation<'a> {
         factory.transformation_create(calibration)
     }
 
     pub(crate) fn from_handle<'a>(
         factory: &'a Factory,
         handle: k4a_transformation_t,
-        calibration: &'a Calibration) -> Transformation<'a> {
+        calibration: &'a Calibration,
+    ) -> Transformation<'a> {
         Transformation {
             factory,
             handle,
@@ -52,14 +50,17 @@ impl Transformation<'_> {
         }
     }
 
-
     pub fn depth_image_to_color_camera_exist_image(
         &self,
         depth_image: &Image,
         transformed_depth_image: &mut Image,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self.factory.api.funcs.k4a_transformation_depth_image_to_color_camera)(
+            (self
+                .factory
+                .api
+                .funcs
+                .k4a_transformation_depth_image_to_color_camera)(
                 self.handle,
                 depth_image.handle,
                 transformed_depth_image.handle,
@@ -89,7 +90,11 @@ impl Transformation<'_> {
         invalid_custom_value: u32,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self.factory.api.funcs.k4a_transformation_depth_image_to_color_camera_custom)(
+            (self
+                .factory
+                .api
+                .funcs
+                .k4a_transformation_depth_image_to_color_camera_custom)(
                 self.handle,
                 depth_image.handle,
                 custom_image.handle,
@@ -147,7 +152,11 @@ impl Transformation<'_> {
         transformed_color_image: &mut Image,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self.factory.api.funcs.k4a_transformation_color_image_to_depth_camera)(
+            (self
+                .factory
+                .api
+                .funcs
+                .k4a_transformation_color_image_to_depth_camera)(
                 self.handle,
                 depth_image.handle,
                 color_image.handle,
@@ -184,7 +193,11 @@ impl Transformation<'_> {
         xyz_image: &mut Image,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self.factory.api.funcs.k4a_transformation_depth_image_to_point_cloud)(
+            (self
+                .factory
+                .api
+                .funcs
+                .k4a_transformation_depth_image_to_point_cloud)(
                 self.handle,
                 depth_image.handle,
                 camera.into(),

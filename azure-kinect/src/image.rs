@@ -8,14 +8,8 @@ pub struct Image<'a> {
 }
 
 impl Image<'_> {
-    pub(crate) fn from_handle(
-        api: &azure_kinect_sys::api::Api,
-        handle: k4a_image_t,
-    ) -> Image {
-        Image {
-            api,
-            handle,
-        }
+    pub(crate) fn from_handle(api: &azure_kinect_sys::api::Api, handle: k4a_image_t) -> Image {
+        Image { api, handle }
     }
 
     /// Create a blank image
@@ -44,8 +38,15 @@ impl Image<'_> {
         buffer_release_cb_context: *mut (),
     ) -> Result<Image, Error> {
         factory.image_create_from_buffer(
-            format, width_pixels, height_pixels, stride_bytes, buffer, buffer_size,
-            buffer_release_cb, buffer_release_cb_context)
+            format,
+            width_pixels,
+            height_pixels,
+            stride_bytes,
+            buffer,
+            buffer_size,
+            buffer_release_cb,
+            buffer_release_cb_context,
+        )
     }
 
     /// Get the image buffer

@@ -1,6 +1,6 @@
-use std::fmt::{Display, Formatter};
 use crate::*;
 use azure_kinect_sys::k4a::*;
+use std::fmt::{Display, Formatter};
 
 pub struct ImuSample {
     pub(crate) value: k4a_imu_sample_t,
@@ -12,15 +12,25 @@ impl ImuSample {
     }
 
     #[doc = "< Temperature reading of this sample (Celsius)."]
-    pub fn temperature(&self) -> f32 { self.value.temperature }
+    pub fn temperature(&self) -> f32 {
+        self.value.temperature
+    }
     #[doc = "< Accelerometer sample in meters per second squared."]
-    pub fn acc_sample(&self) -> Float3 { Float3::from_native(self.value.acc_sample) }
+    pub fn acc_sample(&self) -> Float3 {
+        Float3::from_native(self.value.acc_sample)
+    }
     #[doc = "< Timestamp of the accelerometer in microseconds."]
-    pub fn acc_timestamp_usec(&self) -> u64 { self.value.acc_timestamp_usec }
+    pub fn acc_timestamp_usec(&self) -> u64 {
+        self.value.acc_timestamp_usec
+    }
     #[doc = "< Gyro sample in radians per second."]
-    pub fn gyro_sample(&self) -> Float3 { Float3::from_native(self.value.gyro_sample) }
+    pub fn gyro_sample(&self) -> Float3 {
+        Float3::from_native(self.value.gyro_sample)
+    }
     #[doc = "< Timestamp of the gyroscope in microseconds"]
-    pub fn gyro_timestamp_usec(&self) -> u64 { self.value.gyro_timestamp_usec }
+    pub fn gyro_timestamp_usec(&self) -> u64 {
+        self.value.gyro_timestamp_usec
+    }
 }
 
 impl Display for ImuSample {
@@ -34,8 +44,6 @@ impl Display for ImuSample {
                self.gyro_timestamp_usec())
     }
 }
-
-
 
 pub struct Imu<'a> {
     device: &'a Device<'a>,

@@ -78,7 +78,9 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     print!("; C: {}", version_info.rgb());
     print!(
         "; D: {}[{}.{}]",
-        version_info.depth(), version_info.depth_sensor().major(), version_info.depth_sensor().minor()
+        version_info.depth(),
+        version_info.depth_sensor().major(),
+        version_info.depth_sensor().minor()
     );
     println!("; A: {}", version_info.audio());
 
@@ -111,19 +113,15 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     }
 
     if let Some(gain) = param.gain {
-        if let Err(_) = device.set_color_control(
-            ColorControlCommand::Gain,
-            ColorControlMode::Manual,
-            gain,
-        ) {
+        if let Err(_) =
+            device.set_color_control(ColorControlCommand::Gain, ColorControlMode::Manual, gain)
+        {
             eprintln!("Runtime error: k4a_device_set_color_control() for manual gain failed ");
         }
     } else {
-        if let Err(_) = device.set_color_control(
-            ColorControlCommand::Gain,
-            ColorControlMode::Auto,
-            0,
-        ) {
+        if let Err(_) =
+            device.set_color_control(ColorControlCommand::Gain, ColorControlMode::Auto, 0)
+        {
             eprintln!("Runtime error: k4a_device_set_color_control() for auto gain failed ");
         }
     }
@@ -156,14 +154,13 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     recording.write_header()?;
 
     // Wait for the first capture before starting recording.
-    let timeout_sec_for_first_capture = if param.device_config.wired_sync_mode()
-        == WiredSyncMode::Subordinate
-    {
-        println!("[subordinate mode] Waiting for signal from master");
-        360u64
-    } else {
-        60u64
-    };
+    let timeout_sec_for_first_capture =
+        if param.device_config.wired_sync_mode() == WiredSyncMode::Subordinate {
+            println!("[subordinate mode] Waiting for signal from master");
+            360u64
+        } else {
+            60u64
+        };
 
     let first_capture = Processing::new(Some(Duration::from_secs(timeout_sec_for_first_capture)));
     let mut first_captured = false;

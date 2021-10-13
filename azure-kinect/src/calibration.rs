@@ -1,6 +1,6 @@
+use crate::enums::CalibrationType;
 use crate::*;
 use azure_kinect_sys::k4a::*;
-use crate::enums::CalibrationType;
 
 pub struct Calibration<'a> {
     api: &'a azure_kinect_sys::api::Api,
@@ -12,10 +12,7 @@ impl Calibration<'_> {
         api: &azure_kinect_sys::api::Api,
         calibration: k4a_calibration_t,
     ) -> Calibration {
-        Calibration {
-            api,
-            calibration,
-        }
+        Calibration { api, calibration }
     }
 
     #[deprecated(since = "0.2", note = "Factory::calibration_get_from_raw")]
@@ -25,7 +22,11 @@ impl Calibration<'_> {
         target_depth_mode: DepthMode,
         target_color_resolution: ColorResolution,
     ) -> Result<Calibration<'a>, Error> {
-        factory.calibration_get_from_raw(raw_calibration, target_depth_mode, target_color_resolution)
+        factory.calibration_get_from_raw(
+            raw_calibration,
+            target_depth_mode,
+            target_color_resolution,
+        )
     }
 
     /// Transform a 3d point of a source coordinate system into a 3d point of the target coordinate system.

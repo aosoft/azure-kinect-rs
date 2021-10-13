@@ -1,6 +1,6 @@
-use std::fmt::{Display, Formatter};
-use azure_kinect_sys::k4a::*;
 use crate::*;
+use azure_kinect_sys::k4a::*;
+use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Dimension {
@@ -21,11 +21,17 @@ pub struct Version {
 
 impl Version {
     #[doc = "< Major version; represents a breaking change."]
-    pub fn major(&self) -> u32 { self.value.major }
+    pub fn major(&self) -> u32 {
+        self.value.major
+    }
     #[doc = "< Minor version; represents additional features, no regression from lower versions with same major version."]
-    pub fn minor(&self) -> u32 { self.value.minor }
+    pub fn minor(&self) -> u32 {
+        self.value.minor
+    }
     #[doc = "< Reserved."]
-    pub fn iteration(&self) -> u32 { self.value.iteration }
+    pub fn iteration(&self) -> u32 {
+        self.value.iteration
+    }
 }
 
 impl Display for Version {
@@ -41,16 +47,35 @@ pub struct HardwareVersion {
 
 impl HardwareVersion {
     #[doc = "< Color camera firmware version."]
-    pub fn rgb(&self) -> Version { Version { value: self.value.rgb }}
+    pub fn rgb(&self) -> Version {
+        Version {
+            value: self.value.rgb,
+        }
+    }
     #[doc = "< Depth camera firmware version."]
-    pub fn depth(&self) -> Version { Version { value: self.value.depth }}
+    pub fn depth(&self) -> Version {
+        Version {
+            value: self.value.depth,
+        }
+    }
     #[doc = "< Audio device firmware version."]
-    pub fn audio(&self) -> Version { Version { value: self.value.audio }}
+    pub fn audio(&self) -> Version {
+        Version {
+            value: self.value.audio,
+        }
+    }
     #[doc = "< Depth sensor firmware version."]
-    pub fn depth_sensor(&self) -> Version { Version { value: self.value.depth_sensor }}
+    pub fn depth_sensor(&self) -> Version {
+        Version {
+            value: self.value.depth_sensor,
+        }
+    }
     #[doc = "< Build type reported by the firmware."]
-    pub fn firmware_build(&self) -> FirmwareBuildType { FirmwareBuildType::from_primitive(self.value.firmware_build) }
+    pub fn firmware_build(&self) -> FirmwareBuildType {
+        FirmwareBuildType::from_primitive(self.value.firmware_build)
+    }
     #[doc = "< Signature type of the firmware."]
-    pub fn firmware_signature(&self) -> FirmwareSignatureType { FirmwareSignatureType::from_primitive(self.value.firmware_signature) }
+    pub fn firmware_signature(&self) -> FirmwareSignatureType {
+        FirmwareSignatureType::from_primitive(self.value.firmware_signature)
+    }
 }
-

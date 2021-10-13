@@ -73,7 +73,8 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
                             let p2 = buffer.as_mut_ptr().add(y * pitch) as *mut u32;
                             for x in 0..width as isize {
                                 let value = *p.offset(x);
-                                *p2.offset(x) = get_depth_color(value, camera_config.depth_mode().get_range())
+                                *p2.offset(x) =
+                                    get_depth_color(value, camera_config.depth_mode().get_range())
                             }
                         }
                     }

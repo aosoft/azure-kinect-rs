@@ -1,13 +1,14 @@
 use crate::playback::Playback;
 use crate::record::Record;
 use crate::*;
+use azure_kinect_sys::k4a::{
+    k4a_calibration_t, k4a_capture_t, k4a_image_t, k4a_memory_destroy_cb_t,
+};
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
-use azure_kinect_sys::k4a::{k4a_calibration_t, k4a_capture_t, k4a_image_t, k4a_memory_destroy_cb_t};
 
 pub type DebugMessageHandler = Box<dyn Fn(LogLevel, &str, raw::c_int, &str)>;
-
 
 pub struct Factory {
     pub(crate) api: azure_kinect_sys::api::Api,
@@ -18,21 +19,21 @@ impl Factory {
     pub fn new() -> Result<Factory, Error> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::new()?,
-            debug_message_handler: None
+            debug_message_handler: None,
         })
     }
 
     pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::with_library_directory(lib_dir)?,
-            debug_message_handler: None
+            debug_message_handler: None,
         })
     }
 
     pub(crate) fn with_get_module() -> Result<Factory, Error> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::with_get_module()?,
-            debug_message_handler: None
+            debug_message_handler: None,
         })
     }
 
@@ -49,9 +50,11 @@ impl Factory {
     }
 
     /// Get the camera calibration for a device from a raw calibration blob.
-    pub fn calibration_get_from_raw(&self, raw_calibration: &Vec<u8>,
-                                    target_depth_mode: DepthMode,
-                                    target_color_resolution: ColorResolution,
+    pub fn calibration_get_from_raw(
+        &self,
+        raw_calibration: &Vec<u8>,
+        target_depth_mode: DepthMode,
+        target_color_resolution: ColorResolution,
     ) -> Result<Calibration, Error> {
         let mut calibration = k4a_calibration_t::default();
         Error::from_k4a_result_t(unsafe {
@@ -62,7 +65,8 @@ impl Factory {
                 target_color_resolution.into(),
                 &mut calibration,
             )
-        }).to_result_fn(|| Calibration::from_handle(&self.api, calibration))
+        })
+        .to_result_fn(|| Calibration::from_handle(&self.api, calibration))
     }
 
     pub fn capture_create(&self) -> Result<Capture, Error> {
@@ -89,7 +93,7 @@ impl Factory {
                 &mut handle,
             )
         })
-            .to_result_fn(|| Image::from_handle(&self.api, handle))
+        .to_result_fn(|| Image::from_handle(&self.api, handle))
     }
 
     /// Create an image from a pre-allocated buffer
@@ -118,18 +122,15 @@ impl Factory {
                 &mut handle,
             )
         })
-            .to_result_fn(|| Image::from_handle(&self.api, handle))
+        .to_result_fn(|| Image::from_handle(&self.api, handle))
     }
 
     /// Get handle to transformation handle.
-    pub fn transformation_create<'a>(
-        &'a self,
-        calibration: &'a Calibration,
-    ) -> Transformation<'a> {
-        let handle = unsafe { (self.api.funcs.k4a_transformation_create)(&calibration.calibration) };
+    pub fn transformation_create<'a>(&'a self, calibration: &'a Calibration) -> Transformation<'a> {
+        let handle =
+            unsafe { (self.api.funcs.k4a_transformation_create)(&calibration.calibration) };
         Transformation::from_handle(&self, handle, calibration)
     }
-
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
     pub fn set_debug_message_handler(
@@ -193,16 +194,19 @@ impl FactoryRecord {
     }
 
     pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
-        FactoryRecord::with_api_record(azure_kinect_sys::api::ApiRecord::with_library_directory(lib_dir)?)
+        FactoryRecord::with_api_record(azure_kinect_sys::api::ApiRecord::with_library_directory(
+            lib_dir,
+        )?)
     }
 
-    fn with_api_record(api_record: azure_kinect_sys::api::ApiRecord) -> Result<FactoryRecord, Error> {
+    fn with_api_record(
+        api_record: azure_kinect_sys::api::ApiRecord,
+    ) -> Result<FactoryRecord, Error> {
         Ok(FactoryRecord {
             core: Factory::with_get_module()?,
             api_record,
         })
     }
-
 
     /// Opens a K4A recording for playback.
     pub fn playback_open(&self, path: &str) -> Result<Playback, Error> {
