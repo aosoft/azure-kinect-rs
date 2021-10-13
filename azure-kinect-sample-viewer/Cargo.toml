@@ -9,7 +9,6 @@ edition = "2018"
 [dependencies]
 
 azure-kinect = { path = "../azure-kinect" }
-azure-kinect-sys = { path = "../azure-kinect-sys" }
 sdl2 = "0.34.0"
 
 [features]

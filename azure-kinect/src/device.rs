@@ -2,7 +2,6 @@ use crate::utility::*;
 use crate::*;
 use azure_kinect_sys::k4a::*;
 use std::ptr;
-use crate::ColorControlCommand::Contrast;
 
 pub struct Device<'a> {
     pub(crate) api: &'a azure_kinect_sys::api::Api,

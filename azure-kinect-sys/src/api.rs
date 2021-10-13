@@ -146,10 +146,14 @@ impl Api {
     pub fn with_library_directory(lib_dir: &str) -> Result<Api, Error> {
         Self::with_module(Module::load_library(lib_dir, K4A_LIBNAME)?)
     }
+
+    pub fn with_get_module() -> Result<Api, Error> {
+        Self::with_module(Module::get_module(K4A_LIBNAME)?)
+    }
 }
 
 pub struct ApiRecord {
-    #[allow(dead_code)] module_k4arecord: Module,     //  Module manages a dynamic link library
+    #[allow(dead_code)] pub(crate) module_k4arecord: Module,     //  Module manages a dynamic link library
     pub funcs: super::k4arecord::Funcs,
 }
 

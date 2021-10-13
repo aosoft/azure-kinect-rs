@@ -29,6 +29,13 @@ impl Factory {
         })
     }
 
+    pub(crate) fn with_get_module() -> Result<Factory, Error> {
+        Ok(Factory {
+            api: azure_kinect_sys::api::Api::with_get_module()?,
+            debug_message_handler: None
+        })
+    }
+
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {
         unsafe { (self.api.funcs.k4a_device_get_installed_count)() }
@@ -183,16 +190,17 @@ pub struct FactoryRecord {
 
 impl FactoryRecord {
     pub fn new() -> Result<FactoryRecord, Error> {
-        Ok(FactoryRecord {
-            core: Factory::new()?,
-            api_record: azure_kinect_sys::api::ApiRecord::new()?,
-        })
+        FactoryRecord::with_api_record(azure_kinect_sys::api::ApiRecord::new()?)
     }
 
     pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
+        FactoryRecord::with_api_record(azure_kinect_sys::api::ApiRecord::with_library_directory(lib_dir)?)
+    }
+
+    fn with_api_record(api_record: azure_kinect_sys::api::ApiRecord) -> Result<FactoryRecord, Error> {
         Ok(FactoryRecord {
-            core: Factory::with_library_directory(lib_dir)?,
-            api_record: azure_kinect_sys::api::ApiRecord::with_library_directory(lib_dir)?,
+            core: Factory::with_get_module()?,
+            api_record,
         })
     }
 
