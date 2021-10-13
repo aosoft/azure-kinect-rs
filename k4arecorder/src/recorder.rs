@@ -25,7 +25,6 @@ impl std::fmt::Display for Error<'_> {
 
 struct Processing {
     timer: Instant,
-    requested_abort: bool,
     duration: Option<Duration>,
 }
 
@@ -33,13 +32,8 @@ impl Processing {
     pub fn new(recording_length: Option<Duration>) -> Processing {
         Processing {
             timer: Instant::now(),
-            requested_abort: false,
             duration: recording_length,
         }
-    }
-
-    pub fn request_abort(&mut self) {
-        self.requested_abort = true;
     }
 
     pub fn is_timeout(&self) -> bool {
@@ -47,7 +41,7 @@ impl Processing {
     }
 
     pub fn is_processing(&self) -> bool {
-        !(self.requested_abort || self.is_timeout())
+        !self.is_timeout()
     }
 }
 

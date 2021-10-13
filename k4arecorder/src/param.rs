@@ -20,7 +20,7 @@ impl Parameter {
 
         if let Ok(r) = p.as_ref() {
             if !r.list_device && r.recording_filename.len() == 0 {
-                create_app().print_help();
+                create_app().print_help().or_else(|_| { Err(Error::ErrorStr("err")) })?;
                 std::process::exit(1);
             }
         }
@@ -56,10 +56,9 @@ impl Parameter {
                     .unwrap_or(0))
                 .disable_streaming_indicator(false)
                 .build(),
-            record_imu: args
+            record_imu: to_imu_mode(args
                 .value_of("imu")
-                .unwrap_or("ON")
-                .eq_ignore_ascii_case("ON"),
+                .unwrap_or("ON"))?,
             absolute_exposure_value: correct_param_range(
                 args.value_of("exposure-control"),
                 2,

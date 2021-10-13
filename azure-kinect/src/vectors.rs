@@ -14,6 +14,7 @@ impl Float2 {
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn from_native(value: k4a_float2_t) -> Float2 {
         Float2 { value }
     }

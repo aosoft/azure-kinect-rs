@@ -132,15 +132,14 @@ impl Factory {
 
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
-    pub(crate) fn set_debug_message_handler(
+    pub fn set_debug_message_handler(
         &mut self,
-        api: &azure_kinect_sys::api::Api,
         debug_message_handler: DebugMessageHandler,
         min_level: LogLevel,
     ) {
         self.debug_message_handler = debug_message_handler.into();
         unsafe {
-            (api.funcs.k4a_set_debug_message_handler)(
+            (self.api.funcs.k4a_set_debug_message_handler)(
                 Some(Self::debug_message_handler_func),
                 &self.debug_message_handler as *const Option<DebugMessageHandler> as _,
                 min_level.into(),
@@ -149,10 +148,10 @@ impl Factory {
     }
 
     /// Clears the callback function to receive debug messages from the Azure Kinect device.
-    pub(crate) fn reset_debug_message_handler(&mut self, api: &azure_kinect_sys::api::Api) {
+    pub fn reset_debug_message_handler(&mut self) {
         self.debug_message_handler = None;
         unsafe {
-            (api.funcs.k4a_set_debug_message_handler)(
+            (self.api.funcs.k4a_set_debug_message_handler)(
                 None,
                 ptr::null_mut(),
                 azure_kinect_sys::k4a::k4a_log_level_t_K4A_LOG_LEVEL_OFF,
