@@ -16,7 +16,7 @@ fn test_main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         Box::new(|level, file, line, message| {
             println!("{:?}, {}, {}, {}", level, file, line, message);
         }),
-        k4a_log_level_t::K4A_LOG_LEVEL_ERROR,
+        LogLevel::Error,
     );
 
     let c = factory.device_get_installed_count();
@@ -27,10 +27,10 @@ fn test_main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     println!("serial = {} / hw ver = {:?}", serial, version);
 
     let color_control =
-        device.get_color_control(k4a_color_control_command_t::K4A_COLOR_CONTROL_BRIGHTNESS)?;
+        device.get_color_control(ColorControlCommand::Brightness)?;
     println!("color control(brightness) = {:?}", color_control);
 
-    let camera_config = k4a_device_configuration_t::default();
+    let camera_config = DeviceConfiguration::builder().build();
     let camera = device.start_cameras(&camera_config)?;
 
     {

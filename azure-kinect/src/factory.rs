@@ -37,6 +37,49 @@ impl Factory {
         })
     }
 
+    /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
+    pub fn set_debug_message_handler(
+        mut self,
+        debug_message_handler: DebugMessageHandler,
+        min_level: LogLevel,
+    ) -> Self {
+        self.set_debug_message_handler_internal(debug_message_handler, min_level);
+        self
+    }
+
+    /// Clears the callback function to receive debug messages from the Azure Kinect device.
+    pub fn reset_debug_message_handler(mut self) -> Self {
+        self.reset_debug_message_handler_internal();
+        self
+    }
+
+    pub(crate) fn set_debug_message_handler_internal(
+        &mut self,
+        debug_message_handler: DebugMessageHandler,
+        min_level: LogLevel,
+    ) {
+        self.debug_message_handler = debug_message_handler.into();
+        unsafe {
+            (self.api.funcs.k4a_set_debug_message_handler)(
+                Some(Self::debug_message_handler_func),
+                &self.debug_message_handler as *const Option<DebugMessageHandler> as _,
+                min_level.into(),
+            );
+        }
+    }
+
+    pub(crate) fn reset_debug_message_handler_internal(&mut self) {
+        self.debug_message_handler = None;
+        unsafe {
+            (self.api.funcs.k4a_set_debug_message_handler)(
+                None,
+                ptr::null_mut(),
+                azure_kinect_sys::k4a::k4a_log_level_t_K4A_LOG_LEVEL_OFF,
+            );
+        }
+    }
+
+
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {
         unsafe { (self.api.funcs.k4a_device_get_installed_count)() }
@@ -132,33 +175,6 @@ impl Factory {
         Transformation::from_handle(&self, handle, calibration)
     }
 
-    /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
-    pub fn set_debug_message_handler(
-        &mut self,
-        debug_message_handler: DebugMessageHandler,
-        min_level: LogLevel,
-    ) {
-        self.debug_message_handler = debug_message_handler.into();
-        unsafe {
-            (self.api.funcs.k4a_set_debug_message_handler)(
-                Some(Self::debug_message_handler_func),
-                &self.debug_message_handler as *const Option<DebugMessageHandler> as _,
-                min_level.into(),
-            );
-        }
-    }
-
-    /// Clears the callback function to receive debug messages from the Azure Kinect device.
-    pub fn reset_debug_message_handler(&mut self) {
-        self.debug_message_handler = None;
-        unsafe {
-            (self.api.funcs.k4a_set_debug_message_handler)(
-                None,
-                ptr::null_mut(),
-                azure_kinect_sys::k4a::k4a_log_level_t_K4A_LOG_LEVEL_OFF,
-            );
-        }
-    }
 
     extern "C" fn debug_message_handler_func(
         context: *mut ::std::os::raw::c_void,
@@ -206,6 +222,22 @@ impl FactoryRecord {
             core: Factory::with_get_module()?,
             api_record,
         })
+    }
+
+    /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
+    pub fn set_debug_message_handler(
+        mut self,
+        debug_message_handler: DebugMessageHandler,
+        min_level: LogLevel,
+    ) -> Self {
+        self.core.set_debug_message_handler_internal(debug_message_handler, min_level);
+        self
+    }
+
+    /// Clears the callback function to receive debug messages from the Azure Kinect device.
+    pub fn reset_debug_message_handler(mut self) -> Self {
+        self.core.reset_debug_message_handler_internal();
+        self
     }
 
     /// Opens a K4A recording for playback.
