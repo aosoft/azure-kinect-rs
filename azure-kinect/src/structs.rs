@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use azure_kinect_sys::k4a::*;
 use crate::*;
 
@@ -27,6 +28,11 @@ impl Version {
     pub fn iteration(&self) -> u32 { self.value.iteration }
 }
 
+impl Display for Version {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}.{}.{}", self.major(), self.minor(), self.iteration())
+    }
+}
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct HardwareVersion {

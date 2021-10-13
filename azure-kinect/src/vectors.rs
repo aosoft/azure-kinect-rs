@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use azure_kinect_sys::k4a::*;
 
 #[doc = " Two dimensional floating point vector."]
@@ -21,6 +22,12 @@ impl Float2 {
     pub fn x(&self) -> f32 { unsafe { self.value.xy.x } }
     #[doc = "< Y component of a vector"]
     pub fn y(&self) -> f32 { unsafe { self.value.xy.y } }
+}
+
+impl Display for Float2 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.x(), self.y())
+    }
 }
 
 
@@ -47,4 +54,10 @@ impl Float3 {
     pub fn y(&self) -> f32 { unsafe { self.value.xyz.y } }
     #[doc = "< Z component of a vector"]
     pub fn z(&self) -> f32 { unsafe { self.value.xyz.z } }
+}
+
+impl Display for Float3 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {}, {})", self.x(), self.y(), self.z())
+    }
 }

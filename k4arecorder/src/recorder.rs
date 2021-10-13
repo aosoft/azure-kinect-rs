@@ -1,6 +1,5 @@
 use crate::param::Parameter;
 use azure_kinect::*;
-use azure_kinect_sys::k4a::*;
 use std::time::{Duration, Instant};
 
 #[derive(Debug)]
@@ -57,12 +56,12 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     param: &Parameter,
     request_abort: F,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let installed_devices = factory.device_get_installed_count();
+    let installed_devices = factory.core.device_get_installed_count();
     if param.device_index >= installed_devices {
         return Err(Box::new(Error::ErrorStr("Device not found.")));
     }
 
-    let mut device = match factory.device_open(param.device_index) {
+    let mut device = match factory.core.device_open(param.device_index) {
         Ok(device) => device,
         Err(_) => {
             return Err(Box::new(Error::ErrorStr(
@@ -76,18 +75,18 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     let version_info = device.get_version()?;
     print!(
         "Device version: {}",
-        if version_info.firmware_build == k4a_firmware_build_t_K4A_FIRMWARE_BUILD_RELEASE {
+        if version_info.firmware_build() == FirmwareBuildType::Release {
             "Rel"
         } else {
             "Dbg"
         }
     );
-    print!("; C: {}", version_info.rgb);
+    print!("; C: {}", version_info.rgb());
     print!(
         "; D: {}[{}.{}]",
-        version_info.depth, version_info.depth_sensor.major, version_info.depth_sensor.minor
+        version_info.depth(), version_info.depth_sensor().major(), version_info.depth_sensor().minor()
     );
-    println!("; A: {}", version_info.audio);
+    println!("; A: {}", version_info.audio());
 
     let camera_fps = param.device_config.camera_fps().get_u32();
     if camera_fps <= 0
@@ -101,16 +100,16 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
 
     if let Some(absolute_exposure_value) = param.absolute_exposure_value {
         if let Err(_) = device.set_color_control(
-            k4a_color_control_command_t_K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-            k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_MANUAL,
+            ColorControlCommand::ExposureTimeAbsolute,
+            ColorControlMode::Manual,
             absolute_exposure_value,
         ) {
             eprintln!("Runtime error: k4a_device_set_color_control() for manual exposure failed ");
         }
     } else {
         if let Err(_) = device.set_color_control(
-            k4a_color_control_command_t_K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-            k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_AUTO,
+            ColorControlCommand::ExposureTimeAbsolute,
+            ColorControlMode::Auto,
             0,
         ) {
             eprintln!("Runtime error: k4a_device_set_color_control() for auto exposure failed ");
@@ -119,16 +118,16 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
 
     if let Some(gain) = param.gain {
         if let Err(_) = device.set_color_control(
-            k4a_color_control_command_t_K4A_COLOR_CONTROL_GAIN,
-            k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_MANUAL,
+            ColorControlCommand::Gain,
+            ColorControlMode::Manual,
             gain,
         ) {
             eprintln!("Runtime error: k4a_device_set_color_control() for manual gain failed ");
         }
     } else {
         if let Err(_) = device.set_color_control(
-            k4a_color_control_command_t_K4A_COLOR_CONTROL_GAIN,
-            k4a_color_control_mode_t_K4A_COLOR_CONTROL_MODE_AUTO,
+            ColorControlCommand::Gain,
+            ColorControlMode::Auto,
             0,
         ) {
             eprintln!("Runtime error: k4a_device_set_color_control() for auto gain failed ");
@@ -240,7 +239,7 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
                     }
                 };
 
-                match recording.write_imu_sample(sample) {
+                match recording.write_imu_sample(&sample) {
                     Err(e) => {
                         return Err(Box::new(Error::Error(format!(
                             "Runtime error: k4a_record_write_imu_sample() returned {}",

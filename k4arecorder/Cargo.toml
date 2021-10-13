@@ -9,6 +9,5 @@ edition = "2018"
 [dependencies]
 
 azure-kinect = { path = "../azure-kinect" }
-azure-kinect-sys = { path = "../azure-kinect-sys" }
 clap = "2.33.1"
 ctrlc = "3.1.5"

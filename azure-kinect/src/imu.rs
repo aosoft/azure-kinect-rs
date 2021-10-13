@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use crate::*;
 use azure_kinect_sys::k4a::*;
 
@@ -21,6 +22,20 @@ impl ImuSample {
     #[doc = "< Timestamp of the gyroscope in microseconds"]
     pub fn gyro_timestamp_usec(&self) -> u64 { self.value.gyro_timestamp_usec }
 }
+
+impl Display for ImuSample {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f,
+               "temperature: {}, acc_sample: {}, acc_timestamp_usec: {}, gyro_sample: {} gyro_timestamp_usec: {}",
+               self.temperature(),
+               self.acc_sample(),
+               self.acc_timestamp_usec(),
+               self.gyro_sample(),
+               self.gyro_timestamp_usec())
+    }
+}
+
+
 
 pub struct Imu<'a> {
     device: &'a Device<'a>,

@@ -1,5 +1,4 @@
 use crate::recorder::Error;
-use azure_kinect_sys::k4a::*;
 use clap::{App, Arg, ArgMatches};
 use std::time::Duration;
 use azure_kinect::*;
