@@ -13,6 +13,8 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
     let factory = Factory::new()?;
     let device = factory.device_open(0)?;
     let camera_config = DeviceConfiguration::builder()
+        .color_format(ImageFormat::BGRA32)
+        .color_resolution(ColorResolution::_720p)
         .depth_mode(DepthMode::NFov2x2Binned)
         .camera_fps(Fps::_30fps)
         .build();
@@ -21,7 +23,7 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(feature = "depth-view")]
     let image_dimension = camera_config.depth_mode().get_dimension();
     #[cfg(not(feature = "depth-view"))]
-    let image_dimension = camera_config.color_resolution.get_dimension();
+    let image_dimension = camera_config.color_resolution().get_dimension();
 
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
@@ -107,6 +109,7 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(feature = "depth-view")]
 fn get_depth_color(depth: u16, minmax: Range<u16>) -> u32 {
     if depth == 0 {
         return 0xff000000;
