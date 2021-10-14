@@ -86,7 +86,7 @@ impl Transformation<'_> {
         custom_image: &Image,
         transformed_depth_image: &mut Image,
         transformed_custom_image: &mut Image,
-        interpolation_type: k4a_transformation_interpolation_type_t,
+        interpolation_type: TransformationInterpolationType,
         invalid_custom_value: u32,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
@@ -100,7 +100,7 @@ impl Transformation<'_> {
                 custom_image.handle,
                 transformed_depth_image.handle,
                 transformed_custom_image.handle,
-                interpolation_type,
+                interpolation_type.into(),
                 invalid_custom_value,
             )
         })
@@ -111,7 +111,7 @@ impl Transformation<'_> {
         &self,
         depth_image: &Image,
         custom_image: &Image,
-        interpolation_type: k4a_transformation_interpolation_type_t,
+        interpolation_type: TransformationInterpolationType,
         invalid_custom_value: u32,
     ) -> Result<(Image, Image), Error> {
         let bytes_per_pixel: usize = match custom_image.get_format() {
@@ -139,7 +139,7 @@ impl Transformation<'_> {
             custom_image,
             &mut transformed_depth_image,
             &mut transformed_custom_image,
-            interpolation_type,
+            interpolation_type.into(),
             invalid_custom_value,
         )?;
         Ok((transformed_depth_image, transformed_custom_image))

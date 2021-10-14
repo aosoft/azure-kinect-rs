@@ -53,8 +53,8 @@ impl RecordConfiguration {
         self.value.depth_delay_off_color_usec
     }
     #[doc = " External synchronization mode"]
-    pub fn wired_sync_mode(&self) -> k4a_wired_sync_mode_t {
-        self.value.wired_sync_mode
+    pub fn wired_sync_mode(&self) -> WiredSyncMode {
+        WiredSyncMode::from_primitive(self.value.wired_sync_mode)
     }
     #[doc = " The delay between this recording and the externally synced master camera."]
     #[doc = " This value is 0 unless \\p wired_sync_mode is set to ::K4A_WIRED_SYNC_MODE_SUBORDINATE"]

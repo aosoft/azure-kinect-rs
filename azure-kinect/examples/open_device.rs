@@ -3,7 +3,9 @@ use azure_kinect::*;
 pub fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let factory = Factory::new()?;
     let device = factory.device_open(0)?;
-    let camera_config = k4a_device_configuration_t::default();
+    let camera_config = DeviceConfiguration::builder()
+        .depth_mode(DepthMode::WFov2x2Binned)
+        .build();
     let camera = device.start_cameras(&camera_config)?;
 
     if let Ok(capture) = camera.get_capture(1000) {

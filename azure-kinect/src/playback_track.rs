@@ -2,6 +2,7 @@ use crate::playback::Playback;
 use crate::utility::*;
 use crate::*;
 use azure_kinect_sys::k4arecord::k4a_record_video_settings_t;
+use crate::record::RecordVideoSettings;
 
 pub struct PlaybackTrack<'a> {
     pub(crate) playback: &'a Playback<'a>,
@@ -44,7 +45,7 @@ impl PlaybackTrack<'_> {
     }
 
     /// Gets the video-specific track information for a particular video track.
-    pub fn get_video_settings(&self) -> Result<k4a_record_video_settings_t, Error> {
+    pub fn get_video_settings(&self) -> Result<RecordVideoSettings, Error> {
         let mut settings = k4a_record_video_settings_t::default();
         Error::from_k4a_result_t(unsafe {
             (self
@@ -58,7 +59,7 @@ impl PlaybackTrack<'_> {
                 &mut settings,
             )
         })
-        .to_result(settings)
+        .to_result(RecordVideoSettings { value: settings })
     }
 
     /// Gets the codec id string for a particular track.

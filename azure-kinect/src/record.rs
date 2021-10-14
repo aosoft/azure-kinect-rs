@@ -7,13 +7,13 @@ use azure_kinect_sys::k4arecord::{
 use std::ffi::CString;
 use std::ptr;
 
-pub struct RecordVideoSetting {
+pub struct RecordVideoSettings {
     pub(crate) value: k4a_record_video_settings_t,
 }
 
-impl RecordVideoSetting {
-    pub fn new(width: u64, height: u64, frame_rate: u64) -> RecordVideoSetting {
-        RecordVideoSetting {
+impl RecordVideoSettings {
+    pub fn new(width: u64, height: u64, frame_rate: u64) -> RecordVideoSettings {
+        RecordVideoSettings {
             value: k4a_record_video_settings_t {
                 width,
                 height,
@@ -36,13 +36,13 @@ impl RecordVideoSetting {
     }
 }
 
-pub struct RecordSubtitleSetting {
+pub struct RecordSubtitleSettings {
     pub(crate) value: k4a_record_subtitle_settings_t,
 }
 
-impl RecordSubtitleSetting {
-    pub fn new(high_freq_data: bool) -> RecordSubtitleSetting {
-        RecordSubtitleSetting {
+impl RecordSubtitleSettings {
+    pub fn new(high_freq_data: bool) -> RecordSubtitleSettings {
+        RecordSubtitleSettings {
             value: k4a_record_subtitle_settings_t { high_freq_data },
         }
     }
@@ -109,7 +109,7 @@ impl Record<'_> {
         track_name: &str,
         codec_id: &str,
         codec_context: &[u8],
-        track_settings: &RecordVideoSetting,
+        track_settings: &RecordVideoSettings,
     ) -> Result<(), Error> {
         let track_name = CString::new(track_name).unwrap_or_default();
         let codec_id = CString::new(codec_id).unwrap_or_default();
@@ -132,7 +132,7 @@ impl Record<'_> {
         track_name: &str,
         codec_id: &str,
         codec_context: &[u8],
-        track_settings: &RecordSubtitleSetting,
+        track_settings: &RecordSubtitleSettings,
     ) -> Result<(), Error> {
         let track_name = CString::new(track_name).unwrap_or_default();
         let codec_id = CString::new(codec_id).unwrap_or_default();
