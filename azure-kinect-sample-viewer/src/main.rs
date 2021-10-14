@@ -14,6 +14,7 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
     let device = factory.device_open(0)?;
     let camera_config = DeviceConfiguration::builder()
         .depth_mode(DepthMode::NFov2x2Binned)
+        .camera_fps(Fps::_30fps)
         .build();
     let camera = device.start_cameras(&camera_config)?;
 

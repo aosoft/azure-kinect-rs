@@ -82,8 +82,6 @@ pub(crate) fn get_k4a_binary_data(
 #[cfg(test)]
 mod tests {
     use crate::utility::*;
-    use crate::*;
-    use azure_kinect_sys::k4a::*;
 
     #[test]
     fn test() {

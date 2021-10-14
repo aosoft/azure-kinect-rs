@@ -276,7 +276,7 @@ fn conv_param_test() {
     );
     assert_eq!(
         to_format_and_resolution("OFF").unwrap(),
-        (ImageFormat::MJPG, ColorResolution::_Off)
+        (ImageFormat::MJPG, ColorResolution::Off)
     );
     assert!(to_format_and_resolution("asdqv").is_err());
 
