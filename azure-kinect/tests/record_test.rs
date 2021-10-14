@@ -16,18 +16,18 @@ fn record_test_main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         Box::new(|level, file, line, message| {
             println!("{:?}, {}, {}, {}", level, file, line, message);
         }),
-        k4a_log_level_t::K4A_LOG_LEVEL_ERROR,
+        LogLevel::Error,
     );
 
-    let c = factory.device_get_installed_count();
+    let c = factory.core.device_get_installed_count();
     println!("device count = {}", c);
-    /*let device = factory.device_open(0)?;
-    let camera_config = k4a_device_configuration_t {
-        depth_mode: k4a_depth_mode_t::K4A_DEPTH_MODE_NFOV_2X2BINNED,
-        ..k4a_device_configuration_t::default()
-    };
+    let device = factory.core.device_open(0)?;
+    let camera_config = DeviceConfiguration::builder()
+        .depth_mode(DepthMode::WFov2x2Binned)
+        .build();
+
     let record = factory.record_create("test.mkv", &device,&camera_config)?;
-    record.add_imu_track();*/
+    record.add_imu_track()?;
 
     Ok(())
 }
