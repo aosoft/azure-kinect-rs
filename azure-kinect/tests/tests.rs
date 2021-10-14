@@ -24,13 +24,15 @@ fn test_main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let device = factory.device_open(0)?;
     let serial = device.get_serialnum()?;
     let version = device.get_version()?;
-    println!("serial = {} / hw ver = {:?}", serial, version);
+    println!("serial = {} / hw ver = {}", serial, version);
 
     let color_control =
         device.get_color_control(ColorControlCommand::Brightness)?;
     println!("color control(brightness) = {:?}", color_control);
 
-    let camera_config = DeviceConfiguration::builder().build();
+    let camera_config = DeviceConfiguration::builder()
+        .depth_mode(DepthMode::WFov2x2Binned)
+        .build();
     let camera = device.start_cameras(&camera_config)?;
 
     {

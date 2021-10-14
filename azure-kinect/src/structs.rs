@@ -79,3 +79,10 @@ impl HardwareVersion {
         FirmwareSignatureType::from_primitive(self.value.firmware_signature)
     }
 }
+
+impl Display for HardwareVersion {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "rgb: {}, depth: {}, audio: {}, depth_sensor: {}, firmware_build: {:?}, firmware_signature: {:?}",
+            self.rgb(), self.depth(), self.audio(), self.depth_sensor(), self.firmware_build(), self.firmware_signature())
+    }
+}
