@@ -21,6 +21,7 @@ impl Factory<'_> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::new()?,
             debug_message_handler: None,
+            phantom: Default::default()
         })
     }
 
@@ -28,6 +29,7 @@ impl Factory<'_> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::with_library_directory(lib_dir)?,
             debug_message_handler: None,
+            phantom: Default::default()
         })
     }
 
@@ -35,6 +37,7 @@ impl Factory<'_> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::with_get_module()?,
             debug_message_handler: None,
+            phantom: Default::default()
         })
     }
 

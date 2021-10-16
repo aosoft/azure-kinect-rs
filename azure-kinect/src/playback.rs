@@ -75,7 +75,7 @@ pub struct Playback<'a> {
 
 impl Playback<'_> {
     pub(crate) fn from_handle<'a>(
-        factory: &FactoryRecord<'a>,
+        factory: &'a FactoryRecord<'a>,
         handle: azure_kinect_sys::k4arecord::k4a_playback_t,
     ) -> Playback<'a> {
         Playback { factory, handle }

@@ -15,7 +15,7 @@ impl Image<'_> {
     /// Create a blank image
     #[deprecated(since = "0.2", note = "Factory::image_create")]
     pub fn with_format<'a>(
-        factory: &Factory<'a>,
+        factory: &'a Factory<'a>,
         format: ImageFormat,
         width_pixels: i32,
         height_pixels: i32,
@@ -27,7 +27,7 @@ impl Image<'_> {
     /// Create an image from a pre-allocated buffer
     #[deprecated(since = "0.2", note = "Factory::image_create_from_buffer")]
     pub fn with_buffer<'a>(
-        factory: &Factory<'a>,
+        factory: &'a Factory<'a>,
         format: ImageFormat,
         width_pixels: i32,
         height_pixels: i32,
