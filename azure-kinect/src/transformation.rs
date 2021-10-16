@@ -7,7 +7,7 @@ use std::ptr;
 
 #[allow(dead_code)]
 pub struct Transformation<'a> {
-    factory: &'a Factory,
+    factory: &'a Factory<'a>,
     handle: k4a_transformation_t,
     color_resolution: Dimension,
     depth_resolution: Dimension,

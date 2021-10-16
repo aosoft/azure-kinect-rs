@@ -10,13 +10,14 @@ use std::ptr;
 
 pub type DebugMessageHandler = Box<dyn Fn(LogLevel, &str, raw::c_int, &str)>;
 
-pub struct Factory {
+pub struct Factory<'a> {
     pub(crate) api: azure_kinect_sys::api::Api,
     debug_message_handler: Option<DebugMessageHandler>,
+    phantom: std::marker::PhantomData<&'a i32>
 }
 
-impl Factory {
-    pub fn new() -> Result<Factory, Error> {
+impl Factory<'_> {
+    pub fn new<'a>() -> Result<Factory<'a>, Error> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::new()?,
             debug_message_handler: None,
@@ -30,7 +31,7 @@ impl Factory {
         })
     }
 
-    pub(crate) fn with_get_module() -> Result<Factory, Error> {
+    pub(crate) fn with_get_module<'a>() -> Result<Factory<'a>, Error> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::with_get_module()?,
             debug_message_handler: None,
@@ -199,25 +200,25 @@ impl Factory {
     }
 }
 
-pub struct FactoryRecord {
-    pub core: Factory,
+pub struct FactoryRecord<'a> {
+    pub core: Factory<'a>,
     pub(crate) api_record: azure_kinect_sys::api::ApiRecord,
 }
 
-impl FactoryRecord {
-    pub fn new() -> Result<FactoryRecord, Error> {
+impl FactoryRecord<'_> {
+    pub fn new<'a>() -> Result<FactoryRecord<'a>, Error> {
         FactoryRecord::with_api_record(azure_kinect_sys::api::ApiRecord::new()?)
     }
 
-    pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord, Error> {
+    pub fn with_library_directory<'a>(lib_dir: &str) -> Result<FactoryRecord<'a>, Error> {
         FactoryRecord::with_api_record(azure_kinect_sys::api::ApiRecord::with_library_directory(
             lib_dir,
         )?)
     }
 
-    fn with_api_record(
+    fn with_api_record<'a>(
         api_record: azure_kinect_sys::api::ApiRecord,
-    ) -> Result<FactoryRecord, Error> {
+    ) -> Result<FactoryRecord<'a>, Error> {
         Ok(FactoryRecord {
             core: Factory::with_get_module()?,
             api_record,

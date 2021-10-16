@@ -14,20 +14,20 @@ impl Image<'_> {
 
     /// Create a blank image
     #[deprecated(since = "0.2", note = "Factory::image_create")]
-    pub fn with_format(
-        factory: &Factory,
+    pub fn with_format<'a>(
+        factory: &Factory<'a>,
         format: ImageFormat,
         width_pixels: i32,
         height_pixels: i32,
         stride_bytes: i32,
-    ) -> Result<Image, Error> {
+    ) -> Result<Image<'a>, Error> {
         factory.image_create(format, width_pixels, height_pixels, stride_bytes)
     }
 
     /// Create an image from a pre-allocated buffer
     #[deprecated(since = "0.2", note = "Factory::image_create_from_buffer")]
-    pub fn with_buffer(
-        factory: &Factory,
+    pub fn with_buffer<'a>(
+        factory: &Factory<'a>,
         format: ImageFormat,
         width_pixels: i32,
         height_pixels: i32,
@@ -36,7 +36,7 @@ impl Image<'_> {
         buffer_size: usize,
         buffer_release_cb: k4a_memory_destroy_cb_t,
         buffer_release_cb_context: *mut (),
-    ) -> Result<Image, Error> {
+    ) -> Result<Image<'a>, Error> {
         factory.image_create_from_buffer(
             format,
             width_pixels,

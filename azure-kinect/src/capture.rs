@@ -9,7 +9,7 @@ pub struct Capture<'a> {
 
 impl Capture<'_> {
     #[deprecated(since = "0.2", note = "Factory::capture_create")]
-    pub fn new(factory: &Factory) -> Result<Capture, Error> {
+    pub fn new<'a>(factory: &Factory<'a>) -> Result<Capture<'a>, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
         Error::from_k4a_result_t(unsafe { (factory.api.funcs.k4a_capture_create)(&mut handle) })
             .to_result_fn(|| Capture::from_handle(&factory.api, handle))
