@@ -8,20 +8,18 @@ use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
 
-pub type DebugMessageHandler = Box<dyn Fn(LogLevel, &str, raw::c_int, &str)>;
+pub type DebugMessageHandler = FnOnce(LogLevel, &str, raw::c_int, &str);
 
 pub struct Factory<'a> {
     pub(crate) api: azure_kinect_sys::api::Api,
-    debug_message_handler: Option<DebugMessageHandler>,
-    phantom: std::marker::PhantomData<&'a i32>
+    debug_message_handler: Option<&'a DebugMessageHandler>,
 }
 
-impl Factory<'_> {
-    pub fn new<'a>() -> Result<Factory<'a>, Error> {
+impl<'a> Factory<'a> {
+    pub fn new() -> Result<Factory<'a>, Error> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::new()?,
             debug_message_handler: None,
-            phantom: Default::default()
         })
     }
 
@@ -29,22 +27,20 @@ impl Factory<'_> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::with_library_directory(lib_dir)?,
             debug_message_handler: None,
-            phantom: Default::default()
         })
     }
 
-    pub(crate) fn with_get_module<'a>() -> Result<Factory<'a>, Error> {
+    pub(crate) fn with_get_module() -> Result<Factory<'a>, Error> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::with_get_module()?,
             debug_message_handler: None,
-            phantom: Default::default()
         })
     }
 
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
     pub fn set_debug_message_handler(
         mut self,
-        debug_message_handler: DebugMessageHandler,
+        debug_message_handler: &'a DebugMessageHandler,
         min_level: LogLevel,
     ) -> Self {
         self.set_debug_message_handler_internal(debug_message_handler, min_level);
@@ -59,14 +55,14 @@ impl Factory<'_> {
 
     pub(crate) fn set_debug_message_handler_internal(
         &mut self,
-        debug_message_handler: DebugMessageHandler,
+        debug_message_handler: &'a DebugMessageHandler,
         min_level: LogLevel,
     ) {
-        self.debug_message_handler = debug_message_handler.into();
+        self.debug_message_handler = Some(debug_message_handler);
         unsafe {
             (self.api.funcs.k4a_set_debug_message_handler)(
                 Some(Self::debug_message_handler_func),
-                &self.debug_message_handler as *const Option<DebugMessageHandler> as _,
+                &self.debug_message_handler as *const Option<&DebugMessageHandler> as _,
                 min_level.into(),
             );
         }
@@ -173,7 +169,7 @@ impl Factory<'_> {
     }
 
     /// Get handle to transformation handle.
-    pub fn transformation_create<'a>(&'a self, calibration: &'a Calibration) -> Transformation<'a> {
+    pub fn transformation_create(&'a self, calibration: &'a Calibration) -> Transformation<'a> {
         let handle =
             unsafe { (self.api.funcs.k4a_transformation_create)(&calibration.calibration) };
         Transformation::from_handle(&self, handle, calibration)
@@ -188,7 +184,7 @@ impl Factory<'_> {
         message: *const ::std::os::raw::c_char,
     ) {
         unsafe {
-            let h = context as *const Option<DebugMessageHandler>;
+            let h = context as *const Option<&'a DebugMessageHandler>;
             if h != ptr::null() && (*h).is_some() {
                 (*h).as_ref().unwrap()(
                     LogLevel::from_primitive(level),
@@ -208,18 +204,18 @@ pub struct FactoryRecord<'a> {
     pub(crate) api_record: azure_kinect_sys::api::ApiRecord,
 }
 
-impl FactoryRecord<'_> {
-    pub fn new<'a>() -> Result<FactoryRecord<'a>, Error> {
+impl<'a> FactoryRecord<'a> {
+    pub fn new() -> Result<FactoryRecord<'a>, Error> {
         FactoryRecord::with_api_record(azure_kinect_sys::api::ApiRecord::new()?)
     }
 
-    pub fn with_library_directory<'a>(lib_dir: &str) -> Result<FactoryRecord<'a>, Error> {
+    pub fn with_library_directory(lib_dir: &str) -> Result<FactoryRecord<'a>, Error> {
         FactoryRecord::with_api_record(azure_kinect_sys::api::ApiRecord::with_library_directory(
             lib_dir,
         )?)
     }
 
-    fn with_api_record<'a>(
+    fn with_api_record(
         api_record: azure_kinect_sys::api::ApiRecord,
     ) -> Result<FactoryRecord<'a>, Error> {
         Ok(FactoryRecord {
@@ -231,7 +227,7 @@ impl FactoryRecord<'_> {
     /// Sets and clears the callback function to receive debug messages from the Azure Kinect device.
     pub fn set_debug_message_handler(
         mut self,
-        debug_message_handler: DebugMessageHandler,
+        debug_message_handler: &'a DebugMessageHandler,
         min_level: LogLevel,
     ) -> Self {
         self.core.set_debug_message_handler_internal(debug_message_handler, min_level);
