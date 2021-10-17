@@ -73,8 +73,8 @@ pub struct Playback<'a> {
     pub(crate) handle: k4a_playback_t,
 }
 
-impl Playback<'_> {
-    pub(crate) fn from_handle<'a>(
+impl<'a> Playback<'a> {
+    pub(crate) fn from_handle(
         factory: &'a FactoryRecord<'a>,
         handle: azure_kinect_sys::k4arecord::k4a_playback_t,
     ) -> Playback<'a> {

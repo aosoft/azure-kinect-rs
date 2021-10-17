@@ -7,14 +7,14 @@ pub struct Image<'a> {
     pub(crate) handle: k4a_image_t,
 }
 
-impl Image<'_> {
+impl<'a> Image<'a> {
     pub(crate) fn from_handle(api: &azure_kinect_sys::api::Api, handle: k4a_image_t) -> Image {
         Image { api, handle }
     }
 
     /// Create a blank image
     #[deprecated(since = "0.2", note = "Factory::image_create")]
-    pub fn with_format<'a>(
+    pub fn with_format(
         factory: &'a Factory<'a>,
         format: ImageFormat,
         width_pixels: i32,
@@ -26,7 +26,7 @@ impl Image<'_> {
 
     /// Create an image from a pre-allocated buffer
     #[deprecated(since = "0.2", note = "Factory::image_create_from_buffer")]
-    pub fn with_buffer<'a>(
+    pub fn with_buffer(
         factory: &'a Factory<'a>,
         format: ImageFormat,
         width_pixels: i32,

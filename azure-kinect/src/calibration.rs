@@ -7,7 +7,7 @@ pub struct Calibration<'a> {
     pub(crate) calibration: k4a_calibration_t,
 }
 
-impl Calibration<'_> {
+impl<'a> Calibration<'a> {
     pub(crate) fn from_handle(
         api: &azure_kinect_sys::api::Api,
         calibration: k4a_calibration_t,
@@ -16,7 +16,7 @@ impl Calibration<'_> {
     }
 
     #[deprecated(since = "0.2", note = "Factory::calibration_get_from_raw")]
-    pub fn from_raw<'a>(
+    pub fn from_raw(
         factory: &'a Factory,
         raw_calibration: &Vec<u8>,
         target_depth_mode: DepthMode,
