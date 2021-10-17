@@ -13,13 +13,13 @@ pub struct Transformation<'a> {
     depth_resolution: Dimension,
 }
 
-impl Transformation<'_> {
+impl<'a> Transformation<'a> {
     #[deprecated(since = "0.2", note = "Factory::transformation_create")]
-    pub fn new<'a>(factory: &'a Factory, calibration: &'a Calibration) -> Transformation<'a> {
+    pub fn new(factory: &'a Factory, calibration: &'a Calibration) -> Transformation<'a> {
         factory.transformation_create(calibration)
     }
 
-    pub(crate) fn from_handle<'a>(
+    pub(crate) fn from_handle(
         factory: &'a Factory,
         handle: k4a_transformation_t,
         calibration: &'a Calibration,

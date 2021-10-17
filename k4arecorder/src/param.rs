@@ -14,8 +14,8 @@ pub struct Parameter {
     pub gain: Option<i32>,
 }
 
-impl Parameter {
-    pub fn new<'a>() -> Result<Parameter, Error<'a>> {
+impl<'a> Parameter {
+    pub fn new() -> Result<Parameter, Error<'a>> {
         let p = Parameter::from(create_app().get_matches());
 
         if let Ok(r) = p.as_ref() {
@@ -30,7 +30,7 @@ impl Parameter {
         p
     }
 
-    fn from<'a, 'b>(args: ArgMatches<'a>) -> Result<Parameter, Error<'b>> {
+    fn from(args: ArgMatches) -> Result<Parameter, Error> {
         let format_resolution = to_format_and_resolution(args.value_of("color-mode").unwrap())?;
         let param = Parameter {
             list_device: args.is_present("list"),

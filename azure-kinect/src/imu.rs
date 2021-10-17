@@ -49,8 +49,8 @@ pub struct Imu<'a> {
     device: &'a Device<'a>,
 }
 
-impl Imu<'_> {
-    pub(crate) fn new<'a>(device: &'a Device<'a>) -> Result<Imu<'a>, Error> {
+impl<'a> Imu<'a> {
+    pub(crate) fn new(device: &'a Device<'a>) -> Result<Imu<'a>, Error> {
         Error::from_k4a_result_t(unsafe { (device.api.funcs.k4a_device_start_imu)(device.handle) })
             .to_result(())?;
         Ok(Imu { device })

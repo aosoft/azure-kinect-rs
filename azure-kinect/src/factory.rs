@@ -8,7 +8,7 @@ use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
 
-pub type DebugMessageHandler = FnOnce(LogLevel, &str, raw::c_int, &str);
+pub type DebugMessageHandler = dyn Fn(LogLevel, &str, raw::c_int, &str);
 
 pub struct Factory<'a> {
     pub(crate) api: azure_kinect_sys::api::Api,

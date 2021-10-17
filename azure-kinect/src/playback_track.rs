@@ -9,8 +9,8 @@ pub struct PlaybackTrack<'a> {
     name: std::ffi::CString,
 }
 
-impl PlaybackTrack<'_> {
-    pub(crate) fn new<'a>(playback: &'a Playback, name: std::ffi::CString) -> PlaybackTrack<'a> {
+impl<'a> PlaybackTrack<'a> {
+    pub(crate) fn new(playback: &'a Playback, name: std::ffi::CString) -> PlaybackTrack<'a> {
         PlaybackTrack { playback, name }
     }
 

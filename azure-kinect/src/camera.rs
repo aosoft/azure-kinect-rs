@@ -6,8 +6,8 @@ pub struct Camera<'a> {
     pub(crate) device: &'a Device<'a>,
 }
 
-impl Camera<'_> {
-    pub(crate) fn new<'a>(
+impl<'a> Camera<'a> {
+    pub(crate) fn new(
         device: &'a Device<'a>,
         configuration: &DeviceConfiguration,
     ) -> Result<Camera<'a>, Error> {
