@@ -23,7 +23,7 @@ impl<'a> Factory<'a> {
         })
     }
 
-    pub fn with_library_directory(lib_dir: &str) -> Result<Factory, Error> {
+    pub fn with_library_directory(lib_dir: &str) -> Result<Factory<'a>, Error> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::with_library_directory(lib_dir)?,
             debug_message_handler: None,

@@ -13,9 +13,9 @@ fn test_main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             .ok_or(error::Error::Failed)?,
     )?
     .set_debug_message_handler(
-        Box::new(|level, file, line, message| {
+        &|level, file, line, message| {
             println!("{:?}, {}, {}, {}", level, file, line, message);
-        }),
+        },
         LogLevel::Error,
     );
 
