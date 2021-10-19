@@ -15,7 +15,10 @@ impl<'a> Capture<'a> {
             .to_result_fn(|| Capture::from_handle(&factory.api, handle))
     }
 
-    pub(crate) fn from_handle(api: &'a azure_kinect_sys::api::Api, handle: k4a_capture_t) -> Capture<'a> {
+    pub(crate) fn from_handle(
+        api: &'a azure_kinect_sys::api::Api,
+        handle: k4a_capture_t,
+    ) -> Capture<'a> {
         Capture { api, handle }
     }
 

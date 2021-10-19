@@ -26,8 +26,7 @@ fn test_main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let version = device.get_version()?;
     println!("serial = {} / hw ver = {}", serial, version);
 
-    let color_control =
-        device.get_color_control(ColorControlCommand::Brightness)?;
+    let color_control = device.get_color_control(ColorControlCommand::Brightness)?;
     println!("color control(brightness) = {:?}", color_control);
 
     let camera_config = DeviceConfiguration::builder()

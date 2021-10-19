@@ -4,7 +4,7 @@ pub use capture::Capture;
 pub use device::{Device, DeviceConfiguration, DeviceConfigurationBuilder};
 pub use enums::*;
 pub use error::Error;
-pub use factory::{DebugMessageHandler, MemoryDestroyCallback, Factory, FactoryRecord};
+pub use factory::{DebugMessageHandler, Factory, FactoryRecord, MemoryDestroyCallback};
 pub use image::Image;
 pub use imu::{Imu, ImuSample};
 pub use structs::*;

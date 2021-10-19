@@ -1,8 +1,8 @@
 use crate::playback::Playback;
+use crate::record::RecordVideoSettings;
 use crate::utility::*;
 use crate::*;
 use azure_kinect_sys::k4arecord::k4a_record_video_settings_t;
-use crate::record::RecordVideoSettings;
 
 pub struct PlaybackTrack<'a> {
     pub(crate) playback: &'a Playback<'a>,

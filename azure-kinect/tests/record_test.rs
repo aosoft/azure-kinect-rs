@@ -26,7 +26,7 @@ fn record_test_main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         .depth_mode(DepthMode::WFov2x2Binned)
         .build();
 
-    let record = factory.record_create("test.mkv", &device,&camera_config)?;
+    let record = factory.record_create("test.mkv", &device, &camera_config)?;
     record.add_imu_track()?;
 
     Ok(())
