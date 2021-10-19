@@ -1,9 +1,7 @@
 use crate::playback::Playback;
 use crate::record::Record;
 use crate::*;
-use azure_kinect_sys::k4a::{
-    k4a_calibration_t, k4a_capture_t, k4a_image_t,
-};
+use azure_kinect_sys::k4a::{k4a_calibration_t, k4a_capture_t, k4a_image_t};
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
@@ -80,7 +78,6 @@ impl<'a> Factory<'a> {
         }
     }
 
-
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {
         unsafe { (self.api.funcs.k4a_device_get_installed_count)() }
@@ -141,7 +138,7 @@ impl<'a> Factory<'a> {
     }
 
     /// Create an image from a pre-allocated buffer
-    pub fn image_create_from_buffer(
+    pub fn image_create_from_buffer_native(
         &self,
         format: ImageFormat,
         width_pixels: i32,
@@ -169,13 +166,35 @@ impl<'a> Factory<'a> {
         .to_result_fn(|| Image::from_handle(&self.api, handle))
     }
 
+    /// Create an image from a pre-allocated buffer
+    pub fn image_create_from_buffer<T: FnOnce(*mut ())>(
+        &self,
+        format: ImageFormat,
+        width_pixels: i32,
+        height_pixels: i32,
+        stride_bytes: i32,
+        buffer: *mut u8,
+        buffer_size: usize,
+        buffer_release_cb: Box<T>,
+    ) -> Result<Image, Error> {
+        self.image_create_from_buffer_native(
+            format.into(),
+            width_pixels,
+            height_pixels,
+            stride_bytes,
+            buffer,
+            buffer_size,
+            Some(Self::buffer_release_callback::<T>),
+            Box::<T>::into_raw(buffer_release_cb) as _,
+        )
+    }
+
     /// Get handle to transformation handle.
     pub fn transformation_create(&'a self, calibration: &'a Calibration) -> Transformation<'a> {
         let handle =
             unsafe { (self.api.funcs.k4a_transformation_create)(&calibration.calibration) };
         Transformation::from_handle(&self, handle, calibration)
     }
-
 
     extern "C" fn debug_message_handler_func(
         context: *mut ::std::os::raw::c_void,
@@ -196,6 +215,13 @@ impl<'a> Factory<'a> {
                         .unwrap_or_default(),
                 );
             }
+        }
+    }
+
+    extern "C" fn buffer_release_callback<T: FnOnce(*mut ())>(buffer: *mut (), context: *mut ()) {
+        unsafe {
+            let f = Box::<T>::from_raw(context as _);
+            f(buffer);
         }
     }
 }
@@ -231,7 +257,8 @@ impl<'a> FactoryRecord<'a> {
         debug_message_handler: &'a DebugMessageHandler,
         min_level: LogLevel,
     ) -> Self {
-        self.core.set_debug_message_handler_internal(debug_message_handler, min_level);
+        self.core
+            .set_debug_message_handler_internal(debug_message_handler, min_level);
         self
     }
 
@@ -285,6 +312,34 @@ mod tests {
         let manager2 = manager.unwrap();
         let c = unsafe { (manager2.api.funcs.k4a_device_get_installed_count)() };
         println!("device count = {}", c);
+        Ok(())
+    }
+
+    #[test]
+    fn test_image_create_from_buffer() -> std::result::Result<(), Box<dyn std::error::Error>> {
+        let factory = Factory::with_library_directory(
+            std::env::current_dir()?.to_str().ok_or(Error::Failed)?,
+        );
+        assert!(factory.is_ok());
+
+        let mut mem = Vec::<u8>::with_capacity(256 * 4 * 256);
+        unsafe {
+            mem.set_len(mem.capacity());
+        }
+
+        let factory = factory.unwrap();
+        let image = factory.image_create_from_buffer(
+            ImageFormat::BGRA32,
+            255,
+            256,
+            256 * 4,
+            &mut mem[0] as _,
+            mem.len(),
+            Box::new(|x| {
+                assert_eq!(x as *const u8, &mem[0] as *const u8);
+            }),
+        )?;
+
         Ok(())
     }
 }

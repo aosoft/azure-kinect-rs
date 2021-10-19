@@ -37,7 +37,7 @@ impl<'a> Image<'a> {
         buffer_release_cb: Option<MemoryDestroyCallback>,
         buffer_release_cb_context: *mut (),
     ) -> Result<Image<'a>, Error> {
-        factory.image_create_from_buffer(
+        factory.image_create_from_buffer_native(
             format,
             width_pixels,
             height_pixels,
