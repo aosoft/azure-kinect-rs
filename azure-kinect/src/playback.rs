@@ -220,13 +220,13 @@ impl<'a> Playback<'a> {
 
     /// Set the image format that color captures will be converted to. By default the conversion format will be the
     /// same as the image format stored in the recording file, and no conversion will occur.
-    pub fn set_color_conversion(&mut self, format: k4a_image_format_t) -> Result<(), Error> {
+    pub fn set_color_conversion(&mut self, format: ImageFormat) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
             (self
                 .factory
                 .api_record
                 .funcs
-                .k4a_playback_set_color_conversion)(self.handle, format)
+                .k4a_playback_set_color_conversion)(self.handle, format.into())
         })
         .to_result(())
     }

@@ -41,17 +41,17 @@ impl<'a> Capture<'a> {
     }
 
     /// Set / add a color image to the capture
-    pub fn set_color_image(&mut self, color_image: Image) {
+    pub fn set_color_image(&mut self, color_image: &Image) {
         unsafe { (self.api.funcs.k4a_capture_set_color_image)(self.handle, color_image.handle) }
     }
 
     /// Set / add a depth image to the capture
-    pub fn set_depth_image(&mut self, depth_image: Image) {
+    pub fn set_depth_image(&mut self, depth_image: &Image) {
         unsafe { (self.api.funcs.k4a_capture_set_depth_image)(self.handle, depth_image.handle) }
     }
 
     /// Set / add an IR image to the capture
-    pub fn set_ir_image(&mut self, ir_image: Image) {
+    pub fn set_ir_image(&mut self, ir_image: &Image) {
         unsafe { (self.api.funcs.k4a_capture_set_ir_image)(self.handle, ir_image.handle) }
     }
 
