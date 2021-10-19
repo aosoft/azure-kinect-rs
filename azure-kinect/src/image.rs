@@ -34,7 +34,7 @@ impl<'a> Image<'a> {
         stride_bytes: i32,
         buffer: *mut u8,
         buffer_size: usize,
-        buffer_release_cb: k4a_memory_destroy_cb_t,
+        buffer_release_cb: Option<MemoryDestroyCallback>,
         buffer_release_cb_context: *mut (),
     ) -> Result<Image<'a>, Error> {
         factory.image_create_from_buffer(

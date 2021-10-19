@@ -2,13 +2,14 @@ use crate::playback::Playback;
 use crate::record::Record;
 use crate::*;
 use azure_kinect_sys::k4a::{
-    k4a_calibration_t, k4a_capture_t, k4a_image_t, k4a_memory_destroy_cb_t,
+    k4a_calibration_t, k4a_capture_t, k4a_image_t,
 };
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
 
 pub type DebugMessageHandler = dyn Fn(LogLevel, &str, raw::c_int, &str);
+pub type MemoryDestroyCallback = extern "C" fn(buffer: *mut (), context: *mut ());
 
 pub struct Factory<'a> {
     pub(crate) api: azure_kinect_sys::api::Api,
@@ -148,7 +149,7 @@ impl<'a> Factory<'a> {
         stride_bytes: i32,
         buffer: *mut u8,
         buffer_size: usize,
-        buffer_release_cb: k4a_memory_destroy_cb_t,
+        buffer_release_cb: Option<MemoryDestroyCallback>,
         buffer_release_cb_context: *mut (),
     ) -> Result<Image, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
@@ -160,7 +161,7 @@ impl<'a> Factory<'a> {
                 stride_bytes,
                 buffer,
                 buffer_size,
-                buffer_release_cb,
+                std::mem::transmute(buffer_release_cb),
                 buffer_release_cb_context as _,
                 &mut handle,
             )
