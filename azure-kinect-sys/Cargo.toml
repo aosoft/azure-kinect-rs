@@ -1,9 +1,9 @@
 [package]
-name = "azure-kinect"
+name = "azure-kinect-sys"
 version = "0.2.0"
 authors = ["Yasuhiro Taniuchi"]
 license = "MIT"
-description = "Rust Bindings for Azure Kinect Sensor SDK"
+description = "azure-kinect-sys"
 homepage = "https://github.com/aosoft/azure-kinect-rs"
 repository = "https://github.com/aosoft/azure-kinect-rs"
 readme = "../README.md"
@@ -19,5 +19,3 @@ include = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
-azure-kinect-sys = { version = "0.2.0", path = "../azure-kinect-sys" }

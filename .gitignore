@@ -1,2 +1,3 @@
 /target
 Cargo.lock
+azure-kinect-sys/include/*

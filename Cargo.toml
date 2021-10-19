@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "azure-kinect-sys",
     "azure-kinect",
     "azure-kinect-sample-viewer",
     "k4arecorder"

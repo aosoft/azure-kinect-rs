@@ -5,7 +5,7 @@ Rust Bindings for Azure Kinect Sensor SDK
 
 ## Notice
 
-* Target SDK Version: v1.4.0
+* Target SDK Version: v1.4.1
 * Currently, only Windows is supported.
 * API is not stable.
 
