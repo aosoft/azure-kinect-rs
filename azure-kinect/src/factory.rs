@@ -14,7 +14,7 @@ pub trait PreAllocatedBufferInfo {
     fn width_pixels(&self) -> i32;
     fn height_pixels(&self) -> i32;
     fn stride_bytes(&self) -> i32;
-    fn buffer(&self) -> *mut u8;
+    fn buffer(&mut self) -> *mut u8;
     fn buffer_size(&self) -> usize;
 }
 
@@ -201,7 +201,7 @@ impl<'a> Factory<'a> {
     /// Create an image from a pre-allocated buffer
     pub fn image_create_from_buffer_with_info<T: PreAllocatedBufferInfo + Drop>(
         &self,
-        buffer_info: Box<T>,
+        mut buffer_info: Box<T>,
     ) -> Result<Image, Error> {
         self.image_create_from_buffer(
             buffer_info.format().into(),
@@ -210,9 +210,9 @@ impl<'a> Factory<'a> {
             buffer_info.stride_bytes(),
             buffer_info.buffer(),
             buffer_info.buffer_size(),
-            Box::new(|x| {
-                let buffer_info = buffer_info;
-            })
+            Box::new(|_| {
+                let _ = buffer_info;
+            }),
         )
     }
 
@@ -328,6 +328,7 @@ impl<'a> FactoryRecord<'a> {
 
 #[cfg(test)]
 mod tests {
+    use crate::factory::PreAllocatedBufferInfo;
     use crate::*;
 
     #[test]
@@ -355,7 +356,7 @@ mod tests {
         }
 
         let factory = factory.unwrap();
-        let image = factory.image_create_from_buffer(
+        let _ = factory.image_create_from_buffer(
             ImageFormat::BGRA32,
             255,
             256,
@@ -366,6 +367,69 @@ mod tests {
                 assert_eq!(x as *const u8, &mem[0] as *const u8);
             }),
         )?;
+
+        Ok(())
+    }
+
+    pub struct BufferInfo {
+        mem: Vec<u8>
+    }
+
+    impl BufferInfo {
+        pub fn new() -> BufferInfo {
+            let mut mem = Vec::<u8>::with_capacity(256 * 4 * 256);
+            unsafe {
+                mem.set_len(mem.capacity());
+            }
+
+            BufferInfo { mem }
+        }
+    }
+
+    impl PreAllocatedBufferInfo for BufferInfo {
+        fn format(&self) -> ImageFormat {
+            ImageFormat::BGRA32
+        }
+
+        fn width_pixels(&self) -> i32 {
+            256
+        }
+
+        fn height_pixels(&self) -> i32 {
+            256
+        }
+
+        fn stride_bytes(&self) -> i32 {
+            256 * 4
+        }
+
+        fn buffer(&mut self) -> *mut u8 {
+            &mut self.mem[0]
+        }
+
+        fn buffer_size(&self) -> usize {
+            self.mem.len()
+        }
+    }
+
+    impl Drop for BufferInfo {
+        fn drop(&mut self) {
+            println!("drop BufferInfo");
+        }
+    }
+
+    #[test]
+    fn test_image_create_from_buffer_with_info(
+    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
+        let factory = Factory::with_library_directory(
+            std::env::current_dir()?.to_str().ok_or(Error::Failed)?,
+        );
+        assert!(factory.is_ok());
+
+
+        let factory = factory.unwrap();
+        let buffer_info = Box::new(BufferInfo::new());
+        let _ = factory.image_create_from_buffer_with_info(buffer_info)?;
 
         Ok(())
     }
