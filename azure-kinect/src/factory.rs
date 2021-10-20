@@ -9,6 +9,15 @@ use std::ptr;
 pub type DebugMessageHandler = dyn Fn(LogLevel, &str, raw::c_int, &str);
 pub type MemoryDestroyCallback = extern "C" fn(buffer: *mut (), context: *mut ());
 
+pub trait PreAllocatedBufferInfo {
+    fn format(&self) -> ImageFormat;
+    fn width_pixels(&self) -> i32;
+    fn height_pixels(&self) -> i32;
+    fn stride_bytes(&self) -> i32;
+    fn buffer(&self) -> *mut u8;
+    fn buffer_size(&self) -> usize;
+}
+
 pub struct Factory<'a> {
     pub(crate) api: azure_kinect_sys::api::Api,
     debug_message_handler: Option<&'a DebugMessageHandler>,
@@ -186,6 +195,24 @@ impl<'a> Factory<'a> {
             buffer_size,
             Some(Self::buffer_release_callback::<T>),
             Box::<T>::into_raw(buffer_release_cb) as _,
+        )
+    }
+
+    /// Create an image from a pre-allocated buffer
+    pub fn image_create_from_buffer_with_info<T: PreAllocatedBufferInfo + Drop>(
+        &self,
+        buffer_info: Box<T>,
+    ) -> Result<Image, Error> {
+        self.image_create_from_buffer(
+            buffer_info.format().into(),
+            buffer_info.width_pixels(),
+            buffer_info.height_pixels(),
+            buffer_info.stride_bytes(),
+            buffer_info.buffer(),
+            buffer_info.buffer_size(),
+            Box::new(|x| {
+                let buffer_info = buffer_info;
+            })
         )
     }
 
