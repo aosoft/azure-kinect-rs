@@ -6,7 +6,7 @@ use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
 
-pub type DebugMessageHandler = dyn FnOnce(LogLevel, &str, raw::c_int, &str);
+pub type DebugMessageHandler = dyn FnMut(LogLevel, &str, raw::c_int, &str);
 pub type MemoryDestroyCallback = extern "C" fn(buffer: *mut (), context: *mut ());
 
 pub trait PreAllocatedBufferInfo {
@@ -70,7 +70,7 @@ impl Factory {
         unsafe {
             (self.api.funcs.k4a_set_debug_message_handler)(
                 Some(Self::debug_message_handler_func),
-                &self as _,
+                std::mem::transmute(self.debug_message_handler.as_mut()),
                 min_level.into(),
             );
         }
@@ -210,7 +210,7 @@ impl Factory {
             buffer_info.stride_bytes(),
             buffer_info.buffer(),
             buffer_info.buffer_size(),
-            Box::new(|_| {
+            Box::new(move |_| {
                 let _ = buffer_info;
             }),
         )
@@ -231,17 +231,15 @@ impl Factory {
         message: *const ::std::os::raw::c_char,
     ) {
         unsafe {
-            let h = context as *const Self;
-            if h != ptr::null() && (*h).debug_message_handler.is_some() {
-                (*h).debug_message_handler.unwrap().as_ref()(
-                    LogLevel::from_primitive(level),
-                    std::ffi::CStr::from_ptr(file).to_str().unwrap_or_default(),
-                    line,
-                    std::ffi::CStr::from_ptr(message)
-                        .to_str()
-                        .unwrap_or_default(),
-                );
-            }
+            let f = std::mem::transmute::<_, &mut Box<DebugMessageHandler>>(context);
+            f(
+                LogLevel::from_primitive(level),
+                std::ffi::CStr::from_ptr(file).to_str().unwrap_or_default(),
+                line,
+                std::ffi::CStr::from_ptr(message)
+                    .to_str()
+                    .unwrap_or_default(),
+            );
         }
     }
 
@@ -372,7 +370,7 @@ mod tests {
     }
 
     pub struct BufferInfo {
-        mem: Vec<u8>
+        mem: Vec<u8>,
     }
 
     impl BufferInfo {
@@ -425,7 +423,6 @@ mod tests {
             std::env::current_dir()?.to_str().ok_or(Error::Failed)?,
         );
         assert!(factory.is_ok());
-
 
         let factory = factory.unwrap();
         let buffer_info = Box::new(BufferInfo::new());
