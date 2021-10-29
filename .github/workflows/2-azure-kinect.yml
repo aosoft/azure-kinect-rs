@@ -1,4 +1,4 @@
-name: 2. unity-native-plugin
+name: 2. azure-kinect
 
 on:
   workflow_dispatch:
