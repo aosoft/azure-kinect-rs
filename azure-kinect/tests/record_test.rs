@@ -19,9 +19,9 @@ fn record_test_main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         LogLevel::Error,
     );
 
-    let c = factory.core.device_get_installed_count();
+    let c = factory.core().device_get_installed_count();
     println!("device count = {}", c);
-    let device = factory.core.device_open(0)?;
+    let device = factory.core().device_open(0)?;
     let camera_config = DeviceConfiguration::builder()
         .depth_mode(DepthMode::WFov2x2Binned)
         .build();

@@ -50,12 +50,12 @@ pub(crate) fn do_recording<F: Fn() -> bool>(
     param: &Parameter,
     request_abort: F,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let installed_devices = factory.core.device_get_installed_count();
+    let installed_devices = factory.core().device_get_installed_count();
     if param.device_index >= installed_devices {
         return Err(Box::new(Error::ErrorStr("Device not found.")));
     }
 
-    let mut device = match factory.core.device_open(param.device_index) {
+    let mut device = match factory.core().device_open(param.device_index) {
         Ok(device) => device,
         Err(_) => {
             return Err(Box::new(Error::ErrorStr(

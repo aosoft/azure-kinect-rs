@@ -37,11 +37,11 @@ fn main2() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn list_devices(factory: &FactoryRecord) {
-    let device_count = factory.core.device_get_installed_count();
+    let device_count = factory.core().device_get_installed_count();
     if device_count > 0 {
         for i in 0..device_count {
             println!("Index:{}", i);
-            if let Ok(device) = factory.core.device_open(i) {
+            if let Ok(device) = factory.core().device_open(i) {
                 match device.get_serialnum() {
                     Ok(s) => println!("\tSerial:{}", s),
                     Err(_) => println!("\tSerial:ERROR"),

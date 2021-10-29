@@ -101,7 +101,7 @@ impl<'a> Playback<'a> {
                 std::mem::transmute(&mut calibaraion),
             )
         })
-        .to_result_fn(|| Calibration::from_handle(&self.factory.core.api, calibaraion))
+        .to_result_fn(|| Calibration::from_handle(&self.factory.core().api, calibaraion))
     }
 
     /// Gets the configuration of the recording
@@ -128,7 +128,7 @@ impl<'a> Playback<'a> {
                 std::mem::transmute(&mut handle),
             )
         })
-        .to_result_fn(|| Capture::from_handle(&self.factory.core.api, handle))
+        .to_result_fn(|| Capture::from_handle(&self.factory.core().api, handle))
     }
 
     /// Get the previous capture in the recording.
@@ -143,7 +143,7 @@ impl<'a> Playback<'a> {
                 self.handle, std::mem::transmute(&mut handle)
             )
         })
-        .to_result_fn(|| Capture::from_handle(&self.factory.core.api, handle))
+        .to_result_fn(|| Capture::from_handle(&self.factory.core().api, handle))
     }
 
     /// Reads the value of a tag from the recording

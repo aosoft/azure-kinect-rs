@@ -252,7 +252,7 @@ impl Factory {
 }
 
 pub struct FactoryRecord {
-    pub core: Factory,
+    core: Factory,
     pub(crate) api_record: azure_kinect_sys::api::ApiRecord,
 }
 
@@ -291,6 +291,10 @@ impl FactoryRecord {
     pub fn reset_debug_message_handler(mut self) -> Self {
         self.core.reset_debug_message_handler_internal();
         self
+    }
+
+    pub fn core(&self) -> &Factory {
+        &self.core
     }
 
     /// Opens a K4A recording for playback.
