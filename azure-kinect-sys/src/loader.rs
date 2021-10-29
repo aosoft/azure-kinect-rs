@@ -3,7 +3,7 @@ use std::ffi::c_void;
 use std::ptr;
 
 #[link(name = "kernel32")]
-extern "stdcall" {
+extern "system" {
     fn GetLastError() -> u32;
     fn LoadLibraryExW(
         lpLibFileName: *const u16,
