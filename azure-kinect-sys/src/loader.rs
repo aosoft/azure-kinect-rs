@@ -15,7 +15,7 @@ extern "system" {
     fn GetModuleHandleW(lpModuleName: *const u16) -> *const c_void;
 }
 
-pub(crate) struct Module {
+pub struct Module {
     handle: *const c_void,
     require_free_library: bool,
 }
