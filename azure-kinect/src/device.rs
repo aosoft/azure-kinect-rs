@@ -155,6 +155,12 @@ impl Device<'_> {
     }
 }
 
+impl NativeHandle for Device<'_> {
+    unsafe fn get_native_handle(&self) -> *mut () {
+        self.handle as *mut ()
+    }
+}
+
 impl Drop for Device<'_> {
     fn drop(&mut self) {
         unsafe {

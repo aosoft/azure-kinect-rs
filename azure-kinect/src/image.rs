@@ -135,6 +135,12 @@ impl<'a> Image<'a> {
     }
 }
 
+impl NativeHandle for Image<'_> {
+    unsafe fn get_native_handle(&self) -> *mut () {
+        self.handle as *mut ()
+    }
+}
+
 impl Drop for Image<'_> {
     fn drop(&mut self) {
         unsafe {

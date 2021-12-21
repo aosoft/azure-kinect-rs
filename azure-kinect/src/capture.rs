@@ -69,6 +69,12 @@ impl<'a> Capture<'a> {
     }
 }
 
+impl NativeHandle for Capture<'_> {
+    unsafe fn get_native_handle(&self) -> *mut () {
+        self.handle as *mut ()
+    }
+}
+
 impl Drop for Capture<'_> {
     fn drop(&mut self) {
         unsafe {

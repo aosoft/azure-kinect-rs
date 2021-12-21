@@ -28,3 +28,7 @@ pub mod structs;
 pub mod transformation;
 pub mod utility;
 pub mod vectors;
+
+pub trait NativeHandle {
+    unsafe fn get_native_handle(&self) -> *mut ();
+}

@@ -303,6 +303,12 @@ impl<'a> Playback<'a> {
     }
 }
 
+impl NativeHandle for Playback<'_> {
+    unsafe fn get_native_handle(&self) -> *mut () {
+        self.handle as *mut ()
+    }
+}
+
 impl Drop for Playback<'_> {
     fn drop(&mut self) {
         unsafe {

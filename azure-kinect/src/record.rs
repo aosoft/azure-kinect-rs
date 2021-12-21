@@ -196,6 +196,12 @@ impl Record<'_> {
     }
 }
 
+impl NativeHandle for Record<'_> {
+    unsafe fn get_native_handle(&self) -> *mut () {
+        self.handle as *mut ()
+    }
+}
+
 impl Drop for Record<'_> {
     fn drop(&mut self) {
         unsafe {
