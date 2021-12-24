@@ -1,6 +1,6 @@
 [package]
 name = "azure-kinect-sample-viewer"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Yasuhiro Taniuchi"]
 edition = "2018"
 

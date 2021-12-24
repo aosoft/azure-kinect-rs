@@ -14,7 +14,7 @@ pub enum Error {
 }
 
 impl Error {
-    pub(crate) fn from_k4a_result_t(s: k4a_result_t) -> Error {
+    pub fn from_k4a_result_t(s: k4a_result_t) -> Error {
         match s {
             k4a_result_t_K4A_RESULT_SUCCEEDED => Error::Succeeded,
             k4a_result_t_K4A_RESULT_FAILED => Error::Failed,
@@ -22,7 +22,7 @@ impl Error {
         }
     }
 
-    pub(crate) fn from_k4a_buffer_result_t(s: k4a_buffer_result_t) -> Error {
+    pub fn from_k4a_buffer_result_t(s: k4a_buffer_result_t) -> Error {
         match s {
             k4a_buffer_result_t_K4A_BUFFER_RESULT_SUCCEEDED => Error::Succeeded,
             k4a_buffer_result_t_K4A_BUFFER_RESULT_FAILED => Error::Failed,
@@ -31,7 +31,7 @@ impl Error {
         }
     }
 
-    pub(crate) fn from_k4a_wait_result_t(s: k4a_wait_result_t) -> Error {
+    pub fn from_k4a_wait_result_t(s: k4a_wait_result_t) -> Error {
         match s {
             k4a_wait_result_t_K4A_WAIT_RESULT_SUCCEEDED => Error::Succeeded,
             k4a_wait_result_t_K4A_WAIT_RESULT_FAILED => Error::Failed,
@@ -40,7 +40,7 @@ impl Error {
         }
     }
 
-    pub(crate) fn from_k4a_stream_result_t(s: k4a_stream_result_t) -> Error {
+    pub fn from_k4a_stream_result_t(s: k4a_stream_result_t) -> Error {
         match s {
             azure_kinect_sys::k4arecord::k4a_stream_result_t_K4A_STREAM_RESULT_SUCCEEDED => {
                 Error::Succeeded
@@ -53,14 +53,14 @@ impl Error {
         }
     }
 
-    pub(crate) fn to_result<T>(self, ok: T) -> Result<T, Error> {
+    pub fn to_result<T>(self, ok: T) -> Result<T, Error> {
         match self {
             Error::Succeeded => Ok(ok),
             _ => Err(self),
         }
     }
 
-    pub(crate) fn to_result_fn<T, F: FnOnce() -> T>(self, ok: F) -> Result<T, Error> {
+    pub fn to_result_fn<T, F: FnOnce() -> T>(self, ok: F) -> Result<T, Error> {
         match self {
             Error::Succeeded => Ok(ok()),
             _ => Err(self),
