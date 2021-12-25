@@ -290,7 +290,7 @@ impl DeviceConfigurationBuilder {
         self
     }
 
-    pub fn build(&self) -> DeviceConfiguration {
+    pub fn build(self) -> DeviceConfiguration {
         DeviceConfiguration { value: self.value }
     }
 }
