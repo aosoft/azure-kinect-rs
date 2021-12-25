@@ -29,6 +29,10 @@ impl<'a> Calibration<'a> {
         )
     }
 
+    pub fn get_native(&self) -> &k4a_calibration_t {
+        &self.calibration
+    }
+
     /// Transform a 3d point of a source coordinate system into a 3d point of the target coordinate system.
     pub fn convert_3d_to_3d(
         &self,
