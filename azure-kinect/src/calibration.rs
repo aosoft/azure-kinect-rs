@@ -8,7 +8,7 @@ pub struct Calibration<'a> {
 }
 
 impl<'a> Calibration<'a> {
-    pub(crate) fn from_handle(
+    pub fn from_handle(
         api: &azure_kinect_sys::api::Api,
         calibration: k4a_calibration_t,
     ) -> Calibration {

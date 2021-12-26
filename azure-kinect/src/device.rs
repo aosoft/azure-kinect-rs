@@ -19,7 +19,7 @@ pub struct ColorControlCapabilities {
 }
 
 impl Device<'_> {
-    pub(crate) fn from_handle(api: &azure_kinect_sys::api::Api, handle: k4a_device_t) -> Device {
+    pub fn from_handle(api: &azure_kinect_sys::api::Api, handle: k4a_device_t) -> Device {
         Device { api, handle }
     }
 

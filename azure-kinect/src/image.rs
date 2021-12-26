@@ -8,7 +8,7 @@ pub struct Image<'a> {
 }
 
 impl<'a> Image<'a> {
-    pub(crate) fn from_handle(api: &azure_kinect_sys::api::Api, handle: k4a_image_t) -> Image {
+    pub fn from_handle(api: &azure_kinect_sys::api::Api, handle: k4a_image_t) -> Image {
         Image { api, handle }
     }
 

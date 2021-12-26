@@ -19,7 +19,7 @@ impl<'a> Transformation<'a> {
         factory.transformation_create(calibration)
     }
 
-    pub(crate) fn from_handle(
+    pub fn from_handle(
         factory: &'a Factory,
         handle: k4a_transformation_t,
         calibration: &'a Calibration,

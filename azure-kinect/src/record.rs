@@ -58,7 +58,7 @@ pub struct Record<'a> {
 }
 
 impl Record<'_> {
-    pub(crate) fn from_handle(
+    pub fn from_handle(
         api_record: &azure_kinect_sys::api::ApiRecord,
         handle: k4a_record_t,
     ) -> Record {
