@@ -19,7 +19,7 @@ pub trait PreAllocatedBufferInfo {
 }
 
 pub struct Factory {
-    pub(crate) api: azure_kinect_sys::api::Api,
+    pub api: azure_kinect_sys::api::Api,
     debug_message_handler: Option<Box<DebugMessageHandler>>,
 }
 
@@ -38,7 +38,7 @@ impl Factory {
         })
     }
 
-    pub(crate) fn with_get_module() -> Result<Factory, Error> {
+    pub fn with_get_module() -> Result<Factory, Error> {
         Ok(Factory {
             api: azure_kinect_sys::api::Api::with_get_module()?,
             debug_message_handler: None,
@@ -252,8 +252,8 @@ impl Factory {
 }
 
 pub struct FactoryRecord {
-    core: Factory,
-    pub(crate) api_record: azure_kinect_sys::api::ApiRecord,
+    pub core: Factory,
+    pub api_record: azure_kinect_sys::api::ApiRecord,
 }
 
 impl FactoryRecord {
