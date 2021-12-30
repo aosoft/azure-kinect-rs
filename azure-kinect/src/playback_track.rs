@@ -24,7 +24,7 @@ impl<'a> PlaybackTrack<'a> {
             (self
                 .playback
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_check_track_exists)(
                 self.playback.handle, self.name.as_ptr()
@@ -38,7 +38,7 @@ impl<'a> PlaybackTrack<'a> {
             (self
                 .playback
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_track_is_builtin)(self.playback.handle, self.name.as_ptr())
         }
@@ -51,7 +51,7 @@ impl<'a> PlaybackTrack<'a> {
             (self
                 .playback
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_track_get_video_settings)(
                 self.playback.handle,
@@ -68,7 +68,7 @@ impl<'a> PlaybackTrack<'a> {
             (self
                 .playback
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_track_get_codec_id)(
                 self.playback.handle,
@@ -85,7 +85,7 @@ impl<'a> PlaybackTrack<'a> {
             (self
                 .playback
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_track_get_codec_context)(
                 self.playback.handle,

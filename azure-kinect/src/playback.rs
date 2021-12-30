@@ -86,7 +86,7 @@ impl<'a> Playback<'a> {
         get_k4a_binary_data(&|calibration, buffer| unsafe {
             (self
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_get_raw_calibration)(self.handle, calibration, buffer)
         })
@@ -96,12 +96,12 @@ impl<'a> Playback<'a> {
     pub fn get_calibration(&self) -> Result<Calibration, Error> {
         let mut calibaraion = k4a_calibration_t::default();
         Error::from_k4a_result_t(unsafe {
-            (self.factory.api_record.funcs.k4a_playback_get_calibration)(
+            (self.factory.api_record().funcs.k4a_playback_get_calibration)(
                 self.handle,
                 std::mem::transmute(&mut calibaraion),
             )
         })
-        .to_result_fn(|| Calibration::from_handle(&self.factory.core().api, calibaraion))
+        .to_result_fn(|| Calibration::from_handle(self.factory.core().api(), calibaraion))
     }
 
     /// Gets the configuration of the recording
@@ -110,7 +110,7 @@ impl<'a> Playback<'a> {
         Error::from_k4a_result_t(unsafe {
             (self
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_get_record_configuration)(self.handle, &mut configuration)
         })
@@ -123,12 +123,12 @@ impl<'a> Playback<'a> {
     pub fn get_next_capture(&self) -> Result<Capture, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
         Error::from_k4a_stream_result_t(unsafe {
-            (self.factory.api_record.funcs.k4a_playback_get_next_capture)(
+            (self.factory.api_record().funcs.k4a_playback_get_next_capture)(
                 self.handle,
                 std::mem::transmute(&mut handle),
             )
         })
-        .to_result_fn(|| Capture::from_handle(&self.factory.core().api, handle))
+        .to_result_fn(|| Capture::from_handle(self.factory.core().api(), handle))
     }
 
     /// Get the previous capture in the recording.
@@ -137,20 +137,20 @@ impl<'a> Playback<'a> {
         Error::from_k4a_stream_result_t(unsafe {
             (self
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_get_previous_capture)(
                 self.handle, std::mem::transmute(&mut handle)
             )
         })
-        .to_result_fn(|| Capture::from_handle(&self.factory.core().api, handle))
+        .to_result_fn(|| Capture::from_handle(self.factory.core().api(), handle))
     }
 
     /// Reads the value of a tag from the recording
     pub fn get_tag(&self, name: &str) -> Result<String, Error> {
         let name = std::ffi::CString::new(name).unwrap_or_default();
         get_k4a_string(&|tag, buffer| unsafe {
-            (self.factory.api_record.funcs.k4a_playback_get_tag)(
+            (self.factory.api_record().funcs.k4a_playback_get_tag)(
                 self.handle,
                 name.as_ptr(),
                 tag,
@@ -165,7 +165,7 @@ impl<'a> Playback<'a> {
         Error::from_k4a_stream_result_t(unsafe {
             (self
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_get_next_imu_sample)(
                 self.handle,
@@ -181,7 +181,7 @@ impl<'a> Playback<'a> {
         Error::from_k4a_stream_result_t(unsafe {
             (self
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_get_previous_imu_sample)(
                 self.handle,
@@ -198,7 +198,7 @@ impl<'a> Playback<'a> {
         origin: k4a_playback_seek_origin_t,
     ) -> Result<(), Error> {
         Error::from_k4a_result_t(unsafe {
-            (self.factory.api_record.funcs.k4a_playback_seek_timestamp)(
+            (self.factory.api_record().funcs.k4a_playback_seek_timestamp)(
                 self.handle,
                 offset_usec,
                 origin,
@@ -212,7 +212,7 @@ impl<'a> Playback<'a> {
         unsafe {
             (self
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_get_recording_length_usec)(self.handle)
         }
@@ -224,7 +224,7 @@ impl<'a> Playback<'a> {
         Error::from_k4a_result_t(unsafe {
             (self
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_set_color_conversion)(self.handle, format.into())
         })
@@ -239,13 +239,13 @@ impl<'a> Playback<'a> {
         Error::from_k4a_stream_result_t(unsafe {
             (self
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_get_next_data_block)(
                 self.handle, track.as_ptr(), &mut block_handle
             )
         })
-        .to_result_fn(|| PlaybackDataBlock::from_handle(&self.factory.api_record, block_handle))
+        .to_result_fn(|| PlaybackDataBlock::from_handle(self.factory.api_record(), block_handle))
     }
 
     /// Get the previous data block from the recording.
@@ -256,7 +256,7 @@ impl<'a> Playback<'a> {
         Error::from_k4a_stream_result_t(unsafe {
             (self
                 .factory
-                .api_record
+                .api_record()
                 .funcs
                 .k4a_playback_get_previous_data_block)(
                 self.handle,
@@ -264,14 +264,14 @@ impl<'a> Playback<'a> {
                 &mut block_handle,
             )
         })
-        .to_result_fn(|| PlaybackDataBlock::from_handle(&self.factory.api_record, block_handle))
+        .to_result_fn(|| PlaybackDataBlock::from_handle(self.factory.api_record(), block_handle))
     }
 
     /// Get the attachment block from the recording.
     pub fn get_attachment(&self, attachment: &str) -> Result<Vec<u8>, Error> {
         let attachment = std::ffi::CString::new(attachment).unwrap_or_default();
         get_k4a_binary_data(&|data, data_size| unsafe {
-            (self.factory.api_record.funcs.k4a_playback_get_attachment)(
+            (self.factory.api_record().funcs.k4a_playback_get_attachment)(
                 self.handle,
                 attachment.as_ptr(),
                 data,
@@ -283,7 +283,7 @@ impl<'a> Playback<'a> {
     /// Get the number of tracks in a playback file.
     pub fn get_track_count(&self) -> usize {
         unsafe {
-            (self.factory.api_record.funcs.k4a_playback_get_track_count)(self.handle) as usize
+            (self.factory.api_record().funcs.k4a_playback_get_track_count)(self.handle) as usize
         }
     }
 
@@ -292,7 +292,7 @@ impl<'a> Playback<'a> {
         Ok(PlaybackTrack::new(
             &self,
             get_k4a_cstring(&|track_name, track_name_size| unsafe {
-                (self.factory.api_record.funcs.k4a_playback_get_track_name)(
+                (self.factory.api_record().funcs.k4a_playback_get_track_name)(
                     self.handle,
                     track_index,
                     track_name,
@@ -312,7 +312,7 @@ impl NativeHandle for Playback<'_> {
 impl Drop for Playback<'_> {
     fn drop(&mut self) {
         unsafe {
-            (self.factory.api_record.funcs.k4a_playback_close)(self.handle);
+            (self.factory.api_record().funcs.k4a_playback_close)(self.handle);
         }
         self.handle = ptr::null_mut();
     }

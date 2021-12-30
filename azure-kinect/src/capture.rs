@@ -11,8 +11,8 @@ impl<'a> Capture<'a> {
     #[deprecated(since = "0.2", note = "Factory::capture_create")]
     pub fn new(factory: &'a Factory) -> Result<Capture<'a>, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
-        Error::from_k4a_result_t(unsafe { (factory.api.funcs.k4a_capture_create)(&mut handle) })
-            .to_result_fn(|| Capture::from_handle(&factory.api, handle))
+        Error::from_k4a_result_t(unsafe { (factory.api().funcs.k4a_capture_create)(&mut handle) })
+            .to_result_fn(|| Capture::from_handle(factory.api(), handle))
     }
 
     pub fn from_handle(

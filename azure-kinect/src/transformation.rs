@@ -58,7 +58,7 @@ impl<'a> Transformation<'a> {
         Error::from_k4a_result_t(unsafe {
             (self
                 .factory
-                .api
+                .api()
                 .funcs
                 .k4a_transformation_depth_image_to_color_camera)(
                 self.handle,
@@ -92,7 +92,7 @@ impl<'a> Transformation<'a> {
         Error::from_k4a_result_t(unsafe {
             (self
                 .factory
-                .api
+                .api()
                 .funcs
                 .k4a_transformation_depth_image_to_color_camera_custom)(
                 self.handle,
@@ -154,7 +154,7 @@ impl<'a> Transformation<'a> {
         Error::from_k4a_result_t(unsafe {
             (self
                 .factory
-                .api
+                .api()
                 .funcs
                 .k4a_transformation_color_image_to_depth_camera)(
                 self.handle,
@@ -195,7 +195,7 @@ impl<'a> Transformation<'a> {
         Error::from_k4a_result_t(unsafe {
             (self
                 .factory
-                .api
+                .api()
                 .funcs
                 .k4a_transformation_depth_image_to_point_cloud)(
                 self.handle,
@@ -226,7 +226,7 @@ impl<'a> Transformation<'a> {
 impl Drop for Transformation<'_> {
     fn drop(&mut self) {
         unsafe {
-            (self.factory.api.funcs.k4a_transformation_destroy)(self.handle);
+            (self.factory.api().funcs.k4a_transformation_destroy)(self.handle);
         }
         self.handle = ptr::null_mut();
     }

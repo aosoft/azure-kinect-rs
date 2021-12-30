@@ -5,6 +5,7 @@ use azure_kinect_sys::k4a::{k4a_calibration_t, k4a_capture_t, k4a_image_t};
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
+use azure_kinect_sys::api::ApiRecord;
 
 pub type DebugMessageHandler = dyn FnMut(LogLevel, &str, raw::c_int, &str);
 pub type MemoryDestroyCallback = extern "C" fn(buffer: *mut (), context: *mut ());
@@ -19,7 +20,7 @@ pub trait PreAllocatedBufferInfo {
 }
 
 pub struct Factory {
-    pub api: azure_kinect_sys::api::Api,
+    api: azure_kinect_sys::api::Api,
     debug_message_handler: Option<Box<DebugMessageHandler>>,
 }
 
@@ -68,7 +69,7 @@ impl Factory {
     ) {
         self.debug_message_handler = Some(debug_message_handler);
         unsafe {
-            (self.api.funcs.k4a_set_debug_message_handler)(
+            (self.api().funcs.k4a_set_debug_message_handler)(
                 Some(Self::debug_message_handler_func),
                 std::mem::transmute(self.debug_message_handler.as_mut()),
                 min_level.into(),
@@ -79,7 +80,7 @@ impl Factory {
     pub(crate) fn reset_debug_message_handler_internal(&mut self) {
         self.debug_message_handler = None;
         unsafe {
-            (self.api.funcs.k4a_set_debug_message_handler)(
+            (self.api().funcs.k4a_set_debug_message_handler)(
                 None,
                 ptr::null_mut(),
                 azure_kinect_sys::k4a::k4a_log_level_t_K4A_LOG_LEVEL_OFF,
@@ -87,15 +88,19 @@ impl Factory {
         }
     }
 
+    pub fn api(&self) -> &azure_kinect_sys::api::Api {
+        &self.api
+    }
+
     /// Gets the number of connected devices
     pub fn device_get_installed_count(&self) -> u32 {
-        unsafe { (self.api.funcs.k4a_device_get_installed_count)() }
+        unsafe { (self.api().funcs.k4a_device_get_installed_count)() }
     }
 
     /// Open a k4a device.
     pub fn device_open(&self, index: u32) -> Result<Device, Error> {
         let mut handle: azure_kinect_sys::k4a::k4a_device_t = ptr::null_mut();
-        Error::from_k4a_result_t(unsafe { (self.api.funcs.k4a_device_open)(index, &mut handle) })
+        Error::from_k4a_result_t(unsafe { (self.api().funcs.k4a_device_open)(index, &mut handle) })
             .to_result_fn(|| Device::from_handle(&self.api, handle))
     }
 
@@ -108,7 +113,7 @@ impl Factory {
     ) -> Result<Calibration, Error> {
         let mut calibration = k4a_calibration_t::default();
         Error::from_k4a_result_t(unsafe {
-            (self.api.funcs.k4a_calibration_get_from_raw)(
+            (self.api().funcs.k4a_calibration_get_from_raw)(
                 raw_calibration.as_ptr() as *mut i8,
                 raw_calibration.len(),
                 target_depth_mode.into(),
@@ -121,7 +126,7 @@ impl Factory {
 
     pub fn capture_create(&self) -> Result<Capture, Error> {
         let mut handle: k4a_capture_t = ptr::null_mut();
-        Error::from_k4a_result_t(unsafe { (self.api.funcs.k4a_capture_create)(&mut handle) })
+        Error::from_k4a_result_t(unsafe { (self.api().funcs.k4a_capture_create)(&mut handle) })
             .to_result_fn(|| Capture::from_handle(&self.api, handle))
     }
 
@@ -135,7 +140,7 @@ impl Factory {
     ) -> Result<Image, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
         Error::from_k4a_result_t(unsafe {
-            (self.api.funcs.k4a_image_create)(
+            (self.api().funcs.k4a_image_create)(
                 format.into(),
                 width_pixels,
                 height_pixels,
@@ -160,7 +165,7 @@ impl Factory {
     ) -> Result<Image, Error> {
         let mut handle: k4a_image_t = ptr::null_mut();
         Error::from_k4a_result_t(unsafe {
-            (self.api.funcs.k4a_image_create_from_buffer)(
+            (self.api().funcs.k4a_image_create_from_buffer)(
                 format.into(),
                 width_pixels,
                 height_pixels,
@@ -219,7 +224,7 @@ impl Factory {
     /// Get handle to transformation handle.
     pub fn transformation_create<'a>(&'a self, calibration: &'a Calibration) -> Transformation<'a> {
         let handle =
-            unsafe { (self.api.funcs.k4a_transformation_create)(&calibration.calibration) };
+            unsafe { (self.api().funcs.k4a_transformation_create)(&calibration.calibration) };
         Transformation::from_handle(&self, handle, calibration)
     }
 
@@ -252,8 +257,8 @@ impl Factory {
 }
 
 pub struct FactoryRecord {
-    pub core: Factory,
-    pub api_record: azure_kinect_sys::api::ApiRecord,
+    core: Factory,
+    api_record: azure_kinect_sys::api::ApiRecord,
 }
 
 impl FactoryRecord {
@@ -297,12 +302,14 @@ impl FactoryRecord {
         &self.core
     }
 
+    pub fn api_record(&self) -> &ApiRecord { &self.api_record }
+
     /// Opens a K4A recording for playback.
     pub fn playback_open(&self, path: &str) -> Result<Playback, Error> {
         let mut handle: azure_kinect_sys::k4arecord::k4a_playback_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
         Error::from_k4a_result_t(unsafe {
-            (self.api_record.funcs.k4a_playback_open)(path.as_ptr(), &mut handle)
+            (self.api_record().funcs.k4a_playback_open)(path.as_ptr(), &mut handle)
         })
         .to_result_fn(|| Playback::from_handle(&self, handle))
     }
@@ -317,7 +324,7 @@ impl FactoryRecord {
         let mut handle: azure_kinect_sys::k4arecord::k4a_record_t = ptr::null_mut();
         let path = CString::new(path).unwrap_or_default();
         Error::from_k4a_result_t(unsafe {
-            (self.api_record.funcs.k4a_record_create)(
+            (self.api_record().funcs.k4a_record_create)(
                 path.as_ptr(),
                 device.handle as _,
                 *device_configuration.for_k4arecord(),
@@ -340,7 +347,7 @@ mod tests {
         );
         assert!(manager.is_ok());
         let manager2 = manager.unwrap();
-        let c = unsafe { (manager2.api.funcs.k4a_device_get_installed_count)() };
+        let c = unsafe { (manager2.api().funcs.k4a_device_get_installed_count)() };
         println!("device count = {}", c);
         Ok(())
     }
